@@ -352,17 +352,6 @@ app.get('/status', (req, res) => {
   res.json({ status: 'online', botEnabled: !!token, channel: channelUsername, appUrl: miniAppUrl });
 });
 
-// TEMPORARY ADMIN ENDPOINT TO WIPE DB
-app.get('/api/admin/wipe-all-danger', async (req, res) => {
-  try {
-    await prisma.task.deleteMany({});
-    await prisma.user.deleteMany({});
-    res.send("<h1>✅ Database completely wiped! All users and tasks deleted.</h1><p>You can now test the game from scratch.</p>");
-  } catch (error) {
-    res.status(500).send(`Error wiping database: ${error.message}`);
-  }
-});
-
 app.listen(port, () => {
   console.log(`Express API server is running on port ${port}`);
 });
