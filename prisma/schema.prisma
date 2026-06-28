@@ -1,0 +1,35 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  telegramId     String   @id @unique
+  username       String?
+  firstName      String?
+  points         Int      @default(1000)
+  coins          Int      @default(12450)
+  energy         Int      @default(75)
+  level          Int      @default(12)
+  xp             Int      @default(68)
+  premium        Boolean  @default(false)
+  referredBy     String?
+  referralsCount Int      @default(0)
+  walletAddress  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  tasks          Task[]
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  telegramId  String
+  taskId      String    // e.g. 'join_channel', 'follow_twitter'
+  status      String    @default("not_started") // "not_started", "verifying", "completed"
+  completedAt DateTime?
+  user        User      @relation(fields: [telegramId], references: [telegramId])
+}

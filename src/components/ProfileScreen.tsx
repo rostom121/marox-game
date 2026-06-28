@@ -1,0 +1,118 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useGameStore } from '../store/useGameStore'
+import { useTranslation } from 'react-i18next'
+import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react'
+
+export default function ProfileScreen() {
+  const { data, telegramUser, walletConnected, setWallet } = useGameStore()
+  const { i18n } = useTranslation()
+  const address = useTonAddress()
+
+  const [activeLang, setActiveLang] = useState(i18n.language || 'en')
+
+  // Sync TON wallet address with Zustand store state
+  useEffect(() => {
+    if (address) {
+      setWallet(address)
+    } else {
+      setWallet(null)
+    }
+  }, [address, setWallet])
+
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang)
+    setActiveLang(lang)
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
+      window.Telegram.WebApp.HapticFeedback.selectionChanged()
+    }
+  }
+
+  const LANGUAGES = [
+    { code: 'en', name: 'English', sub: 'USA' },
+    { code: 'ru', name: 'Русский', sub: 'Россия' },
+    { code: 'fr', name: 'Français', sub: 'France' },
+  ]
+
+  return (
+    <div className="page" style={{ padding: '16px 12px' }}>
+      <header className="page-header">
+        <h1 className="pixel-text" style={{ fontSize: '15px', color: 'var(--blue)', textShadow: '0 0 10px var(--blue)' }}>PLAYER PROFILE</h1>
+        <div className="accent-line" style={{ background: 'var(--blue)', boxShadow: '0 0 10px var(--blue)' }} />
+      </header>
+
+      {/* Profile Info Card */}
+      <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(22, 15, 41, 0.6)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div className="avatar-img-wrap" style={{ width: '60px', height: '60px', border: '2px solid var(--blue)', borderRadius: '14px' }}>
+            <img src={telegramUser?.photoUrl || "/marox.png"} onError={(e: any) => { e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e63946'/><circle cx='50' cy='55' r='20' fill='%23fff'/><rect x='35' y='18' width='30' height='18' fill='%23fff' rx='4'/><circle cx='40' cy='52' r='3' fill='%23000'/><circle cx='60' cy='52' r='3' fill='%23000'/></svg>" }} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff' }}>{data.gameUsername || telegramUser?.firstName || 'Player'}</h2>
+            {telegramUser?.username && <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>@{telegramUser.username}</div>}
+            <div style={{ fontSize: '11px', color: 'var(--gold)', marginTop: '4px', fontWeight: 'bold' }}>LEVEL {data.level}</div>
+            <div className="xp-bar-track" style={{ height: '6px', marginTop: '6px' }}>
+              <div className="xp-bar-fill" style={{ width: `${data.xp}%` }} />
+            </div>
+            <div style={{ fontSize: '9px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '3px' }}>{data.xp}% to next level</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '5px' }}>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(0, 210, 255, 0.2)' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 'bold' }}>$MAROX</div>
+            <div className="pixel-text" style={{ fontSize: '14px', color: 'var(--blue)', marginTop: '6px' }}>💎 {data.points.toLocaleString()}</div>
+          </div>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Wallet Address</div>
+            <div style={{ fontSize: '11px', color: walletConnected ? '#fff' : 'var(--red)', fontWeight: 'bold', marginTop: '8px', wordBreak: 'break-all' }}>
+              {walletConnected ? `${address.substring(0, 4)}...${address.substring(address.length - 4)}` : 'Not Connected'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* TON Wallet Connect Section */}
+      <div className="settings-section">
+        <h3 className="settings-section-title">TON WALLET</h3>
+        <div className="wallet-card card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '16px', background: 'rgba(22, 15, 41, 0.6)' }}>
+          <p className="wallet-desc" style={{ fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5, textAlign: 'center' }}>
+            {walletConnected
+              ? `Connected: ${address.substring(0, 6)}...${address.substring(address.length - 6)}`
+              : 'Connect your Web3 wallet to receive token rewards and NFTs!'}
+          </p>
+          <div className="ton-connect-btn-wrapper">
+            <TonConnectButton />
+          </div>
+        </div>
+      </div>
+
+      {/* Language Selector Grid */}
+      <div className="settings-section" style={{ marginTop: '8px' }}>
+        <h3 className="settings-section-title">INTERFACE LANGUAGE</h3>
+        <div className="lang-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          {LANGUAGES.map((lang) => (
+            <button
+              key={lang.code}
+              className={`lang-btn ${activeLang === lang.code ? 'active' : ''}`}
+              onClick={() => changeLanguage(lang.code)}
+              style={{
+                padding: '10px 12px',
+                borderRadius: '12px',
+                border: activeLang === lang.code ? '2px solid var(--blue)' : '1px solid var(--border-neon)',
+                background: activeLang === lang.code ? 'rgba(0, 210, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                color: '#fff',
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <div className="lang-name" style={{ fontSize: '11px', fontWeight: 'bold' }}>{lang.name}</div>
+              <div className="lang-sub" style={{ fontSize: '8px', color: 'var(--text-dim)', marginTop: '2px' }}>{lang.sub}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

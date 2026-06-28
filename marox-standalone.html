@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>MAROX – Slot Machine</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{
+  --blue:#00d2ff;--gold:#ffb700;
+  --dark:#080910;--s1:#12131a;--s2:#1a1b28;
+  --border:rgba(255,255,255,.07);--dim:rgba(255,255,255,.35);--dimmer:rgba(255,255,255,.12);
+}
+body{font-family:system-ui,sans-serif;background:var(--dark);color:#fff;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+#app{min-height:100vh;display:flex;flex-direction:column}
+
+/* ── Pages ── */
+.page{display:none;flex-direction:column;gap:16px;padding:28px 18px 110px;animation:fu .35s ease}
+.page.active{display:flex}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.ph h1{font-size:26px;font-weight:900;font-style:italic;letter-spacing:-1px;background:linear-gradient(90deg,var(--blue),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ph .al{width:36px;height:3px;background:var(--blue);border-radius:4px;margin-top:6px}
+
+/* ── Card ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:22px}
+
+/* ── Stats grid ── */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sc{display:flex;align-items:center;gap:12px;padding:14px}
+.si{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.si.b{background:rgba(0,210,255,.12);box-shadow:0 0 20px rgba(0,210,255,.12)}
+.si.g{background:rgba(255,183,0,.12); box-shadow:0 0 20px rgba(255,183,0,.12)}
+.sl{font-size:9px;color:var(--dim);font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.sv{font-size:17px;font-weight:900;font-family:monospace}
+
+/* ── Level card ── */
+.lc{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;position:relative;overflow:hidden}
+.lb{width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,var(--gold),#e08c00);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#000;box-shadow:0 6px 20px rgba(255,183,0,.3);flex-shrink:0}
+.li{flex:1;padding-left:12px}
+.li .ll{font-size:9px;color:var(--dim);font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.li .lt{font-size:13px;font-weight:700;margin-top:2px}
+.lub{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:9px 14px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#fff;cursor:pointer;transition:.2s;white-space:nowrap}
+.lub:hover{background:var(--gold);color:#000;border-color:var(--gold)}
+.lub:active{transform:scale(.95)}
+
+/* ── Energy ── */
+.es{display:flex;flex-direction:column;gap:8px}
+.eh{display:flex;justify-content:space-between;align-items:center}
+.el{display:flex;align-items:center;gap:6px;color:var(--blue);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.15em}
+.ev{font-size:13px;font-family:monospace;font-weight:900}
+.ev span{color:var(--dimmer)}
+.et{height:10px;background:rgba(255,255,255,.05);border-radius:999px;padding:2px;border:1px solid var(--border)}
+.ef{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),#00ffea,#fff);box-shadow:0 0 12px rgba(0,210,255,.5);transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* ── Slot Machine ── */
+.sw{display:flex;flex-direction:column;align-items:center;gap:22px}
+.sm{background:linear-gradient(160deg,var(--s2),var(--s1));border:2px solid var(--border);border-radius:32px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);position:relative}
+.sm::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,210,255,.04),transparent 60%);pointer-events:none}
+.reels{display:flex;gap:8px;background:#050508;border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:8px;position:relative}
+.reels::after{content:'';position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:.3;pointer-events:none}
+.reel{width:78px;height:98px;border-radius:13px;overflow:hidden;background:#030305;border:1px solid rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;position:relative;font-size:44px}
+.reel::before,.reel::after{content:'';position:absolute;left:0;right:0;height:28px;z-index:2;pointer-events:none}
+.reel::before{top:0;background:linear-gradient(to bottom,#030305,transparent)}
+.reel::after{bottom:0;background:linear-gradient(to top,#030305,transparent)}
+.reel span{position:relative;z-index:1;transition:transform .08s}
+
+/* ── Spin Button ── */
+.sb-wrap{position:relative}
+.sb-glow{position:absolute;inset:-3px;background:linear-gradient(135deg,var(--blue),#0099cc);border-radius:24px;filter:blur(14px);opacity:.35;z-index:0}
+.sb{position:relative;z-index:1;padding:16px 52px;border-radius:22px;border:none;cursor:pointer;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.22em;overflow:hidden;transition:.15s}
+.sb::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--blue),#0099cc)}
+.sb::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;transition:.2s}
+.sb:hover::after{opacity:1}
+.sb:active{transform:scale(.95)}
+.sb:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.sb span{position:relative;z-index:2;color:#001828;font-weight:900}
+.sh{font-size:10px;color:var(--dimmer);font-weight:700;text-transform:uppercase;letter-spacing:.18em}
+
+/* ── Win Banner ── */
+.wb{border-radius:16px;padding:14px 18px;text-align:center;display:none;flex-direction:column;gap:4px;animation:pi .3s cubic-bezier(.34,1.56,.64,1);width:100%}
+.wb.show{display:flex}
+.wb.win{background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.3)}
+.wb.jp{background:rgba(255,183,0,.12);border:1px solid rgba(255,183,0,.4)}
+.wb.bear{background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3)}
+.wt{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}
+.wa{font-size:22px;font-weight:900;font-family:monospace}
+@keyframes pi{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+
+/* ── Tasks ── */
+.tb{display:flex;align-items:center;justify-content:space-between;background:rgba(0,210,255,.06);border:1px solid rgba(0,210,255,.15);border-radius:18px;padding:14px 18px}
+.tb .tbl{font-size:9px;color:var(--dim);font-weight:800;text-transform:uppercase}
+.tb .tbt{font-size:13px;font-weight:700;margin-top:2px}
+.tb .tba{font-size:22px;font-weight:900;font-family:monospace;color:var(--blue)}
+.tl{display:flex;flex-direction:column;gap:8px}
+.tc{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:.2s}
+.tc:hover{background:var(--s2);border-radius:22px}
+.tc:active{transform:scale(.98)}
+.tc.done{opacity:.5;filter:grayscale(.5);cursor:default}
+.ti{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;transition:.2s}
+.tc:hover .ti{transform:scale(1.08)}
+.tin{flex:1}
+.tt{font-size:13px;font-weight:700}
+.tr{font-size:11px;color:var(--blue);font-weight:700;margin-top:3px}
+.ta{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--dim);flex-shrink:0;transition:.2s}
+.tc:hover .ta{background:var(--blue);color:#000}
+
+/* ── Friends ── */
+.rh{background:linear-gradient(135deg,rgba(0,210,255,.07),rgba(0,210,255,.02));border:1px solid rgba(0,210,255,.1);border-radius:26px;padding:26px 18px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.ra{width:68px;height:68px;border-radius:22px;background:rgba(0,210,255,.1);display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 0 28px rgba(0,210,255,.12)}
+.rt{font-size:19px;font-weight:900}
+.rd{font-size:12px;color:var(--dim);text-align:center;line-height:1.6;max-width:220px}
+.rd .rb{color:var(--blue)}
+.rd .rg{color:var(--gold)}
+.lbx{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.2s}
+.lbx:hover{background:rgba(255,255,255,.07)}
+.lbx:active{transform:scale(.98)}
+.lh{font-size:8px;color:var(--dimmer);font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.lv{font-size:12px;font-family:monospace;font-weight:700;color:rgba(255,255,255,.6);margin-top:2px}
+.cb{width:36px;height:36px;border-radius:11px;background:rgba(0,210,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;transition:.2s}
+.lbx:hover .cb{background:var(--blue)}
+.ib{width:100%;height:54px;border-radius:16px;border:none;cursor:pointer;background:var(--blue);font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:#001020;box-shadow:0 10px 28px rgba(0,210,255,.22);transition:.2s}
+.ib:hover{transform:scale(1.02)}
+.ib:active{transform:scale(.97)}
+.fsg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fsc{padding:16px}
+.fscl{font-size:9px;color:var(--dim);font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.fscv{font-size:20px;font-weight:900;font-family:monospace;margin-top:6px}
+.es2{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px;opacity:.18}
+.es2 .ei{font-size:44px}
+.es2 .et2{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.18em}
+
+/* ── Settings ── */
+.ss{display:flex;flex-direction:column;gap:10px}
+.sst{font-size:9px;color:var(--dim);font-weight:800;text-transform:uppercase;letter-spacing:.14em;display:flex;align-items:center;gap:8px;padding:0 4px}
+.sst::after{content:'';flex:1;height:1px;background:var(--border)}
+.wc{padding:22px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;border-color:rgba(0,210,255,.08)}
+.wcb{width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--blue),#0099cc);font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:#001020;transition:.2s}
+.wcb:hover{transform:scale(1.02)}
+.wcb:active{transform:scale(.97)}
+.wcd{font-size:10px;color:var(--dim);text-align:center;line-height:1.6}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lbtn{padding:13px 14px;border-radius:16px;border:1px solid transparent;background:rgba(255,255,255,.03);cursor:pointer;text-align:left;transition:.22s;color:#fff}
+.lbtn:hover{background:rgba(255,255,255,.06)}
+.lbtn.active{background:var(--blue);border-color:var(--blue);box-shadow:0 6px 20px rgba(0,210,255,.18)}
+.lbtn .ln{font-size:13px;font-weight:900}
+.lbtn.active .ln{color:#001020}
+.lbtn .ls{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-top:2px}
+.lbtn.active .ls{color:rgba(0,16,32,.55)}
+.slink{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;transition:.2s;border-radius:22px}
+.slink:hover{background:var(--s2)}
+.sll{display:flex;align-items:center;gap:12px}
+.sli{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:17px;transition:.2s;color:var(--dim)}
+.slink:hover .sli{background:rgba(0,210,255,.1);color:var(--blue)}
+.sll2{font-size:13px;font-weight:700}
+.sla{font-size:14px;color:var(--dimmer);transition:.2s}
+.slink:hover .sla{transform:translateX(3px)}
+.vt{text-align:center;font-size:10px;font-family:monospace;color:var(--dimmer);letter-spacing:.13em}
+
+/* ── Bottom Nav ── */
+.bn{position:fixed;bottom:0;left:0;right:0;height:74px;background:rgba(10,11,18,.94);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 14px;z-index:100;border-radius:26px 26px 0 0}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 14px;border:none;background:none;cursor:pointer;color:var(--dim);border-radius:14px;transition:.22s;position:relative}
+.nb.active{color:var(--blue);transform:translateY(-2px)}
+.niw{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:.22s}
+.nb.active .niw{background:rgba(0,210,255,.1);box-shadow:0 0 14px rgba(0,210,255,.14)}
+.nl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.nd{position:absolute;bottom:0;width:4px;height:4px;background:var(--blue);border-radius:50%;box-shadow:0 0 8px var(--blue)}
+
+/* ── Toast ── */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(0,210,255,.15);backdrop-filter:blur(12px);border:1px solid rgba(0,210,255,.3);border-radius:14px;padding:10px 22px;font-size:13px;font-weight:700;white-space:nowrap;z-index:200;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════ HOME PAGE ═══════════ -->
+  <div id="page-home" class="page active">
+    <!-- Stats -->
+    <div class="sg">
+      <div class="card sc">
+        <div class="si b">🏆</div>
+        <div>
+          <div class="sl">MAROX Points</div>
+          <div class="sv" id="pts-display">12,450</div>
+        </div>
+      </div>
+      <div class="card sc">
+        <div class="si g">🪙</div>
+        <div>
+          <div class="sl">Gold Coins</div>
+          <div class="sv" id="coins-display">520</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level -->
+    <div class="card lc">
+      <div class="lb" id="level-badge">1</div>
+      <div class="li">
+        <div class="ll" id="level-label">Current Level</div>
+        <div class="lt" id="level-name">Novice Spinner</div>
+      </div>
+      <button class="lub" id="levelup-btn" onclick="levelUp()">↑ 500 🪙</button>
+    </div>
+
+    <!-- Energy -->
+    <div class="es">
+      <div class="eh">
+        <div class="el">⚡ <span id="energy-label">Energy</span></div>
+        <div class="ev"><span id="nrj-val">85</span><span>/100</span></div>
+      </div>
+      <div class="et"><div class="ef" id="energy-bar" style="width:85%"></div></div>
+    </div>
+
+    <!-- Slot Machine -->
+    <div class="sw">
+      <div class="sm">
+        <div class="reels">
+          <div class="reel"><span id="r0">💎</span></div>
+          <div class="reel"><span id="r1">🪙</span></div>
+          <div class="reel"><span id="r2">⭐</span></div>
+        </div>
+      </div>
+
+      <!-- Win banner -->
+      <div class="wb" id="win-banner">
+        <div class="wt" id="win-title"></div>
+        <div class="wa" id="win-amount"></div>
+      </div>
+
+      <div class="sb-wrap">
+        <div class="sb-glow"></div>
+        <button class="sb" id="spin-btn" onclick="spin()">
+          <span id="spin-label">⚡ SPIN</span>
+        </button>
+      </div>
+      <div class="sh" id="spin-hint">10 energy per spin</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ TASKS PAGE ═══════════ -->
+  <div id="page-tasks" class="page">
+    <div class="ph"><h1 id="tasks-title">Tasks</h1><div class="al"></div></div>
+    <div class="tb">
+      <div><div class="tbl" id="task-obj-label">Objectives</div><div class="tbt" id="task-obj-sub">Complete all tasks</div></div>
+      <div class="tba">+275 ⚡</div>
+    </div>
+    <div class="tl">
+      <div class="card tc" id="task-1" onclick="completeTask(1)">
+        <div class="ti" style="background:rgba(0,136,204,.2)">📢</div>
+        <div class="tin"><div class="tt">Join MAROX Telegram</div><div class="tr">⚡ +50 Energy</div></div>
+        <div class="ta">›</div>
+      </div>
+      <div class="card tc" id="task-2" onclick="completeTask(2)">
+        <div class="ti" style="background:rgba(29,161,242,.2)">🐦</div>
+        <div class="tin"><div class="tt">Follow on X (Twitter)</div><div class="tr">⚡ +50 Energy</div></div>
+        <div class="ta">›</div>
+      </div>
+      <div class="card tc" id="task-3" onclick="completeTask(3)">
+        <div class="ti" style="background:rgba(255,0,0,.18)">▶️</div>
+        <div class="tin"><div class="tt">Subscribe on YouTube</div><div class="tr">⚡ +100 Energy</div></div>
+        <div class="ta">›</div>
+      </div>
+      <div class="card tc" id="task-4" onclick="completeTask(4)">
+        <div class="ti" style="background:rgba(88,101,242,.2)">💬</div>
+        <div class="tin"><div class="tt">Join Discord Server</div><div class="tr">⚡ +75 Energy</div></div>
+        <div class="ta">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ FRIENDS PAGE ═══════════ -->
+  <div id="page-friends" class="page">
+    <div class="ph"><h1 id="friends-title">Friends</h1><div class="al"></div></div>
+    <div class="rh">
+      <div class="ra">👥</div>
+      <div class="rt" id="invite-title">Invite Friends</div>
+      <p class="rd">Get <span class="rb">+50 Energy</span> and <span class="rg">+500 MAROX Points</span> for every friend you invite!</p>
+      <div class="lbx" onclick="copyLink()">
+        <div><div class="lh">Your Referral Link</div><div class="lv" id="ref-display">...ref_demo</div></div>
+        <div class="cb">📋</div>
+      </div>
+      <button class="ib" onclick="shareLink()">🚀 <span id="invite-btn-text">Invite via Telegram</span></button>
+    </div>
+    <div class="fsg">
+      <div class="card fsc"><div class="fscl">🏆 Earned</div><div class="fscv">0</div></div>
+      <div class="card fsc"><div class="fscl">👤 Invites</div><div class="fscv">0</div></div>
+    </div>
+    <div class="es2"><div class="ei">👥</div><div class="et2" id="no-friends">No friends yet</div></div>
+  </div>
+
+  <!-- ═══════════ SETTINGS PAGE ═══════════ -->
+  <div id="page-settings" class="page">
+    <div class="ph"><h1 id="settings-title">Settings</h1><div class="al"></div></div>
+
+    <!-- Wallet -->
+    <div class="ss">
+      <div class="sst">💎 TON Wallet</div>
+      <div class="card wc" id="wallet-section">
+        <div style="font-size:40px">👛</div>
+        <button class="wcb" onclick="connectWallet()" id="wallet-btn">Connect TON Wallet</button>
+        <p class="wcd" id="wallet-desc">Link your wallet to qualify for MAROX airdrops and NFT rewards.</p>
+      </div>
+    </div>
+
+    <!-- Language -->
+    <div class="ss">
+      <div class="sst">🌐 Language</div>
+      <div class="lg">
+        <button class="lbtn active" onclick="setLang('en')" id="lang-en"><div class="ln">English</div><div class="ls">EN</div></button>
+        <button class="lbtn" onclick="setLang('ar')" id="lang-ar"><div class="ln">العربية</div><div class="ls">AR</div></button>
+        <button class="lbtn" onclick="setLang('ru')" id="lang-ru"><div class="ln">Русский</div><div class="ls">RU</div></button>
+        <button class="lbtn" onclick="setLang('fr')" id="lang-fr"><div class="ln">Français</div><div class="ls">FR</div></button>
+      </div>
+    </div>
+
+    <!-- Links -->
+    <div class="ss">
+      <div class="sst" id="info-label">ℹ️ Info</div>
+      <div class="card" style="overflow:hidden">
+        <div class="slink"><div class="sll"><div class="sli">🛡️</div><div class="sll2" id="privacy-label">Privacy & Terms</div></div><div class="sla">›</div></div>
+        <div class="slink"><div class="sll"><div class="sli">💬</div><div class="sll2" id="support-label">Support</div></div><div class="sla">›</div></div>
+      </div>
+    </div>
+    <div class="vt">MAROX ECOSYSTEM v0.1.0-ALPHA</div>
+  </div>
+
+  <!-- ═══════════ BOTTOM NAV ═══════════ -->
+  <nav class="bn">
+    <button class="nb active" id="nb-home" onclick="goTab('home')">
+      <div class="niw">🎰</div><span class="nl" id="nav-game">Game</span>
+      <span class="nd"></span>
+    </button>
+    <button class="nb" id="nb-tasks" onclick="goTab('tasks')">
+      <div class="niw">📜</div><span class="nl" id="nav-tasks">Tasks</span>
+    </button>
+    <button class="nb" id="nb-friends" onclick="goTab('friends')">
+      <div class="niw">👥</div><span class="nl" id="nav-friends">Friends</span>
+    </button>
+    <button class="nb" id="nb-settings" onclick="goTab('settings')">
+      <div class="niw">⚙️</div><span class="nl" id="nav-settings">Settings</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+const LEVEL_NAMES = { en:['Novice','Spinner','Hunter','Veteran','Legend'], ar:['مبتدئ','لاعب','صياد','محترف','أسطورة'], ru:['Новичок','Игрок','Охотник','Ветеран','Легенда'], fr:['Novice','Joueur','Chasseur','Vétéran','Légende'] }
+const LANGS = {
+  en:{ game:'Game', tasks:'Tasks', friends:'Friends', settings:'Settings', energy:'Energy', spin:'⚡ SPIN', spinning:'⟳ Spinning…', spin_hint:'10 energy per spin', level_label:'Current Level', obj_label:'Objectives', obj_sub:'Complete all tasks', invite_title:'Invite Friends', invite_btn:'Invite via Telegram', no_friends:'No friends yet', wallet_btn:'Connect TON Wallet', wallet_desc:'Link your wallet to qualify for MAROX airdrops and NFT rewards.', wallet_connected:'Wallet Connected ✅', privacy:'Privacy & Terms', support:'Support', info:'ℹ️ Info', levelup:'Level Up', copied:'Link copied!', tasks_title:'Tasks', friends_title:'Friends', settings_title:'Settings', lvl_label:'Current Level' },
+  ar:{ game:'اللعبة', tasks:'المهام', friends:'أصدقاء', settings:'الإعدادات', energy:'الطاقة', spin:'⚡ تدوير', spinning:'⟳ جاري…', spin_hint:'10 طاقة لكل دورة', level_label:'المستوى الحالي', obj_label:'الأهداف', obj_sub:'أكمل جميع المهام', invite_title:'ادعُ أصدقاء', invite_btn:'دعوة عبر تيليجرام', no_friends:'لا يوجد أصدقاء بعد', wallet_btn:'ربط محفظة TON', wallet_desc:'ربط محفظتك لتستحق مكافآت MAROX.', wallet_connected:'المحفظة متصلة ✅', privacy:'الخصوصية والشروط', support:'الدعم', info:'ℹ️ معلومات', levelup:'ترقية', copied:'تم النسخ!', tasks_title:'المهام', friends_title:'الأصدقاء', settings_title:'الإعدادات', lvl_label:'المستوى الحالي' },
+  ru:{ game:'Игра', tasks:'Задания', friends:'Друзья', settings:'Настройки', energy:'Энергия', spin:'⚡ Крутить', spinning:'⟳ Вращается…', spin_hint:'10 энергии за спин', level_label:'Текущий уровень', obj_label:'Цели', obj_sub:'Выполни все задания', invite_title:'Пригласить друзей', invite_btn:'Пригласить в Telegram', no_friends:'Пока нет друзей', wallet_btn:'Подключить кошелёк', wallet_desc:'Подключи кошелёк для получения наград MAROX.', wallet_connected:'Кошелёк подключён ✅', privacy:'Конфиденциальность', support:'Поддержка', info:'ℹ️ Инфо', levelup:'Улучшить', copied:'Ссылка скопирована!', tasks_title:'Задания', friends_title:'Друзья', settings_title:'Настройки', lvl_label:'Текущий уровень' },
+  fr:{ game:'Jeu', tasks:'Tâches', friends:'Amis', settings:'Paramètres', energy:'Énergie', spin:'⚡ Lancer', spinning:'⟳ En cours…', spin_hint:'10 énergie par spin', level_label:'Niveau actuel', obj_label:'Objectifs', obj_sub:'Compléter toutes les tâches', invite_title:'Inviter des amis', invite_btn:'Inviter via Telegram', no_friends:'Pas encore d\'amis', wallet_btn:'Connecter le portefeuille', wallet_desc:'Connectez votre portefeuille pour les airdrops MAROX.', wallet_connected:'Portefeuille connecté ✅', privacy:'Confidentialité', support:'Support', info:'ℹ️ Info', levelup:'Améliorer', copied:'Lien copié!', tasks_title:'Tâches', friends_title:'Amis', settings_title:'Paramètres', lvl_label:'Niveau actuel' }
+}
+
+// Load from storage
+function loadState() {
+  try {
+    const s = localStorage.getItem('marox_v2')
+    if (s) return JSON.parse(s)
+  } catch(e) {}
+  return { points:12450, coins:520, energy:85, level:1, lastUpdate:Date.now(), lang:'en', wallet:false }
+}
+function saveState() {
+  try { localStorage.setItem('marox_v2', JSON.stringify(S)) } catch(e) {}
+}
+
+const S = loadState()
+
+// Energy recharge since last visit (1 per 2 min)
+const secsPassed = Math.floor((Date.now() - S.lastUpdate) / 1000)
+S.energy = Math.min(100, S.energy + Math.floor(secsPassed / 120))
+S.lastUpdate = Date.now()
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+function init() {
+  if (window.Telegram?.WebApp) {
+    Telegram.WebApp.ready()
+    Telegram.WebApp.expand()
+    const u = Telegram.WebApp.initDataUnsafe?.user
+    if (u) document.getElementById('ref-display').textContent = `...ref_${u.id}`
+  }
+  updateUI()
+  applyLang(S.lang)
+}
+
+// ════════════════════════════════════════════
+//  UI UPDATE
+// ════════════════════════════════════════════
+function updateUI() {
+  document.getElementById('pts-display').textContent   = S.points.toLocaleString()
+  document.getElementById('coins-display').textContent = S.coins.toLocaleString()
+  document.getElementById('nrj-val').textContent       = S.energy
+  document.getElementById('energy-bar').style.width    = S.energy + '%'
+  document.getElementById('level-badge').textContent   = S.level
+  document.getElementById('spin-btn').disabled         = S.energy < 10 || spinning
+  const cost = S.level * 500
+  document.getElementById('levelup-btn').textContent   = `↑ ${cost.toLocaleString()} 🪙`
+  const names = LEVEL_NAMES[S.lang] || LEVEL_NAMES.en
+  document.getElementById('level-name').textContent    = (names[Math.min(S.level-1,4)]) + ' Spinner'
+}
+
+// ════════════════════════════════════════════
+//  SLOT MACHINE
+// ════════════════════════════════════════════
+const SYMS = [
+  {e:'💎',pts:500,  coins:0,   w:5 },
+  {e:'🪙',pts:0,    coins:50,  w:14},
+  {e:'⭐',pts:200,  coins:0,   w:14},
+  {e:'🐻',pts:0,    coins:-30, w:20},
+  {e:'🎰',pts:2000, coins:0,   w:3 },
+  {e:'💰',pts:100,  coins:0,   w:20},
+  {e:'🍀',pts:300,  coins:20,  w:12},
+  {e:'🔮',pts:150,  coins:10,  w:12},
+]
+function pick() {
+  const tot = SYMS.reduce((s,x)=>s+x.w,0)
+  let r = Math.random()*tot
+  for(const s of SYMS){r-=s.w;if(r<=0)return s}
+  return SYMS[0]
+}
+
+let spinning=false, spinIntervals=[]
+
+function spin() {
+  if(spinning||S.energy<10) return
+  spinning=true
+  S.energy-=10
+  updateUI()
+  haptic('selection')
+  hideBanner()
+  const L=LANGS[S.lang]||LANGS.en
+  document.getElementById('spin-label').textContent=L.spinning
+
+  // Start spinning animation
+  const ids=['r0','r1','r2']
+  spinIntervals=ids.map(id=>{
+    return setInterval(()=>{
+      document.getElementById(id).textContent=SYMS[Math.floor(Math.random()*SYMS.length)].e
+    },80)
+  })
+
+  const result=[pick(),pick(),pick()]
+  const stops=[700,1100,1500]
+  stops.forEach((t,i)=>{
+    setTimeout(()=>{
+      clearInterval(spinIntervals[i])
+      document.getElementById(ids[i]).textContent=result[i].e
+      haptic('impact')
+    },t)
+  })
+
+  setTimeout(()=>{
+    spinning=false
+    document.getElementById('spin-label').textContent=(LANGS[S.lang]||LANGS.en).spin
+    showResult(result)
+    saveState()
+    updateUI()
+  },1700)
+}
+
+function showResult(result) {
+  const isJp = result[0].e===result[1].e && result[1].e===result[2].e
+  let pts=0,coins=0
+  if(isJp){pts=result[0].pts*5;coins=result[0].coins*5}
+  else{result.forEach(s=>{pts+=s.pts;coins+=s.coins})}
+
+  S.points=Math.max(0,S.points+pts)
+  S.coins =Math.max(0,S.coins+coins)
+
+  const wb=document.getElementById('win-banner')
+  const wt=document.getElementById('win-title')
+  const wa=document.getElementById('win-amount')
+
+  if(isJp){
+    wb.className='wb jp show'
+    wt.textContent=`🎉 JACKPOT! ${result[0].e}${result[0].e}${result[0].e}`
+    wa.style.color='var(--gold)'
+    wa.textContent=(pts>0?`+${pts.toLocaleString()} pts `:'')+(coins>0?`+${coins} coins`:'')
+    haptic('notification')
+  } else if(pts>0||coins>0){
+    wb.className='wb win show'
+    wt.textContent='✨ You Won!'
+    wa.style.color='var(--blue)'
+    wa.textContent=(pts>0?`+${pts.toLocaleString()} pts `:'')+(coins>0?`+${coins} coins`:'')
+    haptic('notification')
+  } else if(coins<0){
+    wb.className='wb bear show'
+    wt.textContent='🐻 Bear Attack!'
+    wa.style.color='#ff4d4d'
+    wa.textContent=`${coins} coins`
+    haptic('notification')
+  } else {
+    wb.className='wb'; return
+  }
+  setTimeout(()=>{ document.getElementById('win-banner').className='wb' },3500)
+}
+
+function hideBanner(){ document.getElementById('win-banner').className='wb' }
+
+// ════════════════════════════════════════════
+//  LEVEL UP
+// ════════════════════════════════════════════
+function levelUp(){
+  const cost=S.level*500
+  if(S.coins<cost){ showToast('❌ Not enough coins!'); return }
+  S.coins-=cost; S.level++
+  saveState(); updateUI()
+  haptic('notification')
+  showToast('🎉 Level Up!')
+}
+
+// ════════════════════════════════════════════
+//  TASKS
+// ════════════════════════════════════════════
+const taskRewards={1:50,2:50,3:100,4:75}
+function completeTask(id){
+  const el=document.getElementById('task-'+id)
+  if(el.classList.contains('done')) return
+  el.classList.add('done')
+  el.querySelector('.ta').textContent='✅'
+  S.energy=Math.min(100,S.energy+taskRewards[id])
+  saveState(); updateUI()
+  haptic('notification')
+  showToast(`⚡ +${taskRewards[id]} Energy!`)
+}
+
+// ════════════════════════════════════════════
+//  FRIENDS
+// ════════════════════════════════════════════
+function copyLink(){
+  const link=`https://t.me/marox_bot?start=ref_${window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'demo'}`
+  navigator.clipboard.writeText(link).catch(()=>{})
+  haptic('selection')
+  showToast((LANGS[S.lang]||LANGS.en).copied)
+}
+function shareLink(){
+  const uid=window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'demo'
+  const url=`https://t.me/share/url?url=https://t.me/marox_bot?start=ref_${uid}&text=Join MAROX and earn free tokens!`
+  window.open(url,'_blank')
+}
+
+// ════════════════════════════════════════════
+//  WALLET
+// ════════════════════════════════════════════
+function connectWallet(){
+  S.wallet=true; saveState()
+  haptic('notification')
+  const sec=document.getElementById('wallet-section')
+  sec.innerHTML=`<div style="font-size:40px">✅</div><div style="font-weight:900;font-size:14px">${(LANGS[S.lang]||LANGS.en).wallet_connected}</div><p class="wcd">${(LANGS[S.lang]||LANGS.en).wallet_desc}</p>`
+}
+
+// ════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════
+const tabs=['home','tasks','friends','settings']
+function goTab(id){
+  tabs.forEach(t=>{
+    document.getElementById('page-'+t).classList.toggle('active',t===id)
+    const nb=document.getElementById('nb-'+t)
+    nb.classList.toggle('active',t===id)
+    const dot=nb.querySelector('.nd')
+    if(dot) dot.style.display=t===id?'block':'none'
+  })
+  haptic('selection')
+}
+// hide all dots except active on init
+tabs.forEach(t=>{
+  const dot=document.getElementById('nb-'+t)?.querySelector('.nd')
+  if(dot) dot.style.display=t==='home'?'block':'none'
+})
+
+// ════════════════════════════════════════════
+//  LANGUAGE
+// ════════════════════════════════════════════
+function applyLang(l){
+  S.lang=l; saveState()
+  const L=LANGS[l]||LANGS.en
+  // Nav
+  document.getElementById('nav-game').textContent    =L.game
+  document.getElementById('nav-tasks').textContent   =L.tasks
+  document.getElementById('nav-friends').textContent =L.friends
+  document.getElementById('nav-settings').textContent=L.settings
+  // Home
+  document.getElementById('energy-label').textContent =L.energy
+  document.getElementById('spin-label').textContent   =L.spin
+  document.getElementById('spin-hint').textContent    =L.spin_hint
+  document.getElementById('level-label').textContent  =L.lvl_label||L.level_label
+  const names=LEVEL_NAMES[l]||LEVEL_NAMES.en
+  document.getElementById('level-name').textContent   =(names[Math.min(S.level-1,4)])+' Spinner'
+  document.getElementById('levelup-btn').textContent  =`↑ ${(S.level*500).toLocaleString()} 🪙`
+  // Tasks
+  document.getElementById('tasks-title').textContent  =L.tasks_title||L.tasks
+  document.getElementById('task-obj-label').textContent=L.obj_label
+  document.getElementById('task-obj-sub').textContent =L.obj_sub
+  // Friends
+  document.getElementById('friends-title').textContent=L.friends_title||L.friends
+  document.getElementById('invite-title').textContent =L.invite_title
+  document.getElementById('invite-btn-text').textContent=L.invite_btn
+  document.getElementById('no-friends').textContent   =L.no_friends
+  // Settings
+  document.getElementById('settings-title').textContent=L.settings_title||L.settings
+  document.getElementById('wallet-btn').textContent   =L.wallet_btn
+  document.getElementById('wallet-desc').textContent  =L.wallet_desc
+  document.getElementById('info-label').textContent   =L.info
+  document.getElementById('privacy-label').textContent=L.privacy
+  document.getElementById('support-label').textContent=L.support
+  // Lang buttons
+  ['en','ar','ru','fr'].forEach(c=>{
+    document.getElementById('lang-'+c).classList.toggle('active',c===l)
+  })
+  // RTL for Arabic
+  document.body.dir=l==='ar'?'rtl':'ltr'
+}
+function setLang(l){ applyLang(l); haptic('selection') }
+
+// ════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════
+function haptic(type){
+  if(!window.Telegram?.WebApp?.HapticFeedback) return
+  if(type==='selection') Telegram.WebApp.HapticFeedback.selectionChanged()
+  else if(type==='notification') Telegram.WebApp.HapticFeedback.notificationOccurred('success')
+  else if(type==='impact') Telegram.WebApp.HapticFeedback.impactOccurred('light')
+}
+let _toastTimer
+function showToast(msg){
+  const t=document.getElementById('toast')
+  t.textContent=msg; t.classList.add('show')
+  clearTimeout(_toastTimer)
+  _toastTimer=setTimeout(()=>t.classList.remove('show'),2500)
+}
+
+// If wallet was connected before, restore
+if(S.wallet) setTimeout(connectWallet,0)
+
+init()
+</script>
+</body>
+</html>
