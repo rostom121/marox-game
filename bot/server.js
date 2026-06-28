@@ -345,6 +345,22 @@ app.get('/status', (req, res) => {
   res.json({ status: 'online', botEnabled: !!token, channel: channelUsername, appUrl: miniAppUrl });
 });
 
+// Clean up dummy account on startup
+(async () => {
+  try {
+    const dummy = await prisma.user.findMany({ 
+      where: { OR: [{ username: 'rostom20' }, { firstName: 'rostom20' }] } 
+    });
+    for (const d of dummy) {
+      await prisma.task.deleteMany({ where: { telegramId: d.telegramId } });
+      await prisma.user.delete({ where: { telegramId: d.telegramId } });
+      console.log(`Cleaned up dummy user ${d.telegramId}`);
+    }
+  } catch (e) {
+    console.error('Failed to cleanup dummy user:', e.message);
+  }
+})();
+
 app.listen(port, () => {
   console.log(`Express API server is running on port ${port}`);
 });
