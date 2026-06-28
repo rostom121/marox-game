@@ -109,6 +109,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const saved = localStorage.getItem('marox_game_data');
       if (saved) {
         localData = JSON.parse(saved);
+        
+        // --- Migration / Reset Hack ---
+        // If the user's local data exactly matches the old dummy data, clear it.
+        if (localData && localData.coins === 12450 && localData.level === 12 && localData.points === 0) {
+          localData = null;
+          localStorage.removeItem('marox_game_data');
+        }
+
         const now = Date.now();
         if (localData) {
           const lastUpdate = localData.lastEnergyUpdate || now;

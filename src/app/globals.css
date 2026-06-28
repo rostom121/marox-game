@@ -1920,3 +1920,34 @@ body {
   50% { box-shadow: 0 0 25px rgba(255, 183, 0, 0.8); }
   100% { box-shadow: 0 0 15px rgba(255, 183, 0, 0.4); }
 }
+
+/* --- MOBILE RESPONSIVENESS HACK --- */
+@media (max-width: 400px) {
+  .slot-header {
+    padding: 6px 4px;
+    gap: 4px;
+  }
+  .slot-stat-chip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+  .slot-stat-chip span:first-child { font-size: 12px; }
+  .slot-avatar-wrap { width: 36px; height: 36px; }
+  .slot-player-name { font-size: 11px; max-width: 70px; }
+  .slot-title-text { font-size: 16px; }
+  .slot-title-sub { font-size: 6px; }
+  .slot-sidebar-btn { width: 44px; height: 44px; }
+  .slot-sidebar-emoji { font-size: 20px; }
+  .slot-sidebar-label { font-size: 7px; }
+  .slot-mid-layout { grid-template-columns: 55px 1fr 55px; }
+  .slot-cabinet-outer { margin: 25px auto 0; padding: 10px 8px 8px; border-top-width: 4px; border-left-width: 2px; border-right-width: 2px; }
+  .slot-logo-container { width: 70px; height: 70px; margin-top: -35px; }
+  .slot-wing { font-size: 20px; }
+  .slot-spin-btn { padding: 10px; border-radius: 10px; }
+  .slot-controls-bar { gap: 4px; }
+  .slot-auto-btn { font-size: 7px; padding: 6px 4px; }
+  .slot-bet-panel { padding: 4px; }
+  .slot-bet-label { font-size: 6px; }
+  .slot-bet-adj { width: 20px; height: 20px; font-size: 12px; }
+  .slot-bet-val { font-size: 10px; min-width: 18px; }
+}
