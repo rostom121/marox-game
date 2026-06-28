@@ -11,11 +11,11 @@ model User {
   telegramId     String   @id @unique
   username       String?
   firstName      String?
-  points         Int      @default(1000)
-  coins          Int      @default(12450)
-  energy         Int      @default(75)
-  level          Int      @default(12)
-  xp             Int      @default(68)
+  points         Int      @default(100)
+  coins          Int      @default(5000)
+  energy         Int      @default(500)
+  level          Int      @default(1)
+  xp             Int      @default(0)
   premium        Boolean  @default(false)
   referredBy     String?
   referralsCount Int      @default(0)

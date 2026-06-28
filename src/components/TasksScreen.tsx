@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react'
 import { useGameStore } from '../store/useGameStore'
 import { gameConfig } from '../config/gameConfig'
 
@@ -10,20 +11,45 @@ interface VerificationState {
 
 export default function TasksScreen() {
   const { updateStats } = useGameStore()
+  const [tonConnectUI] = useTonConnectUI()
+  const wallet = useTonWallet()
   const [taskStates, setTaskStates] = useState<VerificationState>({
     join_channel: 'not_started',
-    follow_twitter: 'not_started',
-    youtube_subscribe: 'not_started',
+    follow_x: 'not_started',
+    join_community: 'not_started',
+    retweet_x: 'not_started',
+    follow_facebook: 'not_started',
+    connect_wallet: 'not_started',
   })
 
   const handleTaskClick = (taskId: string, link: string) => {
     if (taskStates[taskId] !== 'not_started') return;
 
+    if (taskId === 'connect_wallet') {
+      if (wallet) {
+        setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }))
+        const task = gameConfig.tasks.find((t) => t.id === taskId)
+        if (task) {
+          updateStats(task.points, task.coins, task.energy || 0)
+        }
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
+          window.Telegram.WebApp.HapticFeedback.notificationOccurred('success')
+        }
+        return;
+      } else {
+        setTaskStates((prev) => ({ ...prev, [taskId]: 'verifying' }))
+        tonConnectUI.openModal()
+        return;
+      }
+    }
+
     // Open link
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      window.Telegram.WebApp.openLink(link)
-    } else {
-      window.open(link, '_blank')
+    if (link && link !== '#') {
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        window.Telegram.WebApp.openLink(link)
+      } else {
+        window.open(link, '_blank')
+      }
     }
 
     // Set to verifying
@@ -36,9 +62,9 @@ export default function TasksScreen() {
     setTimeout(() => {
       setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }))
       
-      // Award points and coins
+      // Award points, coins, and energy
       if (task) {
-        updateStats(task.points, task.coins, 0)
+        updateStats(task.points, task.coins, task.energy || 0)
       }
 
       if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
@@ -46,6 +72,19 @@ export default function TasksScreen() {
       }
     }, delay)
   }
+
+  useEffect(() => {
+    if (wallet && taskStates['connect_wallet'] === 'verifying') {
+      setTaskStates((prev) => ({ ...prev, connect_wallet: 'completed' }))
+      const task = gameConfig.tasks.find((t) => t.id === 'connect_wallet')
+      if (task) {
+        updateStats(task.points, task.coins, task.energy || 0)
+      }
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success')
+      }
+    }
+  }, [wallet, taskStates, updateStats])
 
   return (
     <div className="page" style={{ padding: '16px 12px' }}>
@@ -86,9 +125,10 @@ export default function TasksScreen() {
                 <span style={{ fontSize: '24px' }}>{task.emoji}</span>
                 <div>
                   <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                    <span style={{ fontSize: '9px', color: 'var(--blue)', fontWeight: 'bold' }}>+{task.points} pts</span>
-                    <span style={{ fontSize: '9px', color: 'var(--gold)', fontWeight: 'bold' }}>+{task.coins} coins</span>
+                  <div className="task-rewards" style={{ display: 'flex', gap: '8px', fontSize: '10px', marginTop: '6px' }}>
+                    <span style={{ color: 'var(--neon-purple)', fontWeight: 'bold' }}>+{task.points} MRX</span>
+                    <span style={{ color: '#ffb700', fontWeight: 'bold' }}>+{task.coins} 🪙</span>
+                    {task.energy && <span style={{ color: '#00d2ff', fontWeight: 'bold' }}>+{task.energy} ⚡</span>}
                   </div>
                 </div>
               </div>

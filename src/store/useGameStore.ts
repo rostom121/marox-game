@@ -86,10 +86,10 @@ interface GameStore {
 
 export const useGameStore = create<GameStore>((set, get) => ({
   data: {
-    points: 0,
-    coins: 0,
-    energy: 100,
-    level: 0,
+    points: 100,
+    coins: 5000,
+    energy: 500,
+    level: 1,
     xp: 0,
     dailyStreak: 1,
     lastClaimDate: null,
@@ -154,9 +154,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     const initialData = localData || {
-      points: 0,
-      coins: 0,
-      energy: 100,
+      points: 100,
+      coins: 5000,
+      energy: 500,
       level: 1,
       xp: 0,
       dailyStreak: 1,

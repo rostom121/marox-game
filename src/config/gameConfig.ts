@@ -39,6 +39,7 @@ export interface GameConfig {
     emoji: string;
     points: number;
     coins: number;
+    energy: number;
     link: string;
     verifyDelayMs: number;
   }>;
@@ -76,8 +77,11 @@ export const gameConfig: GameConfig = {
     multiplier: 1.25,
   },
   tasks: [
-    { id: 'join_channel', title: 'Join MAROX Channel', emoji: '📢', points: 500, coins: 50, link: 'https://t.me/marox_channel', verifyDelayMs: 3000 },
-    { id: 'follow_twitter', title: 'Follow MAROX on X', emoji: '🐦', points: 400, coins: 40, link: 'https://x.com/marox_game', verifyDelayMs: 3000 },
-    { id: 'youtube_subscribe', title: 'Subscribe to YouTube', emoji: '🎥', points: 600, coins: 60, link: 'https://youtube.com/@marox_game', verifyDelayMs: 3000 },
+    { id: 'join_channel', title: 'Join MAROX Channel', emoji: '📢', points: 500, coins: 1000, energy: 200, link: 'https://t.me/MAROXCOIN', verifyDelayMs: 3000 },
+    { id: 'follow_x', title: 'Follow MAROX on X', emoji: '🐦', points: 500, coins: 1000, energy: 200, link: 'https://x.com/MAROXcoin', verifyDelayMs: 3000 },
+    { id: 'join_community', title: 'Join MAROX Community', emoji: '👥', points: 500, coins: 1000, energy: 200, link: 'https://t.me/MAROXCOMMUNITY', verifyDelayMs: 3000 },
+    { id: 'retweet_x', title: 'Like and retweet post on X', emoji: '🔄', points: 500, coins: 1000, energy: 200, link: 'https://x.com/i/status/2060489756056633616', verifyDelayMs: 3000 },
+    { id: 'follow_facebook', title: 'Follow MAROX on Facebook', emoji: '📘', points: 500, coins: 1000, energy: 200, link: 'https://www.facebook.com/share/1EyEtHkXLr/', verifyDelayMs: 3000 },
+    { id: 'connect_wallet', title: 'Connect Wallet', emoji: '👛', points: 500, coins: 1000, energy: 200, link: '#', verifyDelayMs: 1000 },
   ],
 };

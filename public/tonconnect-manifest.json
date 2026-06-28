@@ -1,7 +1,7 @@
 {
-  "url": "https://marox-game.vercel.app",
-  "name": "MAROX",
-  "iconUrl": "https://marox-game.vercel.app/favicon.svg",
-  "termsOfUseUrl": "https://marox-game.vercel.app",
-  "privacyPolicyUrl": "https://marox-game.vercel.app"
+  "url": "https://marox-game-production.up.railway.app",
+  "name": "MAROXCOIN",
+  "iconUrl": "https://marox-game-production.up.railway.app/marox.png",
+  "termsOfUseUrl": "https://marox-game-production.up.railway.app",
+  "privacyPolicyUrl": "https://marox-game-production.up.railway.app"
 }

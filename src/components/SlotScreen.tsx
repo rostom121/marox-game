@@ -25,21 +25,21 @@ interface Particle {
 
 const PARTICLE_COLORS = ['#ffb700', '#00d2ff', '#9d4edd', '#ff3333', '#ffffff']
 
-const AVAILABLE_BETS = [5, 10, 25, 50, 100, 150, 250, 500, 1000];
+const AVAILABLE_BETS = [1, 2, 3, 4, 5, 10, 25, 50, 100, 150, 250, 500, 1000];
 
 export default function SlotScreen() {
   const { data, telegramUser, spinOutcome, setTab } = useGameStore()
   
   const allowedBets = useMemo(() => {
     if (data.energy >= 20000) return AVAILABLE_BETS;
-    if (data.energy >= 10000) return AVAILABLE_BETS.slice(0, 8);
-    if (data.energy >= 5000) return AVAILABLE_BETS.slice(0, 7);
-    if (data.energy >= 3000) return AVAILABLE_BETS.slice(0, 6);
-    if (data.energy >= 2000) return AVAILABLE_BETS.slice(0, 5);
-    if (data.energy >= 1000) return AVAILABLE_BETS.slice(0, 4);
-    if (data.energy >= 500) return AVAILABLE_BETS.slice(0, 3);
-    if (data.energy >= 200) return AVAILABLE_BETS.slice(0, 2);
-    return AVAILABLE_BETS.slice(0, 1);
+    if (data.energy >= 10000) return AVAILABLE_BETS.slice(0, 12);
+    if (data.energy >= 5000) return AVAILABLE_BETS.slice(0, 11);
+    if (data.energy >= 3000) return AVAILABLE_BETS.slice(0, 10);
+    if (data.energy >= 2000) return AVAILABLE_BETS.slice(0, 9);
+    if (data.energy >= 1000) return AVAILABLE_BETS.slice(0, 8);
+    if (data.energy >= 500) return AVAILABLE_BETS.slice(0, 7);
+    if (data.energy >= 200) return AVAILABLE_BETS.slice(0, 6);
+    return AVAILABLE_BETS.slice(0, 5); // 1, 2, 3, 4, 5
   }, [data.energy]);
 
   const [modalType, setModalType] = useState<string | null>(null)
@@ -239,6 +239,9 @@ export default function SlotScreen() {
 
   const handleSpinClick = useCallback(() => {
     if (latestRef.current.spinning || latestRef.current.energy < latestRef.current.bet) {
+      if (!latestRef.current.spinning && latestRef.current.energy < latestRef.current.bet) {
+        showModal('no_energy')
+      }
       setAutoSpin(false)
       return
     }
@@ -490,6 +493,23 @@ export default function SlotScreen() {
 
       {modalType === 'daily' && (
         <DailyRewardModal onClose={() => setModalType(null)} />
+      )}
+
+      {modalType === 'no_energy' && (
+        <div className="slot-modal-overlay">
+          <div className="slot-modal-card pixel-text" style={{ padding: '24px', textAlign: 'center', width: '300px' }}>
+            <h2 style={{ color: '#ff3333', fontSize: '20px', marginBottom: '10px' }}>OUT OF ENERGY!</h2>
+            <p style={{ color: '#fff', fontSize: '10px', marginBottom: '20px', lineHeight: '1.5' }}>
+              Your energy has depleted.<br/>Grab more from the store to keep spinning!
+            </p>
+            <button className="slot-btn primary pixel-text" style={{ padding: '12px 20px', marginBottom: '12px', width: '100%', fontSize: '12px' }} onClick={() => { setModalType(null); setTab('shop'); }}>
+              ⚡ BUY ENERGY
+            </button>
+            <button className="slot-btn pixel-text" style={{ padding: '10px 20px', background: 'transparent', border: '2px solid #555', color: '#aaa', width: '100%', fontSize: '10px' }} onClick={() => setModalType(null)}>
+              CLOSE
+            </button>
+          </div>
+        </div>
       )}
 
       {modalType === 'avatar' && (

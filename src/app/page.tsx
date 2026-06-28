@@ -49,7 +49,7 @@ export default function AppRoot() {
   ]
 
   return (
-    <TonConnectUIProvider manifestUrl="https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json">
+    <TonConnectUIProvider manifestUrl="https://marox-game-production.up.railway.app/tonconnect-manifest.json">
       <div className="relative w-full h-full flex flex-col overflow-hidden">
         <WelcomeModal />
         {/* Active Tab Screen */}
