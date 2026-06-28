@@ -225,6 +225,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 energy: resData.user.energy,
                 level: resData.user.level,
                 xp: resData.user.xp,
+                completedTasks: resData.isNew ? [] : state.data.completedTasks,
               };
               localStorage.setItem('marox_game_data', JSON.stringify(mergedData));
               return { data: mergedData, loading: false, walletAddress: resData.user.walletAddress || state.walletAddress };

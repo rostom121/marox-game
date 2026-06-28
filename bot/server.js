@@ -113,7 +113,9 @@ app.get('/api/user', async (req, res) => {
       where: { telegramId: String(telegramId) }
     });
 
+    let isNew = false;
     if (!user) {
+      isNew = true;
       user = await prisma.user.create({
         data: {
           telegramId: String(telegramId),
@@ -124,7 +126,7 @@ app.get('/api/user', async (req, res) => {
       });
     }
 
-    return res.json({ ok: true, user });
+    return res.json({ ok: true, user, isNew });
   } catch (error) {
     console.error("Database error in GET /api/user:", error.message);
     return res.status(500).json({ ok: false, error: 'Database operation failed' });

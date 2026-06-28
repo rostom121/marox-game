@@ -66,10 +66,10 @@ export const gameConfig: GameConfig = {
       match5: 8.0,
     },
     symbols: [
-      { id: 'coin', name: 'Gold', points: 0, coins: 60, weight: 30 },
-      { id: 'badge', name: 'MAROX', points: 200, coins: 0, weight: 25 },
-      { id: 'energy', name: 'Energy', points: 0, coins: 0, energy: 10, weight: 25 },
-      { id: 'red_x', name: 'Red X', points: 0, coins: -20, weight: 20 },
+      { id: 'coin', name: 'Gold', points: 0, coins: 150, weight: 30 },
+      { id: 'badge', name: 'MAROX', points: 400, coins: 0, weight: 25 },
+      { id: 'energy', name: 'Energy', points: 0, coins: 0, energy: 30, weight: 25 },
+      { id: 'red_x', name: 'Red X', points: 0, coins: -50, weight: 20 },
     ],
   },
   leveling: {

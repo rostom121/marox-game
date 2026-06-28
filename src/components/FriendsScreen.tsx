@@ -56,6 +56,27 @@ export default function FriendsScreen() {
         </div>
       </div>
 
+      {/* Rewards Info */}
+      <div className="card" style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '12px', color: 'var(--gold)', marginBottom: '12px' }}>🎁 Invite Rewards</h3>
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '16px' }}>👤</span>
+            <span style={{ fontSize: '10px', color: '#fff' }}>Standard Telegram</span>
+          </div>
+          <div style={{ fontSize: '10px', color: 'var(--green)', fontWeight: 'bold' }}>+500 MAROX, +100 COINS</div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '16px' }}>⭐️</span>
+            <span style={{ fontSize: '10px', color: '#fff' }}>Telegram Premium</span>
+          </div>
+          <div style={{ fontSize: '10px', color: 'var(--green)', fontWeight: 'bold' }}>+1000 MAROX, +200 COINS</div>
+        </div>
+      </div>
+
       {/* Stats list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         
