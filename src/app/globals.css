@@ -1443,6 +1443,8 @@ body {
 .slot-energy-badge {
   position: absolute;
   top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
   background: #000;
   border: 1px solid var(--blue);
   color: var(--blue);
@@ -1922,46 +1924,67 @@ body {
 }
 
 /* --- MOBILE RESPONSIVENESS HACK --- */
-@media (max-width: 400px) {
-  .slot-header { padding: 6px 4px; gap: 4px; }
-  .slot-stat-chip { font-size: 9px; padding: 4px 6px; }
-  .slot-stat-chip span:first-child { font-size: 11px; }
-  .slot-avatar-wrap { width: 36px; height: 36px; }
-  .slot-player-name { font-size: 11px; max-width: 60px; }
-  .slot-title-text { font-size: 14px; }
-  .slot-title-sub { font-size: 5px; }
-  .slot-sidebar-btn { width: 40px; height: 40px; }
-  .slot-sidebar-emoji { font-size: 18px; }
-  .slot-sidebar-label { font-size: 6px; }
-  .slot-mid-layout { grid-template-columns: 50px 1fr 50px; }
-  
-  /* Shrink the entire slot machine */
+@media (max-width: 500px) {
+  /* Move background up */
+  .slot-screen-root { background-position: center -150px !important; }
+
+  /* Shrink the top header */
+  .slot-header { padding: 1px 2px; gap: 0px; height: 30px; }
+  .slot-stat-chip { font-size: 6px; padding: 1px 2px; border-width: 1px; }
+  .slot-stat-chip span:first-child { font-size: 7px; }
+  .slot-avatar-wrap { width: 20px; height: 20px; border-width: 1px; }
+  .slot-player-name { font-size: 7px; max-width: 40px; }
+  .slot-player-level { font-size: 5px; }
+  .slot-xp-bar { width: 40px; height: 3px; }
+  .slot-title-text { font-size: 9px; }
+  .slot-title-sub { font-size: 4px; }
+
+  /* Shrink sidebars and move them up */
+  .slot-sidebar { padding: 0 2px; gap: 6px; }
+  .slot-sidebar-btn { width: 32px; height: 32px; border-width: 1px; border-radius: 8px; }
+  .slot-sidebar-emoji { font-size: 14px; }
+  .slot-sidebar-label { font-size: 4px; }
+  .slot-mid-layout { grid-template-columns: 36px 1fr 36px; margin-top: 0; }
+
+  /* Make the slot machine wider to fill horizontal gaps */
   .slot-cabinet-outer { 
-    margin: 15px auto 0; 
+    margin: 10px auto 0; 
     padding: 8px 6px 6px; 
     border-top-width: 3px; border-left-width: 2px; border-right-width: 2px; 
-    max-width: 280px; 
+    max-width: 440px; 
+    width: 100%;
   }
   
-  /* Fix logo and ornaments so they don't fly away */
-  .slot-logo-container { width: 55px; height: 55px; margin-top: -25px; }
-  .slot-wing { font-size: 16px; margin: 0 2px; }
-  .slot-marquee-lights.left { padding-right: 2px; }
-  .slot-marquee-lights.right { padding-left: 2px; }
+  /* Logo and Wings moved DOWN slightly to touch the LED banner */
+  .slot-logo-container { width: 60px; height: 60px; margin-top: -15px; }
+  .slot-wing { font-size: 18px; margin: 0 4px; }
+  
+  /* Blinking lights moved DOWN slightly */
+  .slot-marquee-header { align-items: flex-end; } /* aligns items to the bottom of the header */
+  .slot-marquee-lights.left { padding-right: 2px; padding-bottom: 6px; }
+  .slot-marquee-lights.right { padding-left: 2px; padding-bottom: 6px; }
   .marquee-light { width: 8px; height: 8px; }
   
+  /* Move reel ornaments (✦) to the middle of the screen sides */
+  .slot-reels-board::before,
+  .slot-reels-board::after {
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+  }
+  
   /* Shrink LED Banner */
-  .slot-led-banner { min-height: 28px; padding: 4px 6px; font-size: 9px; }
+  .slot-led-banner { min-height: 24px; padding: 2px 4px; font-size: 9px; margin-top: -2px; }
   
   /* Shrink Controls */
-  .slot-spin-btn { padding: 8px; border-radius: 8px; }
-  .slot-spin-title { font-size: 10px; }
+  .slot-spin-btn { padding: 6px; border-radius: 8px; }
+  .slot-spin-title { font-size: 9px; }
   .slot-spin-sub { font-size: 5px; }
-  .slot-controls-bar { gap: 4px; }
-  .slot-auto-btn { font-size: 6px; padding: 6px 4px; }
+  .slot-controls-bar { gap: 4px; margin-top: 4px; }
+  .slot-auto-btn { font-size: 6px; padding: 4px; }
   .slot-bet-panel { padding: 4px; }
   .slot-bet-label { font-size: 5px; }
-  .slot-bet-adj { width: 16px; height: 16px; font-size: 10px; }
-  .slot-bet-val { font-size: 9px; min-width: 14px; }
-  .slot-energy-badge { font-size: 8px; padding: 3px 8px; top: -12px; }
+  .slot-bet-adj { width: 14px; height: 14px; font-size: 9px; }
+  .slot-bet-val { font-size: 8px; min-width: 14px; }
+  .slot-energy-badge { font-size: 7px; padding: 2px 6px; top: -10px; left: 50%; transform: translateX(-50%); }
 }

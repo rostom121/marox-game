@@ -46,7 +46,7 @@ export default function SlotScreen() {
   const [bet, setBet] = useState(5)
   const [spinTrigger, setSpinTrigger] = useState(0)
   const [spinning, setSpinning] = useState(false)
-  const [winMessage, setWinMessage] = useState<string | null>('SPIN, WIN, EARN MAROX!')
+  const [winMessage, setWinMessage] = useState<string | null>('SPIN, EARN MAROX!')
   const [autoSpin, setAutoSpin] = useState(false)
   const [lastWin, setLastWin] = useState<number | null>(null)
   const particleCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -179,17 +179,76 @@ export default function SlotScreen() {
     setBet(allowedBets[nextIndex]);
   }
 
+  const playRetroSpinSound = useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      let time = ctx.currentTime;
+      for (let i = 0; i < 20; i++) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(400 + (i % 3) * 200 + Math.random() * 100, time);
+        gain.gain.setValueAtTime(0.03, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+        osc.start(time);
+        osc.stop(time + 0.08);
+        time += 0.08;
+      }
+    } catch(e) {}
+  }, [])
+
+  const playRetroWinSound = useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      let time = ctx.currentTime;
+      
+      const burstOsc = ctx.createOscillator();
+      const burstGain = ctx.createGain();
+      burstOsc.connect(burstGain);
+      burstGain.connect(ctx.destination);
+      burstOsc.type = 'sawtooth';
+      burstOsc.frequency.setValueAtTime(300, time);
+      burstOsc.frequency.exponentialRampToValueAtTime(50, time + 0.3);
+      burstGain.gain.setValueAtTime(0.1, time);
+      burstGain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+      burstOsc.start(time);
+      burstOsc.stop(time + 0.3);
+
+      const notes = [880, 1108, 1318, 1760, 2217];
+      for (let i = 0; i < 15; i++) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(notes[i % notes.length], time + (i * 0.06));
+        gain.gain.setValueAtTime(0, time + (i * 0.06));
+        gain.gain.linearRampToValueAtTime(0.1, time + (i * 0.06) + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + (i * 0.06) + 0.2);
+        osc.start(time + (i * 0.06));
+        osc.stop(time + (i * 0.06) + 0.2);
+      }
+    } catch(e) {}
+  }, [])
+
   const handleSpinClick = useCallback(() => {
     if (latestRef.current.spinning || latestRef.current.energy < latestRef.current.bet) {
       setAutoSpin(false)
       return
     }
     setSpinning(true)
+    playRetroSpinSound()
     latestRef.current.spinning = true
     setWinMessage(null)
     setLastWin(null)
     setSpinTrigger((prev) => prev + 1)
-  }, [])
+  }, [playRetroSpinSound])
 
   const handleSpinResult = useCallback((payout: { points: number; coins: number; energyWin: number }) => {
     setSpinning(false)
@@ -204,14 +263,17 @@ export default function SlotScreen() {
     spinOutcome(scaledPts, scaledCoins, currentBet, scaledEnergy)
 
     if (payout.coins > 0) {
+      playRetroWinSound()
       setWinMessage(`🪙 WIN! +${scaledCoins} COINS`)
       setLastWin(scaledCoins)
       triggerBurst('coins')
     } else if (payout.points > 0) {
+      playRetroWinSound()
       setWinMessage(`⭐ WIN! +${scaledPts} MAROX`)
       setLastWin(scaledPts)
       triggerBurst('points')
     } else if (payout.energyWin > 0) {
+      playRetroWinSound()
       setWinMessage(`⚡ WIN! +${payout.energyWin} ENERGY`)
       setLastWin(payout.energyWin)
       triggerBurst('energy')
@@ -352,7 +414,7 @@ export default function SlotScreen() {
 
         {/* LED marquee banner */}
         <div className={`slot-led-banner pixel-text ${isWin ? 'win-banner' : ''}`}>
-          {winMessage || '◄ SPIN, WIN, EARN MAROX! ►'}
+          {winMessage || '◄ SPIN, EARN MAROX! ►'}
         </div>
 
         {/* Reels board */}
