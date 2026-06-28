@@ -10,7 +10,7 @@ export default function FriendsScreen() {
   const [copied, setCopied] = useState(false)
   const userId = telegramUser?.id || 'demo'
   const botUsername = 'Maroxcoinbot'
-  const inviteLink = `https://t.me/${botUsername}/play?startapp=ref_${userId}`
+  const inviteLink = `https://t.me/${botUsername}?start=ref_${userId}`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteLink)
