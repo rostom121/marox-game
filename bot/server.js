@@ -81,6 +81,18 @@ if (token) {
     }
   });
 
+  // ── SECRET ADMIN COMMAND TO RESET DATABASE ──
+  bot.onText(/\/admin_reset_db_marox_confirm/, async (msg) => {
+    const chatId = msg.chat.id;
+    try {
+      await prisma.task.deleteMany({});
+      await prisma.user.deleteMany({});
+      await bot.sendMessage(chatId, "✅ <b>DATABASE RESET SUCCESSFUL</b>\nAll players, test accounts, and tasks have been completely deleted. The game is now clean and starts from zero.", { parse_mode: 'HTML' });
+    } catch (e) {
+      await bot.sendMessage(chatId, `❌ <b>ERROR RESETTING DB:</b>\n${e.message}`, { parse_mode: 'HTML' });
+    }
+  });
+
   console.log(`Telegram Bot is active and polling...`);
 } else {
   console.log("Telegram Bot is running in MOCK mode (no BOT_TOKEN provided).");

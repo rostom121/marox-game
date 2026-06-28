@@ -4,12 +4,10 @@ import { gameConfig } from '../config/gameConfig'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
 
 let syncTimeout: NodeJS.Timeout | null = null;
-const syncWithBackend = (telegramId: string, data: Partial<UserData>, walletAddress: string | null) => {
+const syncWithBackend = (telegramId: string, data: Partial<UserData>, walletAddress: string | null, force: boolean = false) => {
   if (!telegramId || telegramId === 'demo') return;
-  if (syncTimeout) clearTimeout(syncTimeout);
   
-  // Debounce sync to avoid spamming API on every spin
-  syncTimeout = setTimeout(() => {
+  const doSync = () => {
     fetch(`${API_URL}/api/user/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -23,7 +21,18 @@ const syncWithBackend = (telegramId: string, data: Partial<UserData>, walletAddr
         walletAddress
       })
     }).catch(console.error);
-  }, 2000);
+  };
+
+  if (force) {
+    if (syncTimeout) clearTimeout(syncTimeout);
+    doSync();
+    return;
+  }
+
+  if (syncTimeout) clearTimeout(syncTimeout);
+  
+  // Debounce sync to avoid spamming API on every spin
+  syncTimeout = setTimeout(doSync, 2000);
 };
 
 export const getUpgradeCost = (level: number): number => {
@@ -34,6 +43,15 @@ export const getUpgradeCost = (level: number): number => {
   if (level < 200) return 2000;
   if (level < 300) return 5000;
   return 10000;
+};
+
+export const getUpgradeClicksRequired = (level: number): number => {
+  if (level < 20) return 2; // Covers 1-19
+  if (level < 50) return 4;
+  if (level < 100) return 7;
+  if (level < 250) return 10;
+  if (level < 500) return 15;
+  return 25; // 500+
 };
 
 export interface UserData {
@@ -47,6 +65,12 @@ export interface UserData {
   gameUsername: string | null;
   lastEnergyUpdate?: number;
   completedTasks?: string[];
+}
+
+export interface SettingsData {
+  isMuted: boolean;
+  volume: number;
+  language: string;
 }
 
 export const DAILY_REWARDS = [
@@ -72,6 +96,7 @@ interface GameStore {
   walletAddress: string | null;
   activeTab: string;
   loading: boolean;
+  settings: SettingsData;
 
   initStore: () => void;
   setTab: (tab: string) => void;
@@ -80,10 +105,11 @@ interface GameStore {
   setWallet: (address: string | null) => void;
   getDailyStatus: () => { canClaim: boolean; currentStreak: number; nextReward: typeof DAILY_REWARDS[0] };
   claimDailyReward: () => boolean;
-  upgradeLevel: () => boolean;
+  upgradeLevel: () => { success: boolean, leveledUp: boolean };
   setGameUsername: (name: string) => void;
   addPurchasedItems: (energyAmount: number, coinsAmount: number) => void;
   completeTask: (taskId: string) => void;
+  updateSettings: (newSettings: Partial<SettingsData>) => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -104,10 +130,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   walletAddress: null,
   activeTab: 'home',
   loading: true,
+  settings: {
+    isMuted: false,
+    volume: 0.5,
+    language: 'EN',
+  },
 
   initStore: () => {
     // Initial data loading (load local storage fallback)
     let localData: UserData | null = null;
+    let localSettings: SettingsData | null = null;
     try {
       const saved = localStorage.getItem('marox_game_data');
       if (saved) {
@@ -132,6 +164,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             localData.lastEnergyUpdate = now;
           }
         }
+      }
+      
+      const savedSettings = localStorage.getItem('marox_game_settings');
+      if (savedSettings) {
+        localSettings = JSON.parse(savedSettings);
       }
     } catch (e) {
       console.error("Local storage error:", e);
@@ -172,6 +209,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       telegramUser: tgUser,
       data: initialData,
+      settings: localSettings || get().settings,
     }); // Keep loading true until API responds
 
     if (tgUser && tgUser.id !== 'demo') {
@@ -384,32 +422,56 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return true;
   },
 
+  // inside GameStore interface, upgradeLevel returns { success: boolean, leveledUp: boolean }
+
   upgradeLevel: () => {
     const state = get();
     const cost = getUpgradeCost(state.data.level);
 
     if (state.data.coins >= cost) {
+      let result = { success: false, leveledUp: false };
       set((s) => {
-        const nextData = {
-          ...s.data,
-          coins: s.data.coins - cost,
-          level: s.data.level + 1,
-          xp: 0, // Reset XP on level up
-          energy: s.data.energy + 30 // Grant +30 energy on level up
-        };
-        try {
-          localStorage.setItem('marox_game_data', JSON.stringify(nextData));
-        } catch (e) {
-          console.error(e);
+        const clicksRequired = getUpgradeClicksRequired(s.data.level);
+        const newXp = (s.data.xp || 0) + 1;
+
+        if (newXp >= clicksRequired) {
+          const nextData = {
+            ...s.data,
+            coins: s.data.coins - cost,
+            level: s.data.level + 1,
+            xp: 0,
+            energy: s.data.energy + 30
+          };
+          try {
+            localStorage.setItem('marox_game_data', JSON.stringify(nextData));
+            syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress, true);
+          } catch (e) {
+            console.error(e);
+          }
+          result = { success: true, leveledUp: true };
+          return { data: nextData };
+        } else {
+          const nextData = {
+            ...s.data,
+            coins: s.data.coins - cost,
+            xp: newXp
+          };
+          try {
+            localStorage.setItem('marox_game_data', JSON.stringify(nextData));
+            syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress, false);
+          } catch (e) {
+            console.error(e);
+          }
+          result = { success: true, leveledUp: false };
+          return { data: nextData };
         }
-        return { data: nextData };
       });
       if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
       }
-      return true;
+      return result as any; // Cast as any because the interface was boolean previously, wait, I need to update the interface!
     }
-    return false;
+    return { success: false, leveledUp: false } as any;
   },
 
   setGameUsername: (name) => {
@@ -430,5 +492,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       try { localStorage.setItem('marox_game_data', JSON.stringify(newData)); } catch (_) {}
       return { data: newData };
     });
-  }
+  },
+
+  updateSettings: (newSettings) => {
+    set((state) => {
+      const nextSettings = { ...state.settings, ...newSettings };
+      try { localStorage.setItem('marox_game_settings', JSON.stringify(nextSettings)); } catch (_) {}
+      return { settings: nextSettings };
+    });
+  },
 }));

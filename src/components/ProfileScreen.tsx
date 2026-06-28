@@ -1,16 +1,12 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useGameStore } from '../store/useGameStore'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useGameStore, getUpgradeClicksRequired } from '../store/useGameStore'
 import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react'
 
 export default function ProfileScreen() {
+  const { t } = useTranslation()
   const { data, telegramUser, walletConnected, setWallet } = useGameStore()
-  const { i18n } = useTranslation()
   const address = useTonAddress()
-
-  const [activeLang, setActiveLang] = useState(i18n.language || 'en')
 
   // Sync TON wallet address with Zustand store state
   useEffect(() => {
@@ -21,24 +17,14 @@ export default function ProfileScreen() {
     }
   }, [address, setWallet])
 
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang)
-    setActiveLang(lang)
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
-      window.Telegram.WebApp.HapticFeedback.selectionChanged()
-    }
-  }
-
-  const LANGUAGES = [
-    { code: 'en', name: 'English', sub: 'USA' },
-    { code: 'ru', name: 'Русский', sub: 'Россия' },
-    { code: 'fr', name: 'Français', sub: 'France' },
-  ]
+  const requiredClicks = getUpgradeClicksRequired(data.level)
+  const currentClicks = data.xp || 0
+  const progressPercent = Math.min(100, Math.max(0, (currentClicks / requiredClicks) * 100))
 
   return (
     <div className="page" style={{ padding: '16px 12px' }}>
       <header className="page-header">
-        <h1 className="pixel-text" style={{ fontSize: '15px', color: 'var(--blue)', textShadow: '0 0 10px var(--blue)' }}>PLAYER PROFILE</h1>
+        <h1 className="pixel-text" style={{ fontSize: '15px', color: 'var(--blue)', textShadow: '0 0 10px var(--blue)' }}>{t('profile_title')}</h1>
         <div className="accent-line" style={{ background: 'var(--blue)', boxShadow: '0 0 10px var(--blue)' }} />
       </header>
 
@@ -51,11 +37,11 @@ export default function ProfileScreen() {
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff' }}>{data.gameUsername || telegramUser?.firstName || 'Player'}</h2>
             {telegramUser?.username && <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>@{telegramUser.username}</div>}
-            <div style={{ fontSize: '11px', color: 'var(--gold)', marginTop: '4px', fontWeight: 'bold' }}>LEVEL {data.level}</div>
+            <div style={{ fontSize: '11px', color: 'var(--gold)', marginTop: '4px', fontWeight: 'bold' }}>{t('level')} {data.level}</div>
             <div className="xp-bar-track" style={{ height: '6px', marginTop: '6px' }}>
-              <div className="xp-bar-fill" style={{ width: `${data.xp}%` }} />
+              <div className="xp-bar-fill" style={{ width: `${progressPercent}%` }} />
             </div>
-            <div style={{ fontSize: '9px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '3px' }}>{data.xp}% to next level</div>
+            <div style={{ fontSize: '9px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '3px' }}>{Math.round(progressPercent)}% {t('to_next_level')}</div>
           </div>
         </div>
 
@@ -65,9 +51,9 @@ export default function ProfileScreen() {
             <div className="pixel-text" style={{ fontSize: '14px', color: 'var(--blue)', marginTop: '6px' }}>💎 {data.points.toLocaleString()}</div>
           </div>
           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Wallet Address</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{t('wallet_address')}</div>
             <div style={{ fontSize: '11px', color: walletConnected ? '#fff' : 'var(--red)', fontWeight: 'bold', marginTop: '8px', wordBreak: 'break-all' }}>
-              {walletConnected ? `${address.substring(0, 4)}...${address.substring(address.length - 4)}` : 'Not Connected'}
+              {walletConnected ? `${address.substring(0, 4)}...${address.substring(address.length - 4)}` : t('not_connected')}
             </div>
           </div>
         </div>
@@ -75,12 +61,12 @@ export default function ProfileScreen() {
 
       {/* TON Wallet Connect Section */}
       <div className="settings-section">
-        <h3 className="settings-section-title">TON WALLET</h3>
+        <h3 className="settings-section-title">{t('ton_wallet')}</h3>
         <div className="wallet-card card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '16px', background: 'rgba(22, 15, 41, 0.6)' }}>
           <p className="wallet-desc" style={{ fontSize: '10px', color: 'var(--text-dim)', lineHeight: 1.5, textAlign: 'center' }}>
             {walletConnected
-              ? `Connected: ${address.substring(0, 6)}...${address.substring(address.length - 6)}`
-              : 'Connect your Web3 wallet to receive token rewards and NFTs!'}
+              ? `${t('ton_wallet_desc_connected')} ${address.substring(0, 6)}...${address.substring(address.length - 6)}`
+              : t('ton_wallet_desc_not')}
           </p>
           <div className="ton-connect-btn-wrapper">
             <TonConnectButton />
@@ -88,31 +74,6 @@ export default function ProfileScreen() {
         </div>
       </div>
 
-      {/* Language Selector Grid */}
-      <div className="settings-section" style={{ marginTop: '8px' }}>
-        <h3 className="settings-section-title">INTERFACE LANGUAGE</h3>
-        <div className="lang-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          {LANGUAGES.map((lang) => (
-            <button
-              key={lang.code}
-              className={`lang-btn ${activeLang === lang.code ? 'active' : ''}`}
-              onClick={() => changeLanguage(lang.code)}
-              style={{
-                padding: '10px 12px',
-                borderRadius: '12px',
-                border: activeLang === lang.code ? '2px solid var(--blue)' : '1px solid var(--border-neon)',
-                background: activeLang === lang.code ? 'rgba(0, 210, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-                color: '#fff',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <div className="lang-name" style={{ fontSize: '11px', fontWeight: 'bold' }}>{lang.name}</div>
-              <div className="lang-sub" style={{ fontSize: '8px', color: 'var(--text-dim)', marginTop: '2px' }}>{lang.sub}</div>
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   )
 }

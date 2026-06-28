@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../store/useGameStore'
 
 interface LandingProps {
@@ -35,6 +36,7 @@ const SPARK_COLORS = ['#ffb700', '#00d2ff', '#9d4edd', '#ffffff', '#ff6b35']
 const FLOAT_EMOJIS = ['🪙', '⭐', '✨', '💎', '⚡']
 
 export default function LandingScreen({ navigate }: LandingProps) {
+  const { t } = useTranslation()
   const bgCanvasRef = useRef<HTMLCanvasElement>(null)
   const particlesRef = useRef<FloatingParticle[]>([])
   const sparklesRef = useRef<Sparkle[]>([])
@@ -44,7 +46,7 @@ export default function LandingScreen({ navigate }: LandingProps) {
   const [charY, setCharY] = useState(0)
   const charRef = useRef({ blink: 0, breathe: 0, glow: 0 })
 
-  const { data, setGameUsername } = useGameStore()
+  const { data, setGameUsername, telegramUser } = useGameStore()
   const [showUsernameModal, setShowUsernameModal] = useState(false)
   const [usernameInput, setUsernameInput] = useState('')
 
@@ -241,7 +243,7 @@ export default function LandingScreen({ navigate }: LandingProps) {
       {/* ── PLAY NOW BUTTON ONLY ── */}
       <div className="landing-bottom-action">
         <button className="play-now-btn pixel-text super-glowing-btn" onClick={handlePlayNow}>
-          PLAY NOW
+          {t('play_now')}
         </button>
         <span className="landing-mini-app-text">game mini app on telegram</span>
       </div>
@@ -249,9 +251,9 @@ export default function LandingScreen({ navigate }: LandingProps) {
       {showUsernameModal && (
         <div className="welcome-modal-overlay" style={{ zIndex: 3000 }}>
           <div className="welcome-modal-card card" style={{ position: 'relative', maxWidth: '320px', width: 'fit-content', padding: '25px 20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <h2 className="pixel-text gold-text" style={{ fontSize: '18px', textAlign: 'center' }}>CHOOSE USERNAME</h2>
+            <h2 className="pixel-text gold-text" style={{ fontSize: '18px', textAlign: 'center' }}>{t('choose_username')}</h2>
             <p style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'center', lineHeight: 1.5 }}>
-              Enter a unique username to be used in the game and leaderboards.
+              {t('choose_username_desc')}
             </p>
             <input 
               type="text" 

@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { TonConnectUIProvider } from '@tonconnect/ui-react'
 import '../i18n'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../store/useGameStore'
 import LandingScreen from '../components/LandingScreen'
 import SlotScreen from '../components/SlotScreen'
@@ -14,12 +15,20 @@ import WelcomeModal from '../components/WelcomeModal'
 import ShopScreen from '../components/ShopScreen'
 
 export default function AppRoot() {
-  const { activeTab, setTab, initStore, loading, data } = useGameStore()
+  const { activeTab, setTab, initStore, loading, data, settings } = useGameStore()
+  const { t, i18n } = useTranslation()
 
   useEffect(() => {
     // Initialise store on mount (client-side only)
     initStore()
   }, [initStore])
+
+  useEffect(() => {
+    const langCode = settings.language === 'Russian' ? 'ru' : settings.language === 'French' ? 'fr' : 'en';
+    if (i18n.language !== langCode) {
+      i18n.changeLanguage(langCode);
+    }
+  }, [settings.language, i18n])
 
   if (loading) {
     return (
@@ -34,18 +43,18 @@ export default function AppRoot() {
         fontWeight: 'bold',
         fontFamily: "'Press Start 2P', monospace"
       }}>
-        Loading MAROX...
+        {t('loading')}
       </div>
     )
   }
 
   const TABS = [
-    { id: 'home', icon: '🏠', label: 'Home' },
-    { id: 'slot', icon: '🎰', label: 'Slot' },
-    { id: 'missions', icon: '📜', label: 'Tasks' },
-    { id: 'friends', icon: '👥', label: 'Friends' },
-    { id: 'leaderboard', icon: '🏆', label: 'Rank' },
-    { id: 'profile', icon: '👤', label: 'Profile' },
+    { id: 'home', icon: '🏠', label: t('nav_home') },
+    { id: 'slot', icon: '🎰', label: t('nav_slot') },
+    { id: 'missions', icon: '📜', label: t('nav_tasks') },
+    { id: 'friends', icon: '👥', label: t('nav_friends') },
+    { id: 'leaderboard', icon: '🏆', label: t('nav_rank') },
+    { id: 'profile', icon: '👤', label: t('nav_profile') },
   ]
 
   return (

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../store/useGameStore'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
@@ -14,6 +15,7 @@ interface LeaderboardEntry {
 }
 
 export default function LeaderboardScreen() {
+  const { t } = useTranslation()
   const { data, telegramUser } = useGameStore()
 
   const getUserTier = (points: number): 'whale' | 'master' | 'legendary' => {
@@ -86,7 +88,7 @@ export default function LeaderboardScreen() {
   return (
     <div className="page" style={{ padding: '16px 12px' }}>
       <header className="page-header">
-        <h1 className="pixel-text" style={{ fontSize: '18px', color: 'var(--gold)', textShadow: '0 0 10px var(--gold)' }}>LEADERBOARD</h1>
+        <h1 className="pixel-text gold-text glow-text" style={{ fontSize: '20px', textShadow: '0 0 10px var(--gold)' }}>{t('top_players')}</h1>
         <div className="accent-line" style={{ background: 'var(--gold)', boxShadow: '0 0 10px var(--gold)' }} />
       </header>
 

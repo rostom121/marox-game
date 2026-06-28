@@ -1,22 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useGameStore, getUpgradeCost } from '../store/useGameStore'
+import { useTranslation } from 'react-i18next'
+import { useGameStore, getUpgradeCost, getUpgradeClicksRequired } from '../store/useGameStore'
 
 interface PlayerInfoModalProps {
   onClose: () => void;
 }
 
 export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
+  const { t } = useTranslation()
   const { data, telegramUser, upgradeLevel } = useGameStore();
   const cost = getUpgradeCost(data.level);
   const canUpgrade = data.coins >= cost;
+  
+  const requiredClicks = getUpgradeClicksRequired(data.level);
+  const currentClicks = data.xp || 0;
+  const progressPercent = Math.min(100, Math.max(0, (currentClicks / requiredClicks) * 100));
   
   const [showCelebration, setShowCelebration] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleUpgrade = () => {
     if (canUpgrade) {
-      const success = upgradeLevel();
-      if (success) {
+      const result = upgradeLevel();
+      if (result.success && result.leveledUp) {
         setShowCelebration(true);
       }
     }
@@ -116,15 +122,20 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
           </div>
           
           <h2 className="pixel-text gold-text" style={{ fontSize: '24px', textShadow: '0 0 15px var(--gold)', marginBottom: '10px' }}>
-            LEVEL UP!
+            {t('level_up')}
           </h2>
           
           <p style={{ color: '#fff', fontSize: '14px', marginBottom: '20px' }}>
-            Congratulations <strong style={{color: 'var(--blue)'}}>{data.gameUsername || telegramUser?.username || telegramUser?.firstName || 'Player'}</strong>! You have reached a new level.
+            {t('congratulations')} <strong style={{color: 'var(--blue)'}}>{data.gameUsername || telegramUser?.username || telegramUser?.firstName || 'Player'}</strong>! {t('reached_new_level')}
           </p>
           
           <div className="player-modal-level-badge" style={{ fontSize: '18px', padding: '10px 20px', background: 'var(--gold)', color: '#000', border: 'none', boxShadow: '0 0 20px var(--gold)' }}>
-            LEVEL {data.level}
+            {t('level')} {data.level}
+          </div>
+          
+          <div style={{ marginTop: '20px', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: '#00d2ff', fontWeight: 'bold', fontSize: '20px', textShadow: '0 0 10px #00d2ff' }}>+30 ⚡</span>
+            <span style={{ color: '#fff', fontSize: '12px', opacity: 0.8 }}>Energy Reward</span>
           </div>
           
           <button 
@@ -154,19 +165,29 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
         </div>
         
         <h2 className="player-modal-name">{data.gameUsername || telegramUser?.firstName || 'Player'}</h2>
-        <div className="player-modal-level-badge">LEVEL {data.level}</div>
+        <div className="player-modal-level-badge">{t('level')} {data.level}</div>
         
         <div className="player-modal-stats">
           <div className="stat-item">
-            <span className="stat-label">Total Gold</span>
+            <span className="stat-label">{t('total_gold')}</span>
             <span className="stat-value gold-text">🪙 {data.coins.toLocaleString()}</span>
           </div>
         </div>
         
         <div className="player-modal-upgrade-section">
-          <div className="upgrade-info">
-            <span>Next Level Cost:</span>
+          <div className="upgrade-info" style={{ marginBottom: '10px' }}>
+            <span>{t('upgrade_cost')}:</span>
             <span className="cost-value">🪙 {cost.toLocaleString()}</span>
+          </div>
+          
+          <div style={{ marginBottom: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-dim)', marginBottom: '5px' }}>
+              <span>{t('progress_to_level')} {data.level + 1}</span>
+              <span>{currentClicks} / {requiredClicks}</span>
+            </div>
+            <div className="xp-bar-track" style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden' }}>
+              <div className="xp-bar-fill" style={{ width: `${progressPercent}%`, height: '100%', background: 'var(--blue)', boxShadow: '0 0 10px var(--blue)' }} />
+            </div>
           </div>
           
           <button 
@@ -174,7 +195,7 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
             onClick={handleUpgrade}
             disabled={!canUpgrade}
           >
-            UPGRADE LEVEL
+            {t('upgrade_level')}
           </button>
           
           {!canUpgrade && (

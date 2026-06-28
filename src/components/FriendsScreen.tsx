@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
-import { useGameStore } from '../store/useGameStore'
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useGameStore } from '../store/useGameStore';
 
 export default function FriendsScreen() {
-  const { telegramUser } = useGameStore()
+  const { t } = useTranslation();
+  const { data, telegramUser } = useGameStore();
   const [copied, setCopied] = useState(false)
   const userId = telegramUser?.id || 'demo'
-  // ضع هنا اسم البوت الخاص بك (Username) بدلاً من YOUR_BOT_USERNAME
-  // وضع الاسم المختصر للتطبيق (Short Name) بدلاً من YOUR_APP_SHORT_NAME
-  const inviteLink = `https://t.me/Maroxcoinbot/play?startapp=ref_${userId}`
+  const botUsername = 'MaroxGameBot'
+  const inviteLink = `https://t.me/${botUsername}?start=ref_${userId}`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteLink)
@@ -21,8 +22,9 @@ export default function FriendsScreen() {
   }
 
   const handleInvite = () => {
-    const text = encodeURIComponent(`🎮 Spin the slots, collect points, and level up in MAROX Slot Adventure! 🎰⚡`)
-    const url = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${text}`
+    const text = "Join me in MAROX and let's earn rewards together!"
+    const url = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(text)}`
+    
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
       window.Telegram.WebApp.openTelegramLink(url)
     } else {
@@ -33,56 +35,34 @@ export default function FriendsScreen() {
   return (
     <div className="page" style={{ padding: '16px 12px' }}>
       <header className="page-header">
-        <h1 className="pixel-text" style={{ fontSize: '15px', color: 'var(--blue)', textShadow: '0 0 10px var(--blue)' }}>INVITE FRIENDS</h1>
+        <h1 className="pixel-text gold-text glow-text" style={{ fontSize: '20px', textShadow: '0 0 10px var(--gold)' }}>{t('invite_title')}</h1>
         <div className="accent-line" style={{ background: 'var(--blue)', boxShadow: '0 0 10px var(--blue)' }} />
       </header>
 
-      <div className="referral-hero card" style={{ padding: '24px 16px', textAlign: 'center', background: 'rgba(22, 15, 41, 0.6)' }}>
+      {/* Main CTA */}
+      <div className="card" style={{ padding: '24px 20px', textAlign: 'center', background: 'rgba(0, 210, 255, 0.05)', border: '1px solid rgba(0, 210, 255, 0.2)', marginBottom: '20px' }}>
         <div style={{ fontSize: '44px', marginBottom: '8px' }}>👥</div>
-        <h2 style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>Spread the Word!</h2>
-        <p style={{ fontSize: '11px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
-          Invite your friends to MAROX! Both of you will receive rewards. Premium users receive massive bonuses!
+        <p style={{ fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: '20px' }}>
+          {t('invite_desc')}
         </p>
 
-        {/* Reward breakdown */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '16px', textAlign: 'left' }}>
-          <div className="card" style={{ padding: '10px', background: 'rgba(0, 210, 255, 0.05)', border: '1px solid rgba(0, 210, 255, 0.2)' }}>
-            <div style={{ fontSize: '9px', textTransform: 'uppercase', color: 'var(--blue)', fontWeight: 'bold' }}>Standard User</div>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#fff', marginTop: '4px' }}>+100 Energy</div>
-            <div style={{ fontSize: '9px', color: 'var(--text-dim)' }}>+5,000 Gold Coins</div>
-          </div>
-          <div className="card" style={{ padding: '10px', background: 'rgba(255, 183, 0, 0.05)', border: '1px solid rgba(255, 183, 0, 0.2)' }}>
-            <div style={{ fontSize: '9px', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 'bold' }}>Telegram Premium</div>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--gold)', marginTop: '4px' }}>+500 Energy</div>
-            <div style={{ fontSize: '9px', color: 'var(--gold)' }}>+50,000 Gold Coins</div>
-          </div>
+        <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+          <button className="invite-btn pixel-text" onClick={handleInvite} style={{ background: 'var(--blue)', color: '#000', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 'bold', fontSize: '12px' }}>
+            {t('invite_btn')}
+          </button>
+          <button className="copy-btn pixel-text" onClick={handleCopy} style={{ background: 'transparent', color: 'var(--blue)', border: '2px solid var(--blue)', padding: '10px', borderRadius: '12px', fontWeight: 'bold', fontSize: '10px' }}>
+            {copied ? 'COPIED!' : t('copy_link')}
+          </button>
         </div>
-      </div>
-
-      {/* Invite Link copy block */}
-      <div className="card" style={{ padding: '16px', background: 'rgba(22, 15, 41, 0.6)' }}>
-        <div style={{ fontSize: '9px', textTransform: 'uppercase', color: 'var(--text-dim)', fontWeight: 'bold', marginBottom: '6px' }}>Your Referral Link</div>
-        <div className="link-box" onClick={handleCopy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-neon)', borderRadius: '12px', cursor: 'pointer' }}>
-          <div style={{ flex: 1, overflow: 'hidden', marginRight: '8px' }}>
-            <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--blue)', whiteSpace: 'nowrap' }}>{inviteLink}</span>
-          </div>
-          <span style={{ fontSize: '12px', color: 'var(--blue)', fontWeight: 'bold' }}>{copied ? 'Copied! 📋' : 'Copy 📋'}</span>
-        </div>
-
-        <button className="invite-btn" onClick={handleInvite} style={{ marginTop: '16px', width: '100%', padding: '14px', borderRadius: '14px', border: 'none', background: 'var(--blue)', color: '#001020', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0, 210, 255, 0.3)' }}>
-          Invite Friends
-        </button>
       </div>
 
       {/* Stats list */}
-      <div className="friends-stats" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-        <div className="friends-stat card" style={{ padding: '12px', background: 'rgba(22, 15, 41, 0.6)' }}>
-          <div style={{ fontSize: '8px', textTransform: 'uppercase', color: 'var(--text-dim)', fontWeight: 'bold' }}>Friends Invited</div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', marginTop: '4px', fontFamily: 'monospace' }}>0</div>
-        </div>
-        <div className="friends-stat card" style={{ padding: '12px', background: 'rgba(22, 15, 41, 0.6)' }}>
-          <div style={{ fontSize: '8px', textTransform: 'uppercase', color: 'var(--text-dim)', fontWeight: 'bold' }}>Points Earned</div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--blue)', marginTop: '4px', fontFamily: 'monospace' }}>0</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        
+        <div className="friends-list card" style={{ padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+          <div style={{ fontSize: '30px', marginBottom: '10px' }}>🚷</div>
+          <h3 style={{ color: '#fff', fontSize: '14px', marginBottom: '5px' }}>{t('no_friends')}</h3>
+          <p style={{ color: 'var(--text-dim)', fontSize: '10px' }}>{t('friend_reward')}</p>
         </div>
       </div>
     </div>

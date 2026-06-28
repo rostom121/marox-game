@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../store/useGameStore'
 import { gameConfig } from '../config/gameConfig'
 
@@ -10,9 +11,11 @@ interface VerificationState {
 }
 
 export default function TasksScreen() {
+  const { t } = useTranslation();
   const { data, updateStats, completeTask } = useGameStore()
   const [tonConnectUI] = useTonConnectUI()
   const wallet = useTonWallet()
+  const [activeTab, setActiveTab] = useState<'new' | 'completed'>('new')
 
   const getInitialTaskStates = (): VerificationState => {
     const states: VerificationState = {
@@ -55,7 +58,6 @@ export default function TasksScreen() {
       }
     }
 
-    // Open link
     if (link && link !== '#') {
       if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
         window.Telegram.WebApp.openLink(link)
@@ -64,10 +66,8 @@ export default function TasksScreen() {
       }
     }
 
-    // Set to verifying
     setTaskStates((prev) => ({ ...prev, [taskId]: 'verifying' }))
 
-    // Trigger timed verification delay (configured in gameConfig)
     const task = gameConfig.tasks.find((t) => t.id === taskId)
     const delay = task ? task.verifyDelayMs : 3000
 
@@ -75,7 +75,6 @@ export default function TasksScreen() {
       setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }))
       completeTask(taskId)
       
-      // Award points, coins, and energy
       if (task) {
         updateStats(task.points, task.coins, task.energy || 0)
       }
@@ -98,32 +97,36 @@ export default function TasksScreen() {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success')
       }
     }
-  }, [wallet, taskStates, updateStats])
+  }, [wallet, taskStates, updateStats, completeTask])
 
   return (
     <div className="page" style={{ padding: '16px 12px' }}>
       <header className="page-header">
-        <h1 className="pixel-text" style={{ fontSize: '15px', color: 'var(--neon-purple)', textShadow: '0 0 10px var(--neon-purple)' }}>TASKS & MISSIONS</h1>
+        <h1 className="pixel-text gold-text glow-text" style={{ fontSize: '20px', textShadow: '0 0 10px var(--gold)' }}>{t('missions_title')}</h1>
         <div className="accent-line" style={{ background: 'var(--neon-purple)', boxShadow: '0 0 10px var(--neon-purple)' }} />
       </header>
 
-      {/* Rewards overview banner */}
-      <div className="task-info-banner card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'rgba(157, 78, 221, 0.08)' }}>
-        <div>
-          <div className="reward-label" style={{ fontSize: '8px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Complete All Tasks</div>
-          <div className="reward-title" style={{ fontSize: '13px', fontWeight: 'bold', color: '#fff', marginTop: '2px' }}>Collect Massive Rewards</div>
-        </div>
-        <div className="reward-amount" style={{ fontFamily: 'monospace', fontSize: '14px', color: 'var(--blue)', fontWeight: 'bold' }}>
-          +1,500 pts
-        </div>
+      <div className="tab-buttons" style={{ display: 'flex', gap: '10px', marginBottom: '20px', marginTop: '20px' }}>
+        <button 
+          onClick={() => setActiveTab('new')}
+          className={`tab-btn ${activeTab === 'new' ? 'active' : ''}`}
+          style={{ flex: 1, padding: '10px', background: activeTab === 'new' ? 'rgba(0, 210, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)', border: activeTab === 'new' ? '1px solid var(--blue)' : '1px solid transparent', borderRadius: '12px', color: activeTab === 'new' ? '#fff' : 'var(--text-dim)', fontWeight: 'bold' }}
+        >
+          {t('new_tasks')}
+        </button>
+        <button 
+          onClick={() => setActiveTab('completed')}
+          className={`tab-btn ${activeTab === 'completed' ? 'active' : ''}`}
+          style={{ flex: 1, padding: '10px', background: activeTab === 'completed' ? 'rgba(0, 210, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)', border: activeTab === 'completed' ? '1px solid var(--blue)' : '1px solid transparent', borderRadius: '12px', color: activeTab === 'completed' ? '#fff' : 'var(--text-dim)', fontWeight: 'bold' }}
+        >
+          {t('completed_tasks')}
+        </button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
-        {/* New Tasks Section */}
-        {gameConfig.tasks.filter(t => (taskStates[t.id] || 'not_started') !== 'completed').length > 0 && (
+        {activeTab === 'new' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <h2 className="pixel-text" style={{ fontSize: '12px', color: '#fff', marginLeft: '4px' }}>NEW TASKS</h2>
             {gameConfig.tasks.filter(t => (taskStates[t.id] || 'not_started') !== 'completed').map((task) => {
               const state = taskStates[task.id] || 'not_started'
               return (
@@ -143,11 +146,7 @@ export default function TasksScreen() {
                     <span style={{ fontSize: '24px' }}>{task.emoji}</span>
                     <div>
                       <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
-                      <div className="task-rewards" style={{ display: 'flex', gap: '8px', fontSize: '10px', marginTop: '6px' }}>
-                        <span style={{ color: 'var(--neon-purple)', fontWeight: 'bold' }}>+{task.points} MRX</span>
-                        <span style={{ color: '#ffb700', fontWeight: 'bold' }}>+{task.coins} 🪙</span>
-                        {task.energy && <span style={{ color: '#00d2ff', fontWeight: 'bold' }}>+{task.energy} ⚡</span>}
-                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--gold)', marginTop: '5px' }}>{t('reward')}: {task.points} pts</div>
                     </div>
                   </div>
 
@@ -164,10 +163,9 @@ export default function TasksScreen() {
                       fontWeight: 'bold',
                       cursor: state === 'not_started' ? 'pointer' : 'default',
                       textTransform: 'uppercase',
-                      boxShadow: state === 'not_started' ? '0 2px 8px rgba(0, 210, 255, 0.25)' : 'none',
                     }}
                   >
-                    {state === 'not_started' ? 'GO' : 'VERIFYING...'}
+                    {state === 'not_started' ? t('do_it') : t('verifying')}
                   </button>
                 </div>
               )
@@ -175,10 +173,8 @@ export default function TasksScreen() {
           </div>
         )}
 
-        {/* Completed Tasks Section */}
-        {gameConfig.tasks.filter(t => taskStates[t.id] === 'completed').length > 0 && (
+        {activeTab === 'completed' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <h2 className="pixel-text" style={{ fontSize: '12px', color: 'var(--text-dim)', marginLeft: '4px' }}>COMPLETED</h2>
             {gameConfig.tasks.filter(t => taskStates[t.id] === 'completed').map((task) => (
                 <div
                   key={task.id}
@@ -199,23 +195,7 @@ export default function TasksScreen() {
                       <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
                     </div>
                   </div>
-
-                  <button
-                    disabled
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: '10px',
-                      border: 'none',
-                      background: 'rgba(255,255,255,0.05)',
-                      color: 'var(--text-dim)',
-                      fontSize: '9px',
-                      fontWeight: 'bold',
-                      cursor: 'default',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    DONE
-                  </button>
+                  <div style={{ color: '#00ff88', fontSize: '12px', fontWeight: 'bold' }}>✓ {t('completed')}</div>
                 </div>
             ))}
           </div>

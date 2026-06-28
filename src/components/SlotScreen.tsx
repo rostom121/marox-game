@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../store/useGameStore'
 import { gameConfig } from '../config/gameConfig'
 import { PixiSlotMachine } from './PixiSlotMachine'
@@ -28,7 +29,8 @@ const PARTICLE_COLORS = ['#ffb700', '#00d2ff', '#9d4edd', '#ff3333', '#ffffff']
 const AVAILABLE_BETS = [1, 2, 3, 4, 5, 10, 25, 50, 100, 150, 250, 500, 1000];
 
 export default function SlotScreen() {
-  const { data, telegramUser, spinOutcome, setTab } = useGameStore()
+  const { t } = useTranslation()
+  const { data, telegramUser, spinOutcome, setTab, settings, updateSettings } = useGameStore()
   
   const allowedBets = useMemo(() => {
     if (data.energy >= 20000) return AVAILABLE_BETS;
@@ -43,6 +45,7 @@ export default function SlotScreen() {
   }, [data.energy]);
 
   const [modalType, setModalType] = useState<string | null>(null)
+  const [showSettings, setShowSettings] = useState(false)
   const [bet, setBet] = useState(5)
   const [spinTrigger, setSpinTrigger] = useState(0)
   const [spinning, setSpinning] = useState(false)
@@ -180,6 +183,7 @@ export default function SlotScreen() {
   }
 
   const playRetroSpinSound = useCallback(() => {
+    if (settings.isMuted) return;
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
@@ -192,16 +196,17 @@ export default function SlotScreen() {
         gain.connect(ctx.destination);
         osc.type = 'square';
         osc.frequency.setValueAtTime(400 + (i % 3) * 200 + Math.random() * 100, time);
-        gain.gain.setValueAtTime(0.03, time);
+        gain.gain.setValueAtTime(0.03 * settings.volume, time);
         gain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
         osc.start(time);
         osc.stop(time + 0.08);
         time += 0.08;
       }
     } catch(e) {}
-  }, [])
+  }, [settings.isMuted, settings.volume])
 
   const playRetroWinSound = useCallback(() => {
+    if (settings.isMuted) return;
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
@@ -215,7 +220,7 @@ export default function SlotScreen() {
       burstOsc.type = 'sawtooth';
       burstOsc.frequency.setValueAtTime(300, time);
       burstOsc.frequency.exponentialRampToValueAtTime(50, time + 0.3);
-      burstGain.gain.setValueAtTime(0.1, time);
+      burstGain.gain.setValueAtTime(0.1 * settings.volume, time);
       burstGain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
       burstOsc.start(time);
       burstOsc.stop(time + 0.3);
@@ -229,13 +234,13 @@ export default function SlotScreen() {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(notes[i % notes.length], time + (i * 0.06));
         gain.gain.setValueAtTime(0, time + (i * 0.06));
-        gain.gain.linearRampToValueAtTime(0.1, time + (i * 0.06) + 0.01);
+        gain.gain.linearRampToValueAtTime(0.1 * settings.volume, time + (i * 0.06) + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.001, time + (i * 0.06) + 0.2);
         osc.start(time + (i * 0.06));
         osc.stop(time + (i * 0.06) + 0.2);
       }
     } catch(e) {}
-  }, [])
+  }, [settings.isMuted, settings.volume])
 
   const handleSpinClick = useCallback(() => {
     if (latestRef.current.spinning || latestRef.current.energy < latestRef.current.bet) {
@@ -354,11 +359,11 @@ export default function SlotScreen() {
         {/* Left Sidebar */}
         <aside className="slot-sidebar">
           {[
-            { emoji: '📜', label: 'Tasks', action: () => setTab('missions'), badge: true },
-            { emoji: '🎁', label: 'Daily', action: () => showModal('daily') },
-            { emoji: '🏆', label: 'Rank', action: () => setTab('leaderboard') },
-            { emoji: '👥', label: 'Refs', action: () => setTab('friends') },
-            { emoji: '⭐', label: 'Feats', action: () => showModal('achievements') },
+            { emoji: '📜', label: t('slot_tasks'), action: () => setTab('missions'), badge: true },
+            { emoji: '🎁', label: t('slot_daily'), action: () => showModal('daily') },
+            { emoji: '🏆', label: t('slot_rank'), action: () => setTab('leaderboard') },
+            { emoji: '👥', label: t('slot_refs'), action: () => setTab('friends') },
+            { emoji: '⭐', label: t('slot_feats'), action: () => showModal('achievements') },
           ].map((btn) => (
             <button key={btn.label} className="slot-sidebar-btn" onClick={btn.action}>
               {btn.badge && <span className="slot-sidebar-badge" />}
@@ -374,11 +379,11 @@ export default function SlotScreen() {
         {/* Right Sidebar */}
         <aside className="slot-sidebar">
           {[
-            { emoji: '🛒', label: 'Shop', action: () => setTab('shop') },
-            { emoji: '📦', label: 'Items', action: () => showModal('inventory') },
-            { emoji: '👛', label: 'Wallet', action: () => setTab('profile') },
-            { emoji: '⚙️', label: 'Setup', action: () => setTab('profile') },
-            { emoji: '🌐', label: 'Lang', action: () => setTab('profile') },
+            { emoji: '🛒', label: t('slot_shop'), action: () => setTab('shop') },
+            { emoji: '📦', label: t('slot_items'), action: () => showModal('inventory') },
+            { emoji: '👛', label: t('slot_wallet'), action: () => setTab('profile') },
+            { emoji: '⚙️', label: t('slot_setup'), action: () => setShowSettings(true) },
+            { emoji: '🌐', label: t('slot_lang'), action: () => setShowSettings(true) },
           ].map((btn) => (
             <button key={btn.label} className="slot-sidebar-btn" onClick={btn.action}>
               <span className="slot-sidebar-emoji">{btn.emoji}</span>
@@ -498,15 +503,15 @@ export default function SlotScreen() {
       {modalType === 'no_energy' && (
         <div className="slot-modal-overlay">
           <div className="slot-modal-card pixel-text" style={{ padding: '24px', textAlign: 'center', width: '300px' }}>
-            <h2 style={{ color: '#ff3333', fontSize: '20px', marginBottom: '10px' }}>OUT OF ENERGY!</h2>
+            <h2 style={{ color: '#ff3333', fontSize: '20px', marginBottom: '10px' }}>{t('out_of_energy')}</h2>
             <p style={{ color: '#fff', fontSize: '10px', marginBottom: '20px', lineHeight: '1.5' }}>
-              Your energy has depleted.<br/>Grab more from the store to keep spinning!
+              {t('out_of_energy_desc')}
             </p>
             <button className="slot-btn primary pixel-text" style={{ padding: '12px 20px', marginBottom: '12px', width: '100%', fontSize: '12px' }} onClick={() => { setModalType(null); setTab('shop'); }}>
-              ⚡ BUY ENERGY
+              {t('buy_energy')}
             </button>
             <button className="slot-btn pixel-text" style={{ padding: '10px 20px', background: 'transparent', border: '2px solid #555', color: '#aaa', width: '100%', fontSize: '10px' }} onClick={() => setModalType(null)}>
-              CLOSE
+              {t('close')}
             </button>
           </div>
         </div>
@@ -515,6 +520,83 @@ export default function SlotScreen() {
       {modalType === 'avatar' && (
         <PlayerInfoModal onClose={() => setModalType(null)} />
       )}
+      {/* ── SETTINGS MODAL ── */}
+      {showSettings && (
+        <div className="player-modal-overlay" style={{ zIndex: 5000, position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowSettings(false)}>
+          <div className="player-modal-content" onClick={(e) => e.stopPropagation()} style={{ width: '90%', maxWidth: '320px', padding: '20px', background: 'linear-gradient(180deg, #160f29 0%, #0d081a 100%)', border: '2px solid var(--border-neon)', borderRadius: '16px', boxShadow: '0 0 30px rgba(0,0,0,0.8)' }}>
+            <button className="red-glow-close-btn" onClick={() => setShowSettings(false)}>✕</button>
+            <h2 className="pixel-text gold-text" style={{ fontSize: '16px', textAlign: 'center', marginBottom: '20px', textShadow: '0 0 10px var(--gold)' }}>{t('settings')}</h2>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="card" style={{ padding: '15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}>
+                <h3 style={{ color: '#fff', fontSize: '14px', marginBottom: '15px' }}>{t('audio')}</h3>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>{t('sound')}</span>
+                  <button onClick={() => updateSettings({ isMuted: !settings.isMuted })} style={{
+                    background: settings.isMuted ? 'rgba(255,51,51,0.2)' : 'rgba(0,210,255,0.2)',
+                    color: settings.isMuted ? '#ff3333' : '#00d2ff',
+                    border: `1px solid ${settings.isMuted ? '#ff3333' : '#00d2ff'}`,
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    minWidth: '80px'
+                  }}>
+                    {settings.isMuted ? t('unmute') : t('mute')}
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>{t('volume')}</span>
+                    <span style={{ color: '#fff', fontSize: '12px', fontFamily: 'monospace' }}>{Math.round(settings.volume * 100)}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="0" max="1" step="0.1" 
+                    value={settings.volume} 
+                    onChange={(e) => updateSettings({ volume: parseFloat(e.target.value) })}
+                    style={{ width: '100%', accentColor: 'var(--blue)' }}
+                  />
+                </div>
+              </div>
+
+              <div className="card" style={{ padding: '15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}>
+                <h3 style={{ color: '#fff', fontSize: '14px', marginBottom: '15px' }}>{t('language')}</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {['English', 'Russian', 'French'].map(lang => (
+                    <button 
+                      key={lang}
+                      onClick={() => updateSettings({ language: lang })}
+                      style={{
+                        background: settings.language === lang ? 'rgba(0,210,255,0.15)' : 'transparent',
+                        border: settings.language === lang ? '1px solid var(--blue)' : '1px solid rgba(255,255,255,0.1)',
+                        color: settings.language === lang ? '#fff' : 'var(--text-dim)',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        textAlign: 'left',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}
+                    >
+                      <span style={{ fontSize: '16px' }}>
+                        {lang === 'English' ? '🇺🇸' : lang === 'Russian' ? '🇷🇺' : '🇫🇷'}
+                      </span>
+                      {lang}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
