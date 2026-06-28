@@ -394,7 +394,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
           ...s.data,
           coins: s.data.coins - cost,
           level: s.data.level + 1,
-          xp: 0 // Reset XP on level up
+          xp: 0, // Reset XP on level up
+          energy: s.data.energy + 30 // Grant +30 energy on level up
         };
         try {
           localStorage.setItem('marox_game_data', JSON.stringify(nextData));
