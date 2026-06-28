@@ -9,8 +9,8 @@ export default function FriendsScreen() {
   const { data, telegramUser } = useGameStore();
   const [copied, setCopied] = useState(false)
   const userId = telegramUser?.id || 'demo'
-  const botUsername = 'MaroxGameBot'
-  const inviteLink = `https://t.me/${botUsername}?start=ref_${userId}`
+  const botUsername = 'Maroxcoinbot'
+  const inviteLink = `https://t.me/${botUsername}/play?startapp=ref_${userId}`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteLink)
@@ -22,7 +22,7 @@ export default function FriendsScreen() {
   }
 
   const handleInvite = () => {
-    const text = "Join me in MAROX and let's earn rewards together!"
+    const text = "🎮 Spin the slots, collect points, and level up in MAROX Slot Adventure! 🎰⚡ Join me and let's earn massive rewards together! 💎🔥"
     const url = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(text)}`
     
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
