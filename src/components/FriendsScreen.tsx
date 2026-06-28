@@ -9,7 +9,7 @@ export default function FriendsScreen() {
   const userId = telegramUser?.id || 'demo'
   // ضع هنا اسم البوت الخاص بك (Username) بدلاً من YOUR_BOT_USERNAME
   // وضع الاسم المختصر للتطبيق (Short Name) بدلاً من YOUR_APP_SHORT_NAME
-  const inviteLink = `https://t.me/Maroxcoinbot/YOUR_APP_SHORT_NAME?startapp=ref_${userId}`
+  const inviteLink = `https://t.me/Maroxcoinbot/play?startapp=ref_${userId}`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteLink)

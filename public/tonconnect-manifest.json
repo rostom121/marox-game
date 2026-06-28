@@ -1,7 +1,7 @@
 {
-  "url": "https://github.com/mohamed-rostom/Marox",
+  "url": "https://marox-game.vercel.app",
   "name": "MAROX",
-  "iconUrl": "https://raw.githubusercontent.com/mohamed-rostom/Marox/main/public/favicon.svg",
-  "termsOfUseUrl": "https://github.com/mohamed-rostom/Marox/privacy",
-  "privacyPolicyUrl": "https://github.com/mohamed-rostom/Marox/privacy"
+  "iconUrl": "https://marox-game.vercel.app/favicon.svg",
+  "termsOfUseUrl": "https://marox-game.vercel.app",
+  "privacyPolicyUrl": "https://marox-game.vercel.app"
 }
