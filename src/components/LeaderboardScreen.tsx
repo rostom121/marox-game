@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGameStore } from '../store/useGameStore'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
 
 interface LeaderboardEntry {
   rank: number;
@@ -22,7 +24,25 @@ export default function LeaderboardScreen() {
 
   const [activeTier, setActiveTier] = useState<'whale' | 'master' | 'legendary'>(getUserTier(data.points))
 
-  const [leaderboardList] = useState<LeaderboardEntry[]>([])
+  const [leaderboardList, setLeaderboardList] = useState<LeaderboardEntry[]>([])
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/leaderboard`)
+      .then(res => res.json())
+      .then(resData => {
+        if (resData.ok && resData.leaderboard) {
+          const list = resData.leaderboard.map((u: any, index: number) => ({
+            rank: index + 1,
+            name: u.username || u.firstName || 'Player',
+            points: u.points,
+            premium: u.premium,
+            avatar: '👤'
+          }));
+          setLeaderboardList(list);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   // Generate dynamic leaderboard list combining dummy data and the current user
   const dynamicLeaderboard = [...leaderboardList]

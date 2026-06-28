@@ -1,6 +1,31 @@
 import { create } from 'zustand'
 import { gameConfig } from '../config/gameConfig'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+
+let syncTimeout: NodeJS.Timeout | null = null;
+const syncWithBackend = (telegramId: string, data: Partial<UserData>, walletAddress: string | null) => {
+  if (!telegramId || telegramId === 'demo') return;
+  if (syncTimeout) clearTimeout(syncTimeout);
+  
+  // Debounce sync to avoid spamming API on every spin
+  syncTimeout = setTimeout(() => {
+    fetch(`${API_URL}/api/user/sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        telegramId,
+        points: data.points,
+        coins: data.coins,
+        energy: data.energy,
+        level: data.level,
+        xp: data.xp,
+        walletAddress
+      })
+    }).catch(console.error);
+  }, 2000);
+};
+
 export const getUpgradeCost = (level: number): number => {
   if (level < 10) return 100;
   if (level < 20) return 250;
@@ -135,8 +160,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       telegramUser: tgUser,
       data: initialData,
-      loading: false,
-    });
+    }); // Keep loading true until API responds
+
+    if (tgUser && tgUser.id !== 'demo') {
+      fetch(`${API_URL}/api/user?telegramId=${tgUser.id}&firstName=${encodeURIComponent(tgUser.firstName)}&premium=${tgUser.premium}`)
+        .then(res => res.json())
+        .then(resData => {
+          if (resData.ok && resData.user) {
+            set((state) => {
+              const mergedData = {
+                ...state.data,
+                points: resData.user.points,
+                coins: resData.user.coins,
+                energy: resData.user.energy,
+                level: resData.user.level,
+                xp: resData.user.xp,
+              };
+              localStorage.setItem('marox_game_data', JSON.stringify(mergedData));
+              return { data: mergedData, loading: false, walletAddress: resData.user.walletAddress || state.walletAddress };
+            });
+          } else {
+            set({ loading: false });
+          }
+        })
+        .catch((e) => {
+          console.error("Failed to load from API", e);
+          set({ loading: false });
+        });
+    } else {
+      set({ loading: false });
+    }
 
     // Start energy regeneration: 100 max, 4 hours to fill (1 energy per 144 seconds)
     const energyRegen = setInterval(() => {
@@ -184,6 +237,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       try {
         localStorage.setItem('marox_game_data', JSON.stringify(nextData));
+        syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress);
       } catch (e) {
         console.error(e);
       }
@@ -214,6 +268,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       try {
         localStorage.setItem('marox_game_data', JSON.stringify(nextData));
+        syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress);
       } catch (e) {
         console.error(e);
       }
@@ -223,9 +278,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setWallet: (address) => {
-    set({
-      walletConnected: !!address,
-      walletAddress: address,
+    set((state) => {
+      syncWithBackend(state.telegramUser?.id || '', state.data, address);
+      return {
+        walletConnected: !!address,
+        walletAddress: address,
+      };
     });
   },
 
