@@ -172,7 +172,7 @@ if (token) {
 
 // 1. Get or Create User
 app.get('/api/user', async (req, res) => {
-  const { telegramId, firstName, username, premium } = req.query;
+  const { telegramId, firstName, username, premium, referredBy } = req.query;
 
   if (!telegramId) {
     return res.status(400).json({ ok: false, error: 'telegramId parameter is required' });
@@ -187,12 +187,35 @@ app.get('/api/user', async (req, res) => {
     let isNew = false;
     if (!user) {
       isNew = true;
+      if (referredBy && String(referredBy) !== String(telegramId)) {
+        // Reward the referrer
+        const isPrem = premium === 'true';
+        const rewardPoints = isPrem ? 1000 : 500;
+        const rewardCoins = isPrem ? 200 : 100;
+        const rewardEnergy = isPrem ? 1000 : 200;
+        
+        try {
+          await prisma.user.update({
+            where: { telegramId: String(referredBy) },
+            data: {
+              points: { increment: rewardPoints },
+              coins: { increment: rewardCoins },
+              energy: { increment: rewardEnergy },
+              referralsCount: { increment: 1 },
+            }
+          });
+        } catch (err) {
+          console.error("Referrer not found in /api/user:", err.message);
+        }
+      }
+
       user = await prisma.user.create({
         data: {
           telegramId: String(telegramId),
           firstName: String(firstName || 'Player'),
           username: username ? String(username) : null,
           premium: premium === 'true',
+          referredBy: referredBy ? String(referredBy) : null,
         }
       });
       user.tasks = [];
