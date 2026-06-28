@@ -1,5 +1,6 @@
 const express = require('express');
-const TelegramBot = require('node-telegram-bot-api');
+const tb = require('node-telegram-bot-api');
+const TelegramBot = tb.default || tb;
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
