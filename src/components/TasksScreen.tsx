@@ -10,17 +10,28 @@ interface VerificationState {
 }
 
 export default function TasksScreen() {
-  const { updateStats } = useGameStore()
+  const { data, updateStats, completeTask } = useGameStore()
   const [tonConnectUI] = useTonConnectUI()
   const wallet = useTonWallet()
-  const [taskStates, setTaskStates] = useState<VerificationState>({
-    join_channel: 'not_started',
-    follow_x: 'not_started',
-    join_community: 'not_started',
-    retweet_x: 'not_started',
-    follow_facebook: 'not_started',
-    connect_wallet: 'not_started',
-  })
+
+  const getInitialTaskStates = (): VerificationState => {
+    const states: VerificationState = {
+      join_channel: 'not_started',
+      follow_x: 'not_started',
+      join_community: 'not_started',
+      retweet_x: 'not_started',
+      follow_facebook: 'not_started',
+      connect_wallet: 'not_started',
+    };
+    if (data.completedTasks) {
+      data.completedTasks.forEach(taskId => {
+        states[taskId] = 'completed';
+      });
+    }
+    return states;
+  };
+
+  const [taskStates, setTaskStates] = useState<VerificationState>(getInitialTaskStates())
 
   const handleTaskClick = (taskId: string, link: string) => {
     if (taskStates[taskId] !== 'not_started') return;
@@ -28,6 +39,7 @@ export default function TasksScreen() {
     if (taskId === 'connect_wallet') {
       if (wallet) {
         setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }))
+        completeTask(taskId)
         const task = gameConfig.tasks.find((t) => t.id === taskId)
         if (task) {
           updateStats(task.points, task.coins, task.energy || 0)
@@ -61,6 +73,7 @@ export default function TasksScreen() {
 
     setTimeout(() => {
       setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }))
+      completeTask(taskId)
       
       // Award points, coins, and energy
       if (task) {
@@ -76,6 +89,7 @@ export default function TasksScreen() {
   useEffect(() => {
     if (wallet && taskStates['connect_wallet'] === 'verifying') {
       setTaskStates((prev) => ({ ...prev, connect_wallet: 'completed' }))
+      completeTask('connect_wallet')
       const task = gameConfig.tasks.find((t) => t.id === 'connect_wallet')
       if (task) {
         updateStats(task.points, task.coins, task.energy || 0)

@@ -46,6 +46,7 @@ export interface UserData {
   lastClaimDate: string | null;
   gameUsername: string | null;
   lastEnergyUpdate?: number;
+  completedTasks?: string[];
 }
 
 export const DAILY_REWARDS = [
@@ -82,6 +83,7 @@ interface GameStore {
   upgradeLevel: () => boolean;
   setGameUsername: (name: string) => void;
   addPurchasedItems: (energyAmount: number, coinsAmount: number) => void;
+  completeTask: (taskId: string) => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -95,6 +97,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     lastClaimDate: null,
     gameUsername: null,
     lastEnergyUpdate: Date.now(),
+    completedTasks: [],
   },
   telegramUser: null,
   walletConnected: false,
@@ -163,6 +166,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastClaimDate: null,
       gameUsername: null,
       lastEnergyUpdate: Date.now(),
+      completedTasks: [],
     };
 
     set({
@@ -246,6 +250,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
       try {
         localStorage.setItem('marox_game_data', JSON.stringify(nextData));
         syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress);
+      } catch (e) {
+        console.error(e);
+      }
+
+      return { data: nextData };
+    });
+  },
+
+  completeTask: (taskId: string) => {
+    set((state) => {
+      const currentTasks = state.data.completedTasks || [];
+      if (currentTasks.includes(taskId)) return state;
+
+      const nextData = {
+        ...state.data,
+        completedTasks: [...currentTasks, taskId],
+      };
+
+      try {
+        localStorage.setItem('marox_game_data', JSON.stringify(nextData));
+        // You could add backend syncing for tasks here if needed
       } catch (e) {
         console.error(e);
       }
