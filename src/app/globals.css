@@ -1925,26 +1925,26 @@ body {
 
 /* --- MOBILE RESPONSIVENESS HACK --- */
 @media (max-width: 500px) {
-  /* Move background up */
-  .slot-screen-root { background-position: center -150px !important; }
+  /* Move background up slightly less */
+  .slot-screen-root { background-position: center -110px !important; }
 
-  /* Shrink the top header */
-  .slot-header { padding: 1px 2px; gap: 0px; height: 30px; }
-  .slot-stat-chip { font-size: 6px; padding: 1px 2px; border-width: 1px; }
-  .slot-stat-chip span:first-child { font-size: 7px; }
-  .slot-avatar-wrap { width: 20px; height: 20px; border-width: 1px; }
-  .slot-player-name { font-size: 7px; max-width: 40px; }
-  .slot-player-level { font-size: 5px; }
-  .slot-xp-bar { width: 40px; height: 3px; }
-  .slot-title-text { font-size: 9px; }
-  .slot-title-sub { font-size: 4px; }
+  /* Shrink the top header but let it wrap items */
+  .slot-header { padding: 4px 6px; gap: 4px; min-height: 40px; height: auto; border-bottom: 1px solid var(--border-neon); }
+  .slot-stat-chip { font-size: 8px; padding: 3px 5px; border-width: 1px; border-radius: 8px; }
+  .slot-stat-chip span:first-child { font-size: 10px; }
+  .slot-avatar-wrap { width: 28px; height: 28px; border-width: 1px; }
+  .slot-player-name { font-size: 9px; max-width: 50px; }
+  .slot-player-level { font-size: 6px; }
+  .slot-xp-bar { width: 45px; height: 4px; }
+  .slot-title-text { font-size: 12px; }
+  .slot-title-sub { font-size: 5px; }
 
-  /* Shrink sidebars and move them up */
-  .slot-sidebar { padding: 0 2px; gap: 6px; }
-  .slot-sidebar-btn { width: 32px; height: 32px; border-width: 1px; border-radius: 8px; }
-  .slot-sidebar-emoji { font-size: 14px; }
-  .slot-sidebar-label { font-size: 4px; }
-  .slot-mid-layout { grid-template-columns: 36px 1fr 36px; margin-top: 0; }
+  /* Sidebars: larger icons, moved slightly down */
+  .slot-sidebar { padding: 0 2px; gap: 8px; margin-top: 8px; }
+  .slot-sidebar-btn { width: 40px; height: 40px; border-width: 1px; border-radius: 10px; }
+  .slot-sidebar-emoji { font-size: 18px; }
+  .slot-sidebar-label { font-size: 5px; }
+  .slot-mid-layout { grid-template-columns: 44px 1fr 44px; margin-top: 0; }
 
   /* Make the slot machine wider to fill horizontal gaps */
   .slot-cabinet-outer { 
