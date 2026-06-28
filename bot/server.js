@@ -303,7 +303,14 @@ app.get('/api/leaderboard', async (req, res) => {
   try {
     const topUsers = await prisma.user.findMany({
       orderBy: { points: 'desc' },
-      take: 20
+      take: 20,
+      select: {
+        telegramId: true,
+        firstName: true,
+        username: true,
+        points: true,
+        premium: true
+      }
     });
     return res.json({ ok: true, leaderboard: topUsers });
   } catch (error) {

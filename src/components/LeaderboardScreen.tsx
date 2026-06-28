@@ -7,6 +7,7 @@ import { useGameStore } from '../store/useGameStore'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
 
 interface LeaderboardEntry {
+  id: string;
   rank: number;
   name: string;
   points: number;
@@ -34,6 +35,7 @@ export default function LeaderboardScreen() {
       .then(resData => {
         if (resData.ok && resData.leaderboard) {
           const list = resData.leaderboard.map((u: any, index: number) => ({
+            id: u.telegramId,
             rank: index + 1,
             name: u.username || u.firstName || 'Player',
             points: u.points,
@@ -50,10 +52,12 @@ export default function LeaderboardScreen() {
   const dynamicLeaderboard = [...leaderboardList]
 
   // Add current user to the list
+  const currentUserId = String(telegramUser?.id || 'demo');
   const currentUserName = data.gameUsername || telegramUser?.username || telegramUser?.firstName || 'You'
-  // Check if current user is already in the list by name to avoid duplicates if names match (unlikely for dummy data but good practice)
-  if (!dynamicLeaderboard.find(p => p.name === currentUserName)) {
+  // Check if current user is already in the list by ID
+  if (!dynamicLeaderboard.find(p => String(p.id) === currentUserId)) {
     dynamicLeaderboard.push({
+      id: currentUserId,
       rank: 0, // Rank will be calculated below
       name: currentUserName,
       points: data.points,
@@ -62,7 +66,7 @@ export default function LeaderboardScreen() {
     })
   } else {
     // If user is in dummy data (e.g. testing), update their points
-    const userIndex = dynamicLeaderboard.findIndex(p => p.name === currentUserName)
+    const userIndex = dynamicLeaderboard.findIndex(p => String(p.id) === currentUserId)
     dynamicLeaderboard[userIndex].points = data.points
   }
 
@@ -135,10 +139,10 @@ export default function LeaderboardScreen() {
       <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ overflowY: 'auto', padding: '6px' }}>
           {displayList.map((player) => {
-            const isMe = player.name === currentUserName;
+            const isMe = String(player.id) === currentUserId;
             return (
               <div
-                key={player.rank}
+                key={player.id}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
