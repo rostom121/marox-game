@@ -277,8 +277,8 @@ export default function SlotScreen() {
       triggerBurst('points')
     } else if (payout.energyWin > 0) {
       playRetroWinSound()
-      setWinMessage(`⚡ WIN! +${payout.energyWin} ENERGY`)
-      setLastWin(payout.energyWin)
+      setWinMessage(`⚡ WIN! +${scaledEnergy} ENERGY`)
+      setLastWin(scaledEnergy)
       triggerBurst('energy')
     } else if (payout.coins < 0) {
       setWinMessage(`❌ OUCH! ${scaledCoins} COINS`)
