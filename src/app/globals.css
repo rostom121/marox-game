@@ -905,7 +905,7 @@ body {
 /* Middle layout */
 .slot-mid-layout {
   display: grid;
-  grid-template-columns: 75px 1fr 75px;
+  grid-template-columns: 65px 1fr 65px;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -926,8 +926,8 @@ body {
 }
 
 .slot-sidebar-btn {
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
   border: 2px solid rgba(157, 78, 221, 0.6);
   background: rgba(22, 15, 41, 0.85);
@@ -991,7 +991,10 @@ body {
 .slot-cabinet-outer {
   position: relative;
   z-index: 5;
-  margin: 35px 12px 0;
+  margin: 35px auto 0;
+  width: calc(100% - 20px);
+  max-width: 420px;
+  box-sizing: border-box;
   background: linear-gradient(180deg, rgba(15, 5, 30, 0.98) 0%, rgba(5, 2, 10, 1) 100%);
   border-top: 6px solid #ffaa00;
   border-left: 4px solid #ffd700;
@@ -1319,6 +1322,8 @@ body {
 /* ── Reels Screen (Glass Frame) ── */
 .slot-reels-board {
   position: relative;
+  box-sizing: border-box;
+  width: 100%;
   background: rgba(10, 5, 0, 0.85);
   border: 4px ridge rgba(255, 215, 0, 0.8);
   border-radius: 12px;

@@ -147,10 +147,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const initialData = localData || {
       points: 0,
-      coins: 12450,
+      coins: 0,
       energy: 100,
-      level: 12,
-      xp: 68,
+      level: 1,
+      xp: 0,
       dailyStreak: 1,
       lastClaimDate: null,
       gameUsername: null,
