@@ -93,6 +93,36 @@ if (token) {
     }
   });
 
+  // ── SEND PROMOTIONAL IMAGE COMMAND ──
+  bot.onText(/\/sendmarox/, async (msg) => {
+    const chatId = msg.chat.id;
+    try {
+      const captionText = "Welcome to the world of MAROX! 🚀 Meet your hero, the master of the slot adventure. Build, play, earn, and conquer the leaderboards. Are you ready to join the journey? Click below to start playing now!";
+      const keyboard = {
+        inline_keyboard: [
+          [
+            { text: 'Play Now 🔥', url: 'https://t.me/Maroxcoinbot' }
+          ]
+        ]
+      };
+      
+      const imagePath = require('path').join(__dirname, '..', '1000129139.jpg');
+      await bot.sendPhoto(chatId, imagePath, {
+        caption: captionText,
+        reply_markup: keyboard
+      });
+
+      // Auto-delete the command message
+      try {
+        await bot.deleteMessage(chatId, msg.message_id);
+      } catch (err) {
+        console.error("Failed to delete user command:", err);
+      }
+    } catch (e) {
+      console.error("Error in /sendmarox:", e);
+    }
+  });
+
   console.log(`Telegram Bot is active and polling...`);
 } else {
   console.log("Telegram Bot is running in MOCK mode (no BOT_TOKEN provided).");
