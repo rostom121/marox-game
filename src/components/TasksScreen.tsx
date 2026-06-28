@@ -118,58 +118,108 @@ export default function TasksScreen() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {gameConfig.tasks.map((task) => {
-          const state = taskStates[task.id] || 'not_started'
-          return (
-            <div
-              key={task.id}
-              className="task-card card"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                background: 'rgba(22, 15, 41, 0.6)',
-                border: state === 'completed' ? '1px solid rgba(0, 210, 255, 0.2)' : '2px solid var(--border-neon)',
-                opacity: state === 'completed' ? 0.75 : 1,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>{task.emoji}</span>
-                <div>
-                  <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
-                  <div className="task-rewards" style={{ display: 'flex', gap: '8px', fontSize: '10px', marginTop: '6px' }}>
-                    <span style={{ color: 'var(--neon-purple)', fontWeight: 'bold' }}>+{task.points} MRX</span>
-                    <span style={{ color: '#ffb700', fontWeight: 'bold' }}>+{task.coins} 🪙</span>
-                    {task.energy && <span style={{ color: '#00d2ff', fontWeight: 'bold' }}>+{task.energy} ⚡</span>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        
+        {/* New Tasks Section */}
+        {gameConfig.tasks.filter(t => (taskStates[t.id] || 'not_started') !== 'completed').length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <h2 className="pixel-text" style={{ fontSize: '12px', color: '#fff', marginLeft: '4px' }}>NEW TASKS</h2>
+            {gameConfig.tasks.filter(t => (taskStates[t.id] || 'not_started') !== 'completed').map((task) => {
+              const state = taskStates[task.id] || 'not_started'
+              return (
+                <div
+                  key={task.id}
+                  className="task-card card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    background: 'rgba(22, 15, 41, 0.6)',
+                    border: '2px solid var(--border-neon)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '24px' }}>{task.emoji}</span>
+                    <div>
+                      <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
+                      <div className="task-rewards" style={{ display: 'flex', gap: '8px', fontSize: '10px', marginTop: '6px' }}>
+                        <span style={{ color: 'var(--neon-purple)', fontWeight: 'bold' }}>+{task.points} MRX</span>
+                        <span style={{ color: '#ffb700', fontWeight: 'bold' }}>+{task.coins} 🪙</span>
+                        {task.energy && <span style={{ color: '#00d2ff', fontWeight: 'bold' }}>+{task.energy} ⚡</span>}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              <button
-                disabled={state !== 'not_started'}
-                onClick={() => handleTaskClick(task.id, task.link)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: state === 'not_started' ? 'var(--blue)' : state === 'verifying' ? 'rgba(255, 183, 0, 0.15)' : 'rgba(255,255,255,0.05)',
-                  color: state === 'not_started' ? '#001020' : state === 'verifying' ? 'var(--gold)' : 'var(--text-dim)',
-                  fontSize: '9px',
-                  fontWeight: 'bold',
-                  cursor: state === 'not_started' ? 'pointer' : 'default',
-                  textTransform: 'uppercase',
-                  boxShadow: state === 'not_started' ? '0 2px 8px rgba(0, 210, 255, 0.25)' : 'none',
-                }}
-              >
-                {state === 'not_started' && 'Go'}
-                {state === 'verifying' && 'Verifying... 🕒'}
-                {state === 'completed' && 'Done ✅'}
-              </button>
-            </div>
-          )
-        })}
+                  <button
+                    disabled={state !== 'not_started'}
+                    onClick={() => handleTaskClick(task.id, task.link)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: state === 'not_started' ? 'var(--blue)' : 'rgba(255, 183, 0, 0.15)',
+                      color: state === 'not_started' ? '#001020' : 'var(--gold)',
+                      fontSize: '9px',
+                      fontWeight: 'bold',
+                      cursor: state === 'not_started' ? 'pointer' : 'default',
+                      textTransform: 'uppercase',
+                      boxShadow: state === 'not_started' ? '0 2px 8px rgba(0, 210, 255, 0.25)' : 'none',
+                    }}
+                  >
+                    {state === 'not_started' ? 'GO' : 'VERIFYING...'}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Completed Tasks Section */}
+        {gameConfig.tasks.filter(t => taskStates[t.id] === 'completed').length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <h2 className="pixel-text" style={{ fontSize: '12px', color: 'var(--text-dim)', marginLeft: '4px' }}>COMPLETED</h2>
+            {gameConfig.tasks.filter(t => taskStates[t.id] === 'completed').map((task) => (
+                <div
+                  key={task.id}
+                  className="task-card card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    background: 'rgba(22, 15, 41, 0.3)',
+                    border: '1px solid rgba(0, 210, 255, 0.1)',
+                    opacity: 0.6,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '24px' }}>{task.emoji}</span>
+                    <div>
+                      <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
+                    </div>
+                  </div>
+
+                  <button
+                    disabled
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'rgba(255,255,255,0.05)',
+                      color: 'var(--text-dim)',
+                      fontSize: '9px',
+                      fontWeight: 'bold',
+                      cursor: 'default',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    DONE
+                  </button>
+                </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
