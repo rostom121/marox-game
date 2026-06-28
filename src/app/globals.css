@@ -1442,7 +1442,7 @@ body {
 .slot-spin-group { position: relative; display: flex; flex-direction: column; align-items: stretch; height: 100%; justify-content: center; }
 .slot-energy-badge {
   position: absolute;
-  top: -16px;
+  top: -24px;
   left: 50%;
   transform: translateX(-50%);
   background: #000;
@@ -1986,5 +1986,5 @@ body {
   .slot-bet-label { font-size: 5px; }
   .slot-bet-adj { width: 14px; height: 14px; font-size: 9px; }
   .slot-bet-val { font-size: 8px; min-width: 14px; }
-  .slot-energy-badge { font-size: 7px; padding: 2px 6px; top: -10px; left: 50%; transform: translateX(-50%); }
+  .slot-energy-badge { font-size: 7px; padding: 2px 6px; top: -16px; left: 50%; transform: translateX(-50%); }
 }
