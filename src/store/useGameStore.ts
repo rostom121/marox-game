@@ -18,7 +18,8 @@ const syncWithBackend = (telegramId: string, data: Partial<UserData>, walletAddr
         energy: data.energy,
         level: data.level,
         xp: data.xp,
-        walletAddress
+        walletAddress,
+        completedTasks: data.completedTasks
       })
     }).catch(console.error);
   };
@@ -65,6 +66,7 @@ export interface UserData {
   gameUsername: string | null;
   lastEnergyUpdate?: number;
   completedTasks?: string[];
+  referralsCount?: number;
 }
 
 export interface SettingsData {
@@ -225,7 +227,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 energy: resData.user.energy,
                 level: resData.user.level,
                 xp: resData.user.xp,
-                completedTasks: resData.isNew ? [] : state.data.completedTasks,
+                referralsCount: resData.user.referralsCount,
+                completedTasks: resData.isNew ? [] : (resData.user.completedTasks || state.data.completedTasks),
               };
               localStorage.setItem('marox_game_data', JSON.stringify(mergedData));
               return { data: mergedData, loading: false, walletAddress: resData.user.walletAddress || state.walletAddress };

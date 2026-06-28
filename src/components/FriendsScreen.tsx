@@ -79,12 +79,24 @@ export default function FriendsScreen() {
 
       {/* Stats list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        
-        <div className="friends-list card" style={{ padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)' }}>
-          <div style={{ fontSize: '30px', marginBottom: '10px' }}>🚷</div>
-          <h3 style={{ color: '#fff', fontSize: '14px', marginBottom: '5px' }}>{t('no_friends')}</h3>
-          <p style={{ color: 'var(--text-dim)', fontSize: '10px' }}>{t('friend_reward')}</p>
-        </div>
+        {(data.referralsCount || 0) === 0 ? (
+          <div className="friends-list card" style={{ padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '30px', marginBottom: '10px' }}>🚷</div>
+            <h3 style={{ color: '#fff', fontSize: '14px', marginBottom: '5px' }}>{t('no_friends')}</h3>
+            <p style={{ color: 'var(--text-dim)', fontSize: '10px' }}>{t('friend_reward')}</p>
+          </div>
+        ) : (
+          <div className="card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--blue)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Referral Stats</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', opacity: 0.8 }}>👥 Total Invites:</span>
+              <span style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--green)' }}>{data.referralsCount}</span>
+            </div>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
+              Rewards have been automatically added to your balance.
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -21,6 +21,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static frontend files from 'out' directory
+const path = require('path');
+const fs = require('fs');
+const outDir = path.join(__dirname, '..', 'out');
+if (fs.existsSync(outDir)) {
+  app.use(express.static(outDir));
+  console.log("Serving Next.js static files from out/ directory");
+}
+
 // ── Telegram Bot Start Command Handler ──
 if (token) {
   bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
@@ -40,6 +49,30 @@ if (token) {
 
     // Try creating/fetching user in PostgreSQL via Prisma
     try {
+      const existingUser = await prisma.user.findUnique({ where: { telegramId: userId } });
+      
+      if (!existingUser && referredBy && referredBy !== userId) {
+        // Reward the referrer based on the new user's premium status
+        const isPrem = !!msg.from.is_premium;
+        const rewardPoints = isPrem ? 1000 : 500;
+        const rewardCoins = isPrem ? 200 : 100;
+        const rewardEnergy = isPrem ? 1000 : 200;
+
+        try {
+          await prisma.user.update({
+            where: { telegramId: referredBy },
+            data: {
+              points: { increment: rewardPoints },
+              coins: { increment: rewardCoins },
+              energy: { increment: rewardEnergy },
+              referralsCount: { increment: 1 },
+            }
+          });
+        } catch (err) {
+          console.error("Referrer not found or error updating referrer:", err.message);
+        }
+      }
+
       await prisma.user.upsert({
         where: { telegramId: userId },
         update: {
@@ -147,7 +180,8 @@ app.get('/api/user', async (req, res) => {
 
   try {
     let user = await prisma.user.findUnique({
-      where: { telegramId: String(telegramId) }
+      where: { telegramId: String(telegramId) },
+      include: { tasks: true }
     });
 
     let isNew = false;
@@ -161,9 +195,27 @@ app.get('/api/user', async (req, res) => {
           premium: premium === 'true',
         }
       });
+      user.tasks = [];
+    } else {
+      if (user.energy < 100) {
+        const now = new Date();
+        const elapsedSeconds = Math.floor((now.getTime() - user.updatedAt.getTime()) / 1000);
+        if (elapsedSeconds >= 144) {
+          const gainedEnergy = Math.floor(elapsedSeconds / 144);
+          user.energy = Math.min(100, user.energy + gainedEnergy);
+          
+          await prisma.user.update({
+            where: { telegramId: String(telegramId) },
+            data: { energy: user.energy }
+          });
+        }
+      }
     }
 
-    return res.json({ ok: true, user, isNew });
+    const completedTasks = user.tasks ? user.tasks.map(t => t.taskId) : [];
+    const payloadUser = { ...user, completedTasks };
+
+    return res.json({ ok: true, user: payloadUser, isNew });
   } catch (error) {
     console.error("Database error in GET /api/user:", error.message);
     return res.status(500).json({ ok: false, error: 'Database operation failed' });
@@ -172,13 +224,38 @@ app.get('/api/user', async (req, res) => {
 
 // 2. Sync User Stats
 app.post('/api/user/sync', async (req, res) => {
-  const { telegramId, points, coins, energy, level, xp, walletAddress } = req.body;
+  const { telegramId, points, coins, energy, level, xp, walletAddress, completedTasks } = req.body;
 
   if (!telegramId) {
     return res.status(400).json({ ok: false, error: 'telegramId is required' });
   }
 
   try {
+    const currentUser = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!currentUser) return res.status(404).json({ ok: false, error: 'User not found' });
+
+    // Basic cheat protection: Disallow more than 1,000,000 points jump in a single sync
+    if (Number(points) - currentUser.points > 1000000) {
+      console.warn(`Cheat detected for user ${telegramId}: jump from ${currentUser.points} to ${points}`);
+      return res.status(400).json({ ok: false, error: 'Invalid points jump' });
+    }
+
+    if (completedTasks && Array.isArray(completedTasks)) {
+      const existingTasks = await prisma.task.findMany({ where: { telegramId: String(telegramId) } });
+      const existingTaskIds = existingTasks.map(t => t.taskId);
+      const newTasks = completedTasks.filter(t => !existingTaskIds.includes(t));
+      if (newTasks.length > 0) {
+        await prisma.task.createMany({
+          data: newTasks.map(taskId => ({
+            telegramId: String(telegramId),
+            taskId: taskId,
+            status: 'completed',
+            completedAt: new Date()
+          }))
+        });
+      }
+    }
+
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
       data: {
