@@ -17,6 +17,10 @@ export interface GameConfig {
   referral: {
     referrerPoints: number;
     referrerCoins: number;
+    referrerEnergy: number;
+    referrerPremiumPoints: number;
+    referrerPremiumCoins: number;
+    referrerPremiumEnergy: number;
     referredPoints: number;
     referredCoins: number;
   };
@@ -55,6 +59,10 @@ export const gameConfig: GameConfig = {
   referral: {
     referrerPoints: 500,
     referrerCoins: 100,
+    referrerEnergy: 200,
+    referrerPremiumPoints: 1000,
+    referrerPremiumCoins: 200,
+    referrerPremiumEnergy: 1000,
     referredPoints: 200,
     referredCoins: 50,
   },

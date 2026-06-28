@@ -65,7 +65,7 @@ export default function FriendsScreen() {
             <span style={{ fontSize: '16px' }}>👤</span>
             <span style={{ fontSize: '10px', color: '#fff' }}>Standard Telegram</span>
           </div>
-          <div style={{ fontSize: '10px', color: 'var(--green)', fontWeight: 'bold' }}>+500 MAROX, +100 COINS</div>
+          <div style={{ fontSize: '10px', color: 'var(--green)', fontWeight: 'bold' }}>+500 MAROX, +100 COINS, +200 ENERGY</div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -73,7 +73,7 @@ export default function FriendsScreen() {
             <span style={{ fontSize: '16px' }}>⭐️</span>
             <span style={{ fontSize: '10px', color: '#fff' }}>Telegram Premium</span>
           </div>
-          <div style={{ fontSize: '10px', color: 'var(--green)', fontWeight: 'bold' }}>+1000 MAROX, +200 COINS</div>
+          <div style={{ fontSize: '10px', color: 'var(--green)', fontWeight: 'bold' }}>+1000 MAROX, +200 COINS, +1000 ENERGY</div>
         </div>
       </div>
 

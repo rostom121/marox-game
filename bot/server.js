@@ -94,7 +94,7 @@ if (token) {
   });
 
   // ── SEND PROMOTIONAL IMAGE COMMAND ──
-  bot.onText(/\/sendmarox/, async (msg) => {
+  const handleSendMarox = async (msg) => {
     const chatId = msg.chat.id;
     try {
       const captionText = "Welcome to the world of MAROX! 🚀 Meet your hero, the master of the slot adventure. Build, play, earn, and conquer the leaderboards. Are you ready to join the journey? Click below to start playing now!";
@@ -120,6 +120,13 @@ if (token) {
       }
     } catch (e) {
       console.error("Error in /sendmarox:", e);
+    }
+  };
+
+  bot.onText(/\/sendmarox/, handleSendMarox);
+  bot.on('channel_post', (msg) => {
+    if (msg.text && msg.text.includes('/sendmarox')) {
+      handleSendMarox(msg);
     }
   });
 
