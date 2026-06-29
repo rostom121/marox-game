@@ -80,6 +80,7 @@ interface GameStore {
 
   initStore: () => void;
   setTab: (tab: string) => void;
+  setServerData: (serverUser: any) => void;
   updateStats: (pointsDiff: number, coinsDiff: number, energyDiff: number) => void;
   spinOutcome: (points: number, coins: number, energyCost: number, energyWin: number) => void;
   setWallet: (address: string | null) => void;
