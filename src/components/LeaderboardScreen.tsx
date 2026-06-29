@@ -126,12 +126,12 @@ export default function LeaderboardScreen() {
       {/* Top Player Card */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
         {displayList[0] && (
-          <div className="card" style={{ width: '50%', maxWidth: '160px', padding: '8px', textAlign: 'center', background: 'rgba(255, 183, 0, 0.08)', border: '2px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '10px' }}>
-            <div style={{ fontSize: '24px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
-            <div style={{ fontSize: '13px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--gold)', margin: '2px 0' }}>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '80%', maxWidth: '250px', padding: '6px 12px', background: 'rgba(255, 183, 0, 0.08)', border: '1px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '8px' }}>
+            <div style={{ fontSize: '18px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--gold)' }}>
               {displayList[0].name}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>{displayList[0].points.toLocaleString()}</div>
+            <div style={{ fontSize: '11px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>• {displayList[0].points.toLocaleString()}</div>
           </div>
         )}
       </div>
