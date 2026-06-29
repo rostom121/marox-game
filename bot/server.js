@@ -40,7 +40,7 @@ if (token) {
     console.log(`User ${userId} started bot. Start param: "${startParam}"`);
 
     let welcomeText = `👋 *Welcome to MAROX Ecosystem!*\n\nSpin the slots, collect MAROX points, level up, and prepare for future airdrops! 🎰💎`;
-    
+
     let referredBy = null;
     if (startParam.startsWith('ref_')) {
       referredBy = startParam.substring(4);
@@ -50,7 +50,7 @@ if (token) {
     // Try creating/fetching user in PostgreSQL via Prisma
     try {
       const existingUser = await prisma.user.findUnique({ where: { telegramId: userId } });
-      
+
       if (!existingUser && referredBy && referredBy !== userId) {
         // Reward the referrer based on the new user's premium status
         const isPrem = !!msg.from.is_premium;
@@ -138,7 +138,7 @@ if (token) {
           ]
         ]
       };
-      
+
       const imagePath = require('path').join(__dirname, '..', '1000129139.jpg');
       await bot.sendPhoto(chatId, imagePath, {
         caption: captionText,
@@ -193,7 +193,7 @@ app.get('/api/user', async (req, res) => {
         const rewardPoints = isPrem ? 1000 : 500;
         const rewardCoins = isPrem ? 200 : 100;
         const rewardEnergy = isPrem ? 1000 : 200;
-        
+
         try {
           await prisma.user.update({
             where: { telegramId: String(referredBy) },
@@ -226,7 +226,7 @@ app.get('/api/user', async (req, res) => {
         if (elapsedSeconds >= 144) {
           const gainedEnergy = Math.floor(elapsedSeconds / 144);
           user.energy = Math.min(100, user.energy + gainedEnergy);
-          
+
           await prisma.user.update({
             where: { telegramId: String(telegramId) },
             data: { energy: user.energy }
