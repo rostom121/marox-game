@@ -4,9 +4,8 @@ import { useEffect, useRef } from 'react'
 import { gameConfig } from '../config/gameConfig'
 
 interface PixiSlotMachineProps {
-  spinTrigger: number;
-  bet: number;
-  onResult: (payout: { points: number; coins: number; energyWin: number }) => void;
+  spinData: { finalGrid: string[][], winnerRows: number[], payout: { points: number, coins: number, energyWin: number } } | null
+  onResult: (payout: { points: number; coins: number; energyWin: number }) => void
 }
 
 // Symbol definitions with emoji and color
@@ -283,73 +282,24 @@ export function PixiSlotMachine({ spinTrigger, bet, onResult }: PixiSlotMachineP
     }
   }, [])
 
-  // Trigger spin on spinTrigger change
+  // Trigger spin on spinData change
   useEffect(() => {
     if (isInitialMountRef.current) {
       isInitialMountRef.current = false
       return
     }
-    if (spinTrigger === 0) return // Ensure we don't spin on initial mount/unmount
-
-    const r = Math.random() * 100
-    let outcome = 'mixed'
-
-    // 30% Gold, 25% MAROX, 20% Energy, 10% Red X, 15% Mixed
-    if (r < 30) {
-      outcome = 'coin'
-    } else if (r < 55) { // 30 + 25
-      outcome = 'badge'
-    } else if (r < 75) { // 55 + 20
-      outcome = 'energy'
-    } else if (r < 85) { // 75 + 10
-      outcome = 'red_x'
-    } else {
-      outcome = 'mixed' // Remaining 15%
-    }
-
-    let finalGrid: string[][]
-    if (outcome !== 'mixed') {
-      finalGrid = [[outcome], [outcome], [outcome]]
-    } else {
-      // Pick 3 distinct symbols so it's impossible to have a 3-match
-      const allSymbols = ['coin', 'badge', 'energy', 'red_x']
-      const shuffled = allSymbols.sort(() => 0.5 - Math.random())
-      finalGrid = [[shuffled[0]], [shuffled[1]], [shuffled[2]]]
-    }
-
-    // Determine winning rows
-    const winnerRows: number[] = []
-    let points = 0
-    let coins = 0
-    let energyWin = 0
-
-    for (let row = 0; row < 1; row++) {
-      const sym0 = finalGrid[0][row]
-      const sym1 = finalGrid[1][row]
-      const sym2 = finalGrid[2][row]
-      if (sym0 === sym1 && sym1 === sym2) {
-        winnerRows.push(row)
-        const matchedSym = gameConfig.slot.symbols.find((s) => s.id === sym0)
-        if (matchedSym) {
-          points += matchedSym.points
-          coins += matchedSym.coins
-          if (matchedSym.energy) {
-            energyWin += matchedSym.energy
-          }
-        }
-      }
-    }
+    if (!spinData) return // Ensure we don't spin on initial mount/unmount
 
     if (typeof window !== 'undefined' && (window as any).__spinMaroxSlot) {
-      ; (window as any).__spinMaroxSlot(finalGrid, winnerRows)
+      ; (window as any).__spinMaroxSlot(spinData.finalGrid, spinData.winnerRows)
     }
 
     // Resolve outcome after all reels stop
     setTimeout(() => {
-      onResult({ points, coins, energyWin })
+      onResult(spinData.payout)
     }, 2200)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spinTrigger])
+  }, [spinData])
 
   return (
     <div

@@ -264,37 +264,101 @@ app.post('/api/user/sync', async (req, res) => {
     }
 
     if (completedTasks && Array.isArray(completedTasks)) {
-      const existingTasks = await prisma.task.findMany({ where: { telegramId: String(telegramId) } });
-      const existingTaskIds = existingTasks.map(t => t.taskId);
-      const newTasks = completedTasks.filter(t => !existingTaskIds.includes(t));
-      if (newTasks.length > 0) {
-        await prisma.task.createMany({
-          data: newTasks.map(taskId => ({
-            telegramId: String(telegramId),
-            taskId: taskId,
-            status: 'completed',
-            completedAt: new Date()
-          }))
-        });
-      }
-    }
+  try {
+    const { telegramId, walletAddress } = req.body;
+    if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing telegramId' });
 
-    const updatedUser = await prisma.user.update({
-      where: { telegramId: String(telegramId) },
-      data: {
-        points: Number(points),
-        coins: Number(coins),
-        energy: Number(energy),
-        level: Number(level),
-        xp: Number(xp),
-        walletAddress: walletAddress ? String(walletAddress) : null
-      }
-    });
+    // ONLY update walletAddress from sync! Everything else is handled by the server (spin/tasks).
+    const dataToUpdate = {};
+    if (walletAddress) dataToUpdate.walletAddress = String(walletAddress);
+
+    let updatedUser;
+    if (Object.keys(dataToUpdate).length > 0) {
+      updatedUser = await prisma.user.update({
+        where: { telegramId: String(telegramId) },
+        data: dataToUpdate
+      });
+    } else {
+      updatedUser = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    }
 
     return res.json({ ok: true, user: updatedUser });
   } catch (error) {
     console.error("Database error in POST /api/user/sync:", error.message);
     return res.status(500).json({ ok: false, error: 'Failed to sync stats' });
+  }
+});
+
+// SECURE SPIN ENDPOINT
+app.post('/api/spin', async (req, res) => {
+  try {
+    const { telegramId, bet } = req.body;
+    if (!telegramId || !bet) return res.status(400).json({ ok: false, error: 'Missing params' });
+
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
+    if (user.energy < bet) return res.status(400).json({ ok: false, error: 'Not enough energy' });
+
+    // Calculate Outcome
+    const scale = bet / 5;
+    const r = Math.random() * 100;
+    let outcome = 'mixed';
+    if (r < 30) outcome = 'coin';
+    else if (r < 55) outcome = 'badge';
+    else if (r < 75) outcome = 'energy';
+    else if (r < 85) outcome = 'red_x';
+
+    let finalGrid;
+    if (outcome !== 'mixed') {
+      finalGrid = [[outcome], [outcome], [outcome]];
+    } else {
+      const allSymbols = ['coin', 'badge', 'energy', 'red_x'];
+      const shuffled = allSymbols.sort(() => 0.5 - Math.random());
+      finalGrid = [[shuffled[0]], [shuffled[1]], [shuffled[2]]];
+    }
+
+    let points = 0, coins = 0, energyWin = 0;
+    let winnerRows = [];
+
+    const symbolValues = {
+      'red_x': { points: 0, coins: -500, energy: 0 },
+      'coin': { points: 0, coins: 1500, energy: 0 },
+      'badge': { points: 100, coins: 0, energy: 0 },
+      'energy': { points: 0, coins: 0, energy: 30 }
+    };
+
+    if (outcome !== 'mixed') {
+      winnerRows.push(0);
+      points = symbolValues[outcome].points;
+      coins = symbolValues[outcome].coins;
+      energyWin = symbolValues[outcome].energy;
+    }
+
+    const scaledPoints = Math.floor(points * scale);
+    const scaledCoins = Math.floor(coins * scale);
+    const scaledEnergyWin = Math.floor(energyWin * scale);
+
+    const updatedUser = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: {
+        energy: user.energy - bet + scaledEnergyWin,
+        points: user.points + scaledPoints,
+        coins: user.coins + scaledCoins,
+      }
+    });
+
+    return res.json({
+      ok: true,
+      user: updatedUser,
+      spin: {
+        finalGrid,
+        winnerRows,
+        payout: { points: scaledPoints, coins: scaledCoins, energyWin: scaledEnergyWin }
+      }
+    });
+  } catch (error) {
+    console.error("Database error in /api/spin:", error.message);
+    return res.status(500).json({ ok: false, error: 'Spin failed' });
   }
 });
 
@@ -347,9 +411,104 @@ app.get('/api/verify', async (req, res) => {
   }
 });
 
+// SECURE TASK COMPLETION
+app.post('/api/tasks/complete', async (req, res) => {
+  try {
+    const { telegramId, taskId, rewardPoints, rewardCoins } = req.body;
+    if (!telegramId || !taskId) return res.status(400).json({ ok: false, error: 'Missing params' });
+
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) }, include: { tasks: true } });
+    if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
+
+    const alreadyCompleted = user.tasks.some(t => t.taskId === taskId);
+    if (alreadyCompleted) return res.status(400).json({ ok: false, error: 'Task already completed' });
+
+    await prisma.task.create({
+      data: { telegramId: String(telegramId), taskId: taskId, status: 'completed', completedAt: new Date() }
+    });
+
+    const updatedUser = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: {
+        points: user.points + Number(rewardPoints || 0),
+        coins: user.coins + Number(rewardCoins || 0)
+      }
+    });
+
+    return res.json({ ok: true, user: updatedUser });
+  } catch (error) {
+    console.error("Error in /api/tasks/complete:", error.message);
+    return res.status(500).json({ ok: false, error: 'Failed to complete task' });
+  }
+});
+
+// SECURE DAILY REWARD
+app.post('/api/daily/claim', async (req, res) => {
+  try {
+    const { telegramId, points, energy } = req.body;
+    if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing params' });
+
+    const updatedUser = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: {
+        points: { increment: Number(points || 0) },
+        energy: { increment: Number(energy || 0) }
+      }
+    });
+
+    return res.json({ ok: true, user: updatedUser });
+  } catch (error) {
+    console.error("Error in /api/daily/claim:", error.message);
+    return res.status(500).json({ ok: false, error: 'Failed to claim daily reward' });
+  }
+});
+
+// SECURE SHOP PURCHASE (Virtual currency only for now)
+app.post('/api/shop/buy', async (req, res) => {
+  try {
+    const { telegramId, costCoins, gainEnergy, gainCoins, gainPoints } = req.body;
+    if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing params' });
+
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
+
+    if (costCoins && user.coins < costCoins) {
+      return res.status(400).json({ ok: false, error: 'Not enough coins' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: {
+        coins: user.coins - Number(costCoins || 0) + Number(gainCoins || 0),
+        energy: user.energy + Number(gainEnergy || 0),
+        points: user.points + Number(gainPoints || 0)
+      }
+    });
+
+    return res.json({ ok: true, user: updatedUser });
+  } catch (error) {
+    console.error("Error in /api/shop/buy:", error.message);
+    return res.status(500).json({ ok: false, error: 'Shop purchase failed' });
+  }
+});
+
 // Basic status check
 app.get('/status', (req, res) => {
   res.json({ status: 'online', botEnabled: !!token, channel: channelUsername, appUrl: miniAppUrl });
+});
+
+// TEMPORARY ENDPOINT TO DELETE HACKERS
+app.get('/api/admin/ban-hackers', async (req, res) => {
+  try {
+    const hackerIds = ['5126493471', '6224736496', '6114081533', '8811290958', '1797450754'];
+    for (const id of hackerIds) {
+      await prisma.task.deleteMany({ where: { telegramId: id } });
+      await prisma.user.deleteMany({ where: { telegramId: id } });
+    }
+    res.send("<h1>Hackers banned/deleted successfully!</h1>");
+  } catch (error) {
+    res.status(500).send(`Error: ${error.message}`);
+  }
 });
 
 app.listen(port, () => {

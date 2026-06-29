@@ -58,12 +58,36 @@ export default function ShopScreen() {
 
       setTxMessage('PAYMENT SUCCESSFUL! 💸')
       
-      setTimeout(() => {
+      setTimeout(async () => {
+        let gainEnergy = 0;
+        let gainCoins = 0;
         if (pkg.type === 'energy') {
-          addPurchasedItems(pkg.amount, 0)
+          gainEnergy = pkg.amount;
         } else {
-          addPurchasedItems(0, pkg.amount)
+          gainCoins = pkg.amount;
         }
+        
+        // Sync with server
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+        try {
+          const res = await fetch(`${API_URL}/api/shop/buy`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              telegramId: useGameStore.getState().telegramUser?.id,
+              costCoins: 0,
+              gainEnergy,
+              gainCoins
+            })
+          });
+          const data = await res.json();
+          if (data.ok && data.user) {
+            useGameStore.getState().setServerData(data.user);
+          }
+        } catch (e) {
+          console.error("Shop purchase sync failed", e);
+        }
+
         setTxMessage(null)
       }, 1500)
 

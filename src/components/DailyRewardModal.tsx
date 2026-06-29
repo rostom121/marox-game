@@ -12,13 +12,33 @@ export default function DailyRewardModal({ onClose }: DailyRewardModalProps) {
   const [showCelebration, setShowCelebration] = useState(false);
   const [justClaimedReward, setJustClaimedReward] = useState<typeof DAILY_REWARDS[0] | null>(null);
 
-  const handleClaim = () => {
+  const handleClaim = async () => {
     if (status.canClaim) {
       const reward = status.nextReward;
       const success = claimDailyReward();
       if (success) {
         setJustClaimedReward(reward);
         setShowCelebration(true);
+
+        // Sync with server
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+        try {
+          const res = await fetch(`${API_URL}/api/daily/claim`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              telegramId: useGameStore.getState().telegramUser?.id,
+              points: reward.points,
+              energy: reward.energy
+            })
+          });
+          const data = await res.json();
+          if (data.ok && data.user) {
+            useGameStore.getState().setServerData(data.user);
+          }
+        } catch (e) {
+          console.error("Daily claim sync failed", e);
+        }
       }
     }
   };

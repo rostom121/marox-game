@@ -1,40 +1,18 @@
 import { create } from 'zustand'
 import { gameConfig } from '../config/gameConfig'
+import { debounce } from 'lodash';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
 
-let syncTimeout: NodeJS.Timeout | null = null;
-const syncWithBackend = (telegramId: string, data: Partial<UserData>, walletAddress: string | null, force: boolean = false) => {
+// Only used for wallet sync now
+const syncWithBackend = debounce((telegramId: string, data: any, walletAddress: string | null) => {
   if (!telegramId || telegramId === 'demo') return;
-  
-  const doSync = () => {
-    fetch(`${API_URL}/api/user/sync`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        telegramId,
-        points: data.points,
-        coins: data.coins,
-        energy: data.energy,
-        level: data.level,
-        xp: data.xp,
-        walletAddress,
-        completedTasks: data.completedTasks
-      })
-    }).catch(console.error);
-  };
-
-  if (force) {
-    if (syncTimeout) clearTimeout(syncTimeout);
-    doSync();
-    return;
-  }
-
-  if (syncTimeout) clearTimeout(syncTimeout);
-  
-  // Debounce sync to avoid spamming API on every spin
-  syncTimeout = setTimeout(doSync, 2000);
-};
+  fetch(`${API_URL}/api/user/sync`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telegramId, walletAddress })
+  }).catch(e => console.error("Sync failed:", e));
+}, 1500);
 
 export const getUpgradeCost = (level: number): number => {
   if (level < 10) return 100;
@@ -275,6 +253,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
 
   setTab: (tab) => set({ activeTab: tab }),
+
+  setServerData: (serverUser) => {
+    set((state) => {
+      const nextData = {
+        ...state.data,
+        points: serverUser.points ?? state.data.points,
+        coins: serverUser.coins ?? state.data.coins,
+        energy: serverUser.energy ?? state.data.energy,
+        level: serverUser.level ?? state.data.level,
+        xp: serverUser.xp ?? state.data.xp,
+      };
+      try { localStorage.setItem('marox_game_data', JSON.stringify(nextData)); } catch (e) {}
+      return { data: nextData };
+    });
+  },
 
   updateStats: (pointsDiff, coinsDiff, energyDiff) => {
     set((state) => {

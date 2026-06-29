@@ -71,12 +71,31 @@ export default function TasksScreen() {
     const task = gameConfig.tasks.find((t) => t.id === taskId)
     const delay = task ? task.verifyDelayMs : 3000
 
-    setTimeout(() => {
+    setTimeout(async () => {
       setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }))
       completeTask(taskId)
       
       if (task) {
-        updateStats(task.points, task.coins, task.energy || 0)
+        // Send completion to server
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+        try {
+          const res = await fetch(`${API_URL}/api/tasks/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              telegramId: useGameStore.getState().telegramUser?.id,
+              taskId: task.id,
+              rewardPoints: task.points,
+              rewardCoins: task.coins
+            })
+          });
+          const data = await res.json();
+          if (data.ok && data.user) {
+            useGameStore.getState().setServerData(data.user);
+          }
+        } catch (e) {
+          console.error("Task complete failed", e);
+        }
       }
 
       if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
@@ -91,7 +110,21 @@ export default function TasksScreen() {
       completeTask('connect_wallet')
       const task = gameConfig.tasks.find((t) => t.id === 'connect_wallet')
       if (task) {
-        updateStats(task.points, task.coins, task.energy || 0)
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+        fetch(`${API_URL}/api/tasks/complete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            telegramId: useGameStore.getState().telegramUser?.id,
+            taskId: task.id,
+            rewardPoints: task.points,
+            rewardCoins: task.coins
+          })
+        }).then(r => r.json()).then(data => {
+          if (data.ok && data.user) {
+            useGameStore.getState().setServerData(data.user);
+          }
+        }).catch(e => console.error(e));
       }
       if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success')
