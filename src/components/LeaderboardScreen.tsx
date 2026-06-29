@@ -85,9 +85,8 @@ export default function LeaderboardScreen() {
     player.rank = index + 1
   })
 
-  // Optional: If you only want to show Top N (e.g. Top 10) plus the current user if they are lower
-  // For now we show the whole list
-  const displayList = filteredList
+  // Show Top 100 plus the current user if they are lower
+  const displayList = filteredList.filter((player, index) => index < 100 || String(player.id) === currentUserId)
 
   return (
     <div className="page" style={{ padding: '6px 8px' }}>
@@ -153,8 +152,8 @@ export default function LeaderboardScreen() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '14px', fontFamily: 'monospace', color: player.rank <= 3 || isMe ? 'var(--gold)' : 'var(--text-dim)', width: '24px', textAlign: 'center', fontWeight: 'bold' }}>
-                    #{player.rank}
+                  <span style={{ fontSize: '14px', fontFamily: 'monospace', color: player.rank <= 3 || isMe ? 'var(--gold)' : 'var(--text-dim)', width: '36px', textAlign: 'center', fontWeight: 'bold' }}>
+                    {player.rank > 100 ? '>100' : `#${player.rank}`}
                   </span>
                   {player.avatar === 'user_photo' && telegramUser?.photoUrl ? (
                      <img src={telegramUser.photoUrl} alt="User Avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />

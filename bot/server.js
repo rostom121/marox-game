@@ -355,7 +355,7 @@ app.get('/api/leaderboard', async (req, res) => {
   try {
     const topUsers = await prisma.user.findMany({
       orderBy: { points: 'desc' },
-      take: 20,
+      take: 100,
       select: {
         telegramId: true,
         firstName: true,
