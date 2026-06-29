@@ -119,14 +119,14 @@ export default function LeaderboardScreen() {
       </div>
 
       {/* Top Player Card (Square) */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '6px' }}>
         {displayList[0] && (
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '130px', height: '110px', background: 'rgba(255, 183, 0, 0.08)', border: '1px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '14px' }}>
-            <div style={{ fontSize: '28px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
-            <div style={{ fontSize: '13px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%', color: 'var(--gold)' }}>
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', width: '110px', height: '90px', background: 'rgba(255, 183, 0, 0.08)', border: '1px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '12px' }}>
+            <div style={{ fontSize: '24px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%', color: 'var(--gold)' }}>
               {displayList[0].name}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>
+            <div style={{ fontSize: '10px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>
               {displayList[0].points.toLocaleString()}
             </div>
           </div>
