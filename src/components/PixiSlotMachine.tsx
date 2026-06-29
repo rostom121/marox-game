@@ -16,7 +16,7 @@ const SYMBOL_DEFS: Record<string, { emoji?: string; imageSrc?: string; color: st
   red_x: { emoji: '❌', color: '#ff3333', label: 'RED X' },
 }
 
-export function PixiSlotMachine({ spinTrigger, bet, onResult }: PixiSlotMachineProps) {
+export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const stateRef = useRef({
     reels: [

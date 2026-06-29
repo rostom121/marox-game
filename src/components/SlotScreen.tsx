@@ -48,7 +48,7 @@ export default function SlotScreen() {
   const [showSettings, setShowSettings] = useState(false)
   const [showLangModal, setShowLangModal] = useState(false)
   const [bet, setBet] = useState(5)
-  const [spinTrigger, setSpinTrigger] = useState(0)
+  const [spinData, setSpinData] = useState<{ finalGrid: string[][], winnerRows: number[], payout: { points: number, coins: number, energyWin: number } } | null>(null)
   const [spinning, setSpinning] = useState(false)
   const [winMessage, setWinMessage] = useState<string | null>('SPIN, EARN MAROX!')
   const [autoSpin, setAutoSpin] = useState(false)
@@ -243,7 +243,7 @@ export default function SlotScreen() {
     } catch(e) {}
   }, [settings.isMuted, settings.volume])
 
-  const handleSpinClick = useCallback(() => {
+  const handleSpinClick = useCallback(async () => {
     if (latestRef.current.spinning || latestRef.current.energy < latestRef.current.bet) {
       if (!latestRef.current.spinning && latestRef.current.energy < latestRef.current.bet) {
         showModal('no_energy')
@@ -256,20 +256,38 @@ export default function SlotScreen() {
     latestRef.current.spinning = true
     setWinMessage(null)
     setLastWin(null)
-    setSpinTrigger((prev) => prev + 1)
-  }, [playRetroSpinSound])
+    
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+    try {
+      const res = await fetch(`${API_URL}/api/spin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId: telegramUser?.id, bet: latestRef.current.bet })
+      });
+      const resData = await res.json();
+      if (resData.ok && resData.spin) {
+        useGameStore.getState().setServerData(resData.user);
+        setSpinData(resData.spin);
+      } else {
+        setSpinning(false);
+        latestRef.current.spinning = false;
+        setAutoSpin(false);
+      }
+    } catch (e) {
+      setSpinning(false);
+      latestRef.current.spinning = false;
+      setAutoSpin(false);
+    }
+  }, [playRetroSpinSound, telegramUser])
 
   const handleSpinResult = useCallback((payout: { points: number; coins: number; energyWin: number }) => {
     setSpinning(false)
     latestRef.current.spinning = false
 
     const currentBet = latestRef.current.bet
-    const scale = currentBet / 5
-    const scaledCoins = Math.floor(payout.coins * scale)
-    const scaledPts = Math.floor(payout.points * scale)
-    const scaledEnergy = Math.floor(payout.energyWin * scale)
-
-    spinOutcome(scaledPts, scaledCoins, currentBet, scaledEnergy)
+    const scaledCoins = payout.coins
+    const scaledPts = payout.points
+    const scaledEnergy = payout.energyWin
 
     if (payout.coins > 0) {
       playRetroWinSound()
@@ -428,12 +446,7 @@ export default function SlotScreen() {
 
         {/* Reels board */}
         <div className="slot-reels-board">
-          <PixiSlotMachine
-            key="force-remount-no-shake"
-            spinTrigger={spinTrigger}
-            bet={bet}
-            onResult={handleSpinResult}
-          />
+          <PixiSlotMachine spinData={spinData} onResult={handleSpinResult} />
           <div className="slot-glass-overlay"></div>
         </div>
 

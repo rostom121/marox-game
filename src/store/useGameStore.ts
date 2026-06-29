@@ -442,7 +442,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           };
           try {
             localStorage.setItem('marox_game_data', JSON.stringify(nextData));
-            syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress, true);
+            syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress);
           } catch (e) {
             console.error(e);
           }
@@ -456,7 +456,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           };
           try {
             localStorage.setItem('marox_game_data', JSON.stringify(nextData));
-            syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress, false);
+            syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress);
           } catch (e) {
             console.error(e);
           }
