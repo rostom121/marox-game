@@ -90,17 +90,16 @@ export default function LeaderboardScreen() {
   const displayList = filteredList
 
   return (
-    <div className="page" style={{ padding: '16px 12px' }}>
-      <header className="page-header">
+    <div className="page" style={{ padding: '8px 12px' }}>
+      <header className="page-header" style={{ marginBottom: '4px' }}>
         <h1 className="pixel-text gold-text glow-text" style={{ fontSize: '20px', textShadow: '0 0 10px var(--gold)' }}>{t('top_players')}</h1>
         <div className="accent-line" style={{ background: 'var(--gold)', boxShadow: '0 0 10px var(--gold)' }} />
       </header>
 
-      <p style={{ fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.3, margin: '2px 0 8px' }}>
+      <p style={{ fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.3, margin: '0 0 8px' }}>
         See where you stand among top MAROX Players. Compete to win massive crypto rewards!
       </p>
 
-      {/* TIER SWITCHER */}
       {/* TIER SWITCHER */}
       <div style={{ display: 'flex', gap: '4px', padding: '2px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px', marginBottom: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
         <button
