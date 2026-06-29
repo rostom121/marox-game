@@ -247,23 +247,6 @@ app.get('/api/user', async (req, res) => {
 
 // 2. Sync User Stats
 app.post('/api/user/sync', async (req, res) => {
-  const { telegramId, points, coins, energy, level, xp, walletAddress, completedTasks } = req.body;
-
-  if (!telegramId) {
-    return res.status(400).json({ ok: false, error: 'telegramId is required' });
-  }
-
-  try {
-    const currentUser = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
-    if (!currentUser) return res.status(404).json({ ok: false, error: 'User not found' });
-
-    // Basic cheat protection: Disallow more than 1,000,000 points jump in a single sync
-    if (Number(points) - currentUser.points > 1000000) {
-      console.warn(`Cheat detected for user ${telegramId}: jump from ${currentUser.points} to ${points}`);
-      return res.status(400).json({ ok: false, error: 'Invalid points jump' });
-    }
-
-    if (completedTasks && Array.isArray(completedTasks)) {
   try {
     const { telegramId, walletAddress } = req.body;
     if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing telegramId' });
