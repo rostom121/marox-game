@@ -46,6 +46,7 @@ export default function SlotScreen() {
 
   const [modalType, setModalType] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
+  const [showLangModal, setShowLangModal] = useState(false)
   const [bet, setBet] = useState(5)
   const [spinTrigger, setSpinTrigger] = useState(0)
   const [spinning, setSpinning] = useState(false)
@@ -383,7 +384,7 @@ export default function SlotScreen() {
             { emoji: '📦', label: t('slot_items'), action: () => showModal('inventory') },
             { emoji: '👛', label: t('slot_wallet'), action: () => setTab('profile') },
             { emoji: '⚙️', label: t('slot_setup'), action: () => setShowSettings(true) },
-            { emoji: '🌐', label: t('slot_lang'), action: () => setShowSettings(true) },
+            { emoji: '🌐', label: t('lang'), action: () => setShowLangModal(true) },
           ].map((btn) => (
             <button key={btn.label} className="slot-sidebar-btn" onClick={btn.action}>
               <span className="slot-sidebar-emoji">{btn.emoji}</span>
@@ -562,9 +563,39 @@ export default function SlotScreen() {
                   />
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
 
+      {/* ── LANG MODAL ── */}
+      {showLangModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.85)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(5px)'
+        }} onClick={() => setShowLangModal(false)}>
+          <div style={{
+            background: 'var(--panel-bg)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '20px',
+            width: '90%', maxWidth: '350px',
+            padding: '24px',
+            position: 'relative'
+          }} onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setShowLangModal(false)}
+              style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer' }}
+            >
+              ✕
+            </button>
+            <h2 style={{ color: '#fff', fontSize: '20px', marginBottom: '24px', textAlign: 'center', fontFamily: "'Press Start 2P', monospace" }}>
+              LANG
+            </h2>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div className="card" style={{ padding: '15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}>
-                <h3 style={{ color: '#fff', fontSize: '14px', marginBottom: '15px' }}>{t('language')}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {['English', 'Russian', 'French'].map(lang => (
                     <button 

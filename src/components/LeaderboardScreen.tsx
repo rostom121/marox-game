@@ -96,41 +96,42 @@ export default function LeaderboardScreen() {
         <div className="accent-line" style={{ background: 'var(--gold)', boxShadow: '0 0 10px var(--gold)' }} />
       </header>
 
-      <p style={{ fontSize: '13px', color: 'var(--text-dim)', lineHeight: 1.5, margin: '8px 0 16px' }}>
+      <p style={{ fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.3, margin: '2px 0 8px' }}>
         See where you stand among top MAROX Players. Compete to win massive crypto rewards!
       </p>
 
       {/* TIER SWITCHER */}
-      <div style={{ display: 'flex', gap: '4px', padding: '4px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', marginBottom: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+      {/* TIER SWITCHER */}
+      <div style={{ display: 'flex', gap: '4px', padding: '2px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px', marginBottom: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
         <button
           onClick={() => setActiveTier('whale')}
-          style={{ flex: 1, padding: '12px 0', fontSize: '11px', fontFamily: "'Press Start 2P', monospace", borderRadius: '8px', transition: 'all 0.2s', border: activeTier === 'whale' ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid transparent', background: activeTier === 'whale' ? 'rgba(59, 130, 246, 0.8)' : 'transparent', color: activeTier === 'whale' ? '#fff' : '#9ca3af', boxShadow: activeTier === 'whale' ? '0 0 10px rgba(59, 130, 246, 0.4)' : 'none' }}
+          style={{ flex: 1, padding: '8px 0', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", borderRadius: '6px', transition: 'all 0.2s', border: activeTier === 'whale' ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid transparent', background: activeTier === 'whale' ? 'rgba(59, 130, 246, 0.8)' : 'transparent', color: activeTier === 'whale' ? '#fff' : '#9ca3af', boxShadow: activeTier === 'whale' ? '0 0 10px rgba(59, 130, 246, 0.4)' : 'none' }}
         >
           🐳 WHALE
         </button>
         <button
           onClick={() => setActiveTier('master')}
-          style={{ flex: 1, padding: '12px 0', fontSize: '11px', fontFamily: "'Press Start 2P', monospace", borderRadius: '8px', transition: 'all 0.2s', border: activeTier === 'master' ? '1px solid rgba(168, 85, 247, 0.5)' : '1px solid transparent', background: activeTier === 'master' ? 'rgba(168, 85, 247, 0.8)' : 'transparent', color: activeTier === 'master' ? '#fff' : '#9ca3af', boxShadow: activeTier === 'master' ? '0 0 10px rgba(168, 85, 247, 0.4)' : 'none' }}
+          style={{ flex: 1, padding: '8px 0', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", borderRadius: '6px', transition: 'all 0.2s', border: activeTier === 'master' ? '1px solid rgba(168, 85, 247, 0.5)' : '1px solid transparent', background: activeTier === 'master' ? 'rgba(168, 85, 247, 0.8)' : 'transparent', color: activeTier === 'master' ? '#fff' : '#9ca3af', boxShadow: activeTier === 'master' ? '0 0 10px rgba(168, 85, 247, 0.4)' : 'none' }}
         >
           👑 MASTER
         </button>
         <button
           onClick={() => setActiveTier('legendary')}
-          style={{ flex: 1, padding: '12px 0', fontSize: '11px', fontFamily: "'Press Start 2P', monospace", borderRadius: '8px', transition: 'all 0.2s', border: activeTier === 'legendary' ? '1px solid rgba(250, 204, 21, 0.5)' : '1px solid transparent', background: activeTier === 'legendary' ? 'rgba(250, 204, 21, 0.8)' : 'transparent', color: activeTier === 'legendary' ? '#000' : '#9ca3af', boxShadow: activeTier === 'legendary' ? '0 0 10px rgba(250, 204, 21, 0.4)' : 'none' }}
+          style={{ flex: 1, padding: '8px 0', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", borderRadius: '6px', transition: 'all 0.2s', border: activeTier === 'legendary' ? '1px solid rgba(250, 204, 21, 0.5)' : '1px solid transparent', background: activeTier === 'legendary' ? 'rgba(250, 204, 21, 0.8)' : 'transparent', color: activeTier === 'legendary' ? '#000' : '#9ca3af', boxShadow: activeTier === 'legendary' ? '0 0 10px rgba(250, 204, 21, 0.4)' : 'none' }}
         >
           🐉 LEGEND
         </button>
       </div>
 
       {/* Top Player Card */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
         {displayList[0] && (
-          <div className="card" style={{ width: '60%', maxWidth: '200px', padding: '12px 12px', textAlign: 'center', background: 'rgba(255, 183, 0, 0.08)', border: '2px solid var(--gold)', boxShadow: '0 0 15px rgba(255, 183, 0, 0.2)', borderRadius: '12px' }}>
-            <div style={{ fontSize: '32px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
-            <div style={{ fontSize: '14px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--gold)', margin: '4px 0' }}>
+          <div className="card" style={{ width: '50%', maxWidth: '160px', padding: '8px', textAlign: 'center', background: 'rgba(255, 183, 0, 0.08)', border: '2px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '10px' }}>
+            <div style={{ fontSize: '24px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--gold)', margin: '2px 0' }}>
               {displayList[0].name}
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>{displayList[0].points.toLocaleString()}</div>
+            <div style={{ fontSize: '11px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>{displayList[0].points.toLocaleString()}</div>
           </div>
         )}
       </div>

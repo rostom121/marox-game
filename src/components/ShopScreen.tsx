@@ -12,7 +12,7 @@ const ENERGY_PACKAGES = [
   { id: 'e3', amount: 5000, price: 4.0, type: 'energy', label: '5,000 ENERGY', emoji: '🔥', highlight: false },
   { id: 'e4', amount: 10000, price: 7.5, type: 'energy', label: '10,000 ENERGY', emoji: '💎⚡', highlight: true },
   { id: 'e5', amount: 20000, price: 12.0, type: 'energy', label: '20,000 ENERGY', emoji: '🚀', highlight: false },
-  { id: 'e6', amount: 50000, price: 18.0, type: 'energy', label: '50,000 ENERGY', emoji: '👑⚡', highlight: true },
+  { id: 'e6', amount: 50000, price: 15.0, type: 'energy', label: '50,000 ENERGY', emoji: '👑⚡', highlight: true },
 ]
 
 const COINS_PACKAGES = [
