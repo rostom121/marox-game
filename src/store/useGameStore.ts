@@ -76,6 +76,7 @@ interface GameStore {
   walletAddress: string | null;
   activeTab: string;
   loading: boolean;
+  isBanned: boolean;
   settings: SettingsData;
 
   initStore: () => void;
@@ -111,6 +112,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   walletAddress: null,
   activeTab: 'home',
   loading: true,
+  isBanned: false,
   settings: {
     isMuted: false,
     volume: 0.5,
@@ -213,6 +215,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
               return { data: mergedData, loading: false, walletAddress: resData.user.walletAddress || state.walletAddress };
             });
           } else {
+            if (resData.error === 'BANNED') set({ isBanned: true });
             set({ loading: false });
           }
         })

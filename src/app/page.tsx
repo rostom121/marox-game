@@ -15,7 +15,7 @@ import WelcomeModal from '../components/WelcomeModal'
 import ShopScreen from '../components/ShopScreen'
 
 export default function AppRoot() {
-  const { activeTab, setTab, initStore, loading, data, settings } = useGameStore()
+  const { activeTab, setTab, initStore, loading, data, settings, isBanned } = useGameStore()
   const { t, i18n } = useTranslation()
 
   useEffect(() => {
@@ -44,6 +44,29 @@ export default function AppRoot() {
         fontFamily: "'Press Start 2P', monospace"
       }}>
         {t('loading')}
+      </div>
+    )
+  }
+
+  if (isBanned) {
+    return (
+      <div style={{
+        display: 'flex',
+        height: '100vh',
+        background: '#1a0000',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        color: '#ff4444',
+        padding: '20px',
+        textAlign: 'center',
+        fontFamily: "'Press Start 2P', monospace"
+      }}>
+        <div style={{ fontSize: '40px', marginBottom: '20px' }}>⛔</div>
+        <h2 style={{ fontSize: '20px', marginBottom: '10px' }}>ACCOUNT BANNED</h2>
+        <p style={{ marginTop: '20px', fontSize: '10px', lineHeight: '1.5' }}>
+          This account has been permanently banned<br/>due to cheating or violation of terms.<br/>You can no longer play Marox.
+        </p>
       </div>
     )
   }
