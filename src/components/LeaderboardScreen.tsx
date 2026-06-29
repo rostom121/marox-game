@@ -90,15 +90,11 @@ export default function LeaderboardScreen() {
   const displayList = filteredList
 
   return (
-    <div className="page" style={{ padding: '8px 12px' }}>
-      <header className="page-header" style={{ marginBottom: '4px' }}>
+    <div className="page" style={{ padding: '6px 8px' }}>
+      <header className="page-header" style={{ marginBottom: '6px' }}>
         <h1 className="pixel-text gold-text glow-text" style={{ fontSize: '20px', textShadow: '0 0 10px var(--gold)' }}>{t('top_players')}</h1>
         <div className="accent-line" style={{ background: 'var(--gold)', boxShadow: '0 0 10px var(--gold)' }} />
       </header>
-
-      <p style={{ fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.3, margin: '0 0 8px' }}>
-        See where you stand among top MAROX Players. Compete to win massive crypto rewards!
-      </p>
 
       {/* TIER SWITCHER */}
       <div style={{ display: 'flex', gap: '4px', padding: '2px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px', marginBottom: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -122,15 +118,17 @@ export default function LeaderboardScreen() {
         </button>
       </div>
 
-      {/* Top Player Card */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+      {/* Top Player Card (Square) */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
         {displayList[0] && (
-          <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '80%', maxWidth: '250px', padding: '6px 12px', background: 'rgba(255, 183, 0, 0.08)', border: '1px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '8px' }}>
-            <div style={{ fontSize: '18px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
-            <div style={{ fontSize: '12px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--gold)' }}>
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '130px', height: '110px', background: 'rgba(255, 183, 0, 0.08)', border: '1px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '14px' }}>
+            <div style={{ fontSize: '28px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%', color: 'var(--gold)' }}>
               {displayList[0].name}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>• {displayList[0].points.toLocaleString()}</div>
+            <div style={{ fontSize: '11px', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 'bold' }}>
+              {displayList[0].points.toLocaleString()}
+            </div>
           </div>
         )}
       </div>
