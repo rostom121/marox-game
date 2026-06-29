@@ -60,11 +60,7 @@ export default function SlotScreen() {
   const latestRef = useRef({ spinning, energy: data.energy, bet, autoSpin })
   latestRef.current = { spinning, energy: data.energy, bet, autoSpin }
 
-  useEffect(() => {
-    if (!allowedBets.includes(bet)) {
-      setBet(allowedBets[allowedBets.length - 1]);
-    }
-  }, [allowedBets, bet]);
+  // We removed the useEffect that auto-decreases the bet so players can keep their unlocked bets.
 
   // Continuous ambient particle system
   useEffect(() => {
@@ -176,11 +172,19 @@ export default function SlotScreen() {
 
   const changeBet = (diff: number) => {
     if (spinning) return
-    const currentIndex = allowedBets.indexOf(bet);
-    let nextIndex = currentIndex !== -1 ? currentIndex + diff : 0;
+    const currentIndex = AVAILABLE_BETS.indexOf(bet);
+    let nextIndex = currentIndex + diff;
     if (nextIndex < 0) nextIndex = 0;
-    if (nextIndex >= allowedBets.length) nextIndex = allowedBets.length - 1;
-    setBet(allowedBets[nextIndex]);
+    if (nextIndex >= AVAILABLE_BETS.length) nextIndex = AVAILABLE_BETS.length - 1;
+    
+    const nextBet = AVAILABLE_BETS[nextIndex];
+
+    // If trying to increase the bet, they can only do so if the next bet is within their allowed bets.
+    if (diff > 0 && !allowedBets.includes(nextBet)) {
+      return;
+    }
+
+    setBet(nextBet);
   }
 
   const playRetroSpinSound = useCallback(() => {
