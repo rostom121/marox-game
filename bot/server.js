@@ -288,7 +288,7 @@ app.post('/api/spin', async (req, res) => {
     if (user.energy < bet) return res.status(400).json({ ok: false, error: 'Not enough energy' });
 
     // Calculate Outcome
-    const scale = bet / 5;
+    const scale = bet / 10;
     const r = Math.random() * 100;
     let outcome = 'mixed';
     if (r < 30) outcome = 'coin';
@@ -309,9 +309,9 @@ app.post('/api/spin', async (req, res) => {
     let winnerRows = [];
 
     const symbolValues = {
-      'red_x': { points: 0, coins: -500, energy: 0 },
-      'coin': { points: 0, coins: 1500, energy: 0 },
-      'badge': { points: 100, coins: 0, energy: 0 },
+      'red_x': { points: 0, coins: -50, energy: 0 },
+      'coin': { points: 0, coins: 150, energy: 0 },
+      'badge': { points: 400, coins: 0, energy: 0 },
       'energy': { points: 0, coins: 0, energy: 30 }
     };
 
