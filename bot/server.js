@@ -178,10 +178,7 @@ app.get('/api/user', async (req, res) => {
     return res.status(400).json({ ok: false, error: 'telegramId parameter is required' });
   }
 
-  const hackerIds = ['5126493471', '6224736496', '6114081533', '8811290958', '1797450754'];
-  if (hackerIds.includes(String(telegramId))) {
-    return res.json({ ok: false, error: 'BANNED' });
-  }
+
 
   try {
     let user = await prisma.user.findUnique({
