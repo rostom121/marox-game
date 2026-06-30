@@ -453,9 +453,7 @@ export default function SlotScreen() {
 
         {/* Reels board */}
         <div className="slot-reels-board">
-          <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
-            <PixiSlotMachine spinData={spinData} onResult={handleSpinResult} isActive={isActive} />
-          </div>
+          <PixiSlotMachine spinData={spinData} onResult={handleSpinResult} isActive={isActive} />
           <div className="slot-glass-overlay"></div>
         </div>
 
