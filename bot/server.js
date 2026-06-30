@@ -485,19 +485,7 @@ app.get('/status', (req, res) => {
   res.json({ status: 'online', botEnabled: !!token, channel: channelUsername, appUrl: miniAppUrl });
 });
 
-// TEMPORARY ENDPOINT TO DELETE HACKERS
-app.get('/api/admin/ban-hackers', async (req, res) => {
-  try {
-    const hackerIds = ['5126493471', '6224736496', '6114081533', '8811290958', '1797450754'];
-    for (const id of hackerIds) {
-      await prisma.task.deleteMany({ where: { telegramId: id } });
-      await prisma.user.deleteMany({ where: { telegramId: id } });
-    }
-    res.send("<h1>Hackers banned/deleted successfully!</h1>");
-  } catch (error) {
-    res.status(500).send(`Error: ${error.message}`);
-  }
-});
+
 
 app.listen(port, () => {
   console.log(`Express API server is running on port ${port}`);
