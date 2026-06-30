@@ -27,5 +27,10 @@ declare global {
     Telegram?: {
       WebApp?: TelegramWebApp;
     };
+    Adsgram?: {
+      init: (params: { blockId: string, debug?: boolean }) => {
+        show: () => Promise<{ done: boolean }>;
+      };
+    };
   }
 }

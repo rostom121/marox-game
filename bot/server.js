@@ -455,6 +455,29 @@ app.post('/api/tasks/complete', async (req, res) => {
   }
 });
 
+// SECURE ADS REWARD
+app.post('/api/ads/reward', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing params' });
+
+    const isBanned = await checkAntiCheat(telegramId, 0); // Not points, but just a check
+    if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
+
+    const updatedUser = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: {
+        energy: { increment: 200 }
+      }
+    });
+
+    return res.json({ ok: true, user: updatedUser });
+  } catch (error) {
+    console.error("Error in /api/ads/reward:", error.message);
+    return res.status(500).json({ ok: false, error: 'Failed to claim ad reward' });
+  }
+});
+
 // SECURE DAILY REWARD
 app.post('/api/daily/claim', async (req, res) => {
   try {

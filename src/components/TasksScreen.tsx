@@ -104,6 +104,37 @@ export default function TasksScreen() {
     }, delay)
   }
 
+  const handleWatchAd = () => {
+    if (typeof window !== 'undefined' && window.Adsgram) {
+      const AdController = window.Adsgram.init({ blockId: "36721" });
+      AdController.show().then(async (result) => {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+        try {
+          const res = await fetch(`${API_URL}/api/ads/reward`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              telegramId: useGameStore.getState().telegramUser?.id
+            })
+          });
+          const resData = await res.json();
+          if (resData.ok && resData.user) {
+            useGameStore.getState().setServerData(resData.user);
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
+              window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
+          }
+        } catch (e) {
+          console.error("Ad reward failed", e);
+        }
+      }).catch((result) => {
+        console.error("Ad skipped or error", result);
+      });
+    } else {
+      console.warn("Adsgram SDK not loaded yet");
+    }
+  };
+
   useEffect(() => {
     if (wallet && taskStates['connect_wallet'] === 'verifying') {
       setTaskStates((prev) => ({ ...prev, connect_wallet: 'completed' }))
@@ -160,6 +191,46 @@ export default function TasksScreen() {
         
         {activeTab === 'new' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            
+            {/* ADSGRAM BUTTON */}
+            <div
+              className="task-card card"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background: 'linear-gradient(90deg, rgba(255, 183, 0, 0.2) 0%, rgba(255, 183, 0, 0.05) 100%)',
+                border: '2px solid var(--gold)',
+                boxShadow: '0 0 15px rgba(255, 183, 0, 0.2)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>📺</span>
+                <div>
+                  <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>Watch Video Ad</h3>
+                  <div style={{ fontSize: '12px', color: 'var(--blue)', marginTop: '5px' }}>Reward: 200 Energy ⚡</div>
+                </div>
+              </div>
+              <button
+                onClick={handleWatchAd}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'var(--gold)',
+                  color: '#000',
+                  fontSize: '9px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  boxShadow: '0 0 10px rgba(255,183,0,0.5)'
+                }}
+              >
+                WATCH
+              </button>
+            </div>
+
             {gameConfig.tasks.filter(t => (taskStates[t.id] || 'not_started') !== 'completed').map((task) => {
               const state = taskStates[task.id] || 'not_started'
               return (

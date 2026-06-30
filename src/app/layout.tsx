@@ -23,6 +23,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+        <Script src="https://sad.adsgram.ai/js/sad.min.js" strategy="beforeInteractive" />
       </head>
       <body>
         <div className="app-container">
