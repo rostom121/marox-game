@@ -26,14 +26,15 @@ interface Particle {
 
 const PARTICLE_COLORS = ['#ffb700', '#00d2ff', '#9d4edd', '#ff3333', '#ffffff']
 
-const AVAILABLE_BETS = [1, 2, 3, 4, 5, 10, 25, 50, 100, 150, 250, 500, 1000];
+const AVAILABLE_BETS = [1, 2, 3, 4, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 2000];
 
 export default function SlotScreen() {
   const { t } = useTranslation()
   const { data, telegramUser, spinOutcome, setTab, settings, updateSettings } = useGameStore()
   
   const allowedBets = useMemo(() => {
-    if (data.energy >= 20000) return AVAILABLE_BETS;
+    if (data.energy >= 50000) return AVAILABLE_BETS;
+    if (data.energy >= 20000) return AVAILABLE_BETS.slice(0, 13);
     if (data.energy >= 10000) return AVAILABLE_BETS.slice(0, 12);
     if (data.energy >= 5000) return AVAILABLE_BETS.slice(0, 11);
     if (data.energy >= 3000) return AVAILABLE_BETS.slice(0, 10);
