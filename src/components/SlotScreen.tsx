@@ -119,8 +119,6 @@ export default function SlotScreen() {
           ctx.save()
           ctx.globalAlpha = alpha
           ctx.fillStyle = p.color
-          ctx.shadowColor = p.color
-          ctx.shadowBlur = 6
           ctx.beginPath()
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
           ctx.fill()

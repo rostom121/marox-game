@@ -98,7 +98,8 @@ export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
       // Card background
       ctx.save()
       if (isSpinning) {
-        ctx.filter = `blur(${3 + Math.random()}px)`
+        // We use slightly lower opacity instead of blur for performance
+        ctx.globalAlpha = 0.8;
       }
 
       // Winning glow
