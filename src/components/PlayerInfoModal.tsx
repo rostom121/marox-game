@@ -17,11 +17,14 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
   const progressPercent = Math.min(100, Math.max(0, (currentClicks / requiredClicks) * 100));
   
   const [showCelebration, setShowCelebration] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const handleUpgrade = () => {
-    if (canUpgrade) {
-      const result = upgradeLevel();
+  const handleUpgrade = async () => {
+    if (canUpgrade && !isUpgrading) {
+      setIsUpgrading(true);
+      const result = await upgradeLevel();
+      setIsUpgrading(false);
       if (result.success && result.leveledUp) {
         setShowCelebration(true);
       }
@@ -191,11 +194,11 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
           </div>
           
           <button 
-            className={`upgrade-btn pixel-text ${canUpgrade ? 'active' : 'disabled'}`}
+            className={`upgrade-btn pixel-text ${canUpgrade && !isUpgrading ? 'active' : 'disabled'}`}
             onClick={handleUpgrade}
-            disabled={!canUpgrade}
+            disabled={!canUpgrade || isUpgrading}
           >
-            {t('upgrade_level')}
+            {isUpgrading ? '...' : t('upgrade_level')}
           </button>
           
           {!canUpgrade && (

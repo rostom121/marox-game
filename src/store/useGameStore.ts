@@ -87,7 +87,7 @@ interface GameStore {
   setWallet: (address: string | null) => void;
   getDailyStatus: () => { canClaim: boolean; currentStreak: number; nextReward: typeof DAILY_REWARDS[0] };
   claimDailyReward: () => boolean;
-  upgradeLevel: () => { success: boolean, leveledUp: boolean };
+  upgradeLevel: () => Promise<{ success: boolean, leveledUp: boolean }>;
   setGameUsername: (name: string) => void;
   addPurchasedItems: (energyAmount: number, coinsAmount: number) => void;
   completeTask: (taskId: string) => void;
@@ -425,54 +425,67 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // inside GameStore interface, upgradeLevel returns { success: boolean, leveledUp: boolean }
 
-  upgradeLevel: () => {
+  upgradeLevel: async () => {
     const state = get();
     const cost = getUpgradeCost(state.data.level);
 
     if (state.data.coins >= cost) {
-      let result = { success: false, leveledUp: false };
-      set((s) => {
-        const clicksRequired = getUpgradeClicksRequired(s.data.level);
-        const newXp = (s.data.xp || 0) + 1;
-
-        if (newXp >= clicksRequired) {
-          const nextData = {
-            ...s.data,
-            coins: s.data.coins - cost,
-            level: s.data.level + 1,
-            xp: 0,
-            energy: s.data.energy + 30
-          };
-          try {
-            localStorage.setItem('marox_game_data', JSON.stringify(nextData));
-            syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress);
-          } catch (e) {
-            console.error(e);
+      if (!state.telegramUser || state.telegramUser.id === 'demo') {
+        // Fallback for demo mode
+        let result = { success: false, leveledUp: false };
+        set((s) => {
+          const clicksRequired = getUpgradeClicksRequired(s.data.level);
+          const newXp = (s.data.xp || 0) + 1;
+          let nextData = { ...s.data, coins: s.data.coins - cost };
+          
+          if (newXp >= clicksRequired) {
+            nextData.level = s.data.level + 1;
+            nextData.xp = 0;
+            nextData.energy = s.data.energy + 30;
+            result = { success: true, leveledUp: true };
+          } else {
+            nextData.xp = newXp;
+            result = { success: true, leveledUp: false };
           }
-          result = { success: true, leveledUp: true };
+          try { localStorage.setItem('marox_game_data', JSON.stringify(nextData)); } catch (e) {}
           return { data: nextData };
-        } else {
-          const nextData = {
-            ...s.data,
-            coins: s.data.coins - cost,
-            xp: newXp
-          };
-          try {
-            localStorage.setItem('marox_game_data', JSON.stringify(nextData));
-            syncWithBackend(state.telegramUser?.id || '', nextData, state.walletAddress);
-          } catch (e) {
-            console.error(e);
-          }
-          result = { success: true, leveledUp: false };
-          return { data: nextData };
-        }
-      });
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        });
+        return result;
       }
-      return result as any; // Cast as any because the interface was boolean previously, wait, I need to update the interface!
+
+      try {
+        const response = await fetch(`${API_URL}/api/upgrade`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ telegramId: state.telegramUser.id })
+        });
+        
+        const resData = await response.json();
+        
+        if (resData.ok && resData.user) {
+          set((s) => {
+            const nextData = {
+              ...s.data,
+              coins: resData.user.coins,
+              level: resData.user.level,
+              xp: resData.user.xp,
+              energy: resData.user.energy,
+            };
+            try { localStorage.setItem('marox_game_data', JSON.stringify(nextData)); } catch (e) {}
+            return { data: nextData };
+          });
+          
+          if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+          }
+          
+          return { success: true, leveledUp: resData.leveledUp };
+        }
+      } catch (error) {
+        console.error("Failed to call upgrade API:", error);
+      }
     }
-    return { success: false, leveledUp: false } as any;
+    return { success: false, leveledUp: false };
   },
 
   setGameUsername: (name) => {

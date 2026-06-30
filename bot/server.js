@@ -534,6 +534,72 @@ app.post('/api/shop/buy', async (req, res) => {
   }
 });
 
+const getUpgradeCost = (level) => {
+  if (level < 10) return 100;
+  if (level < 20) return 250;
+  if (level < 50) return 500;
+  if (level < 100) return 1000;
+  if (level < 200) return 2000;
+  if (level < 300) return 5000;
+  return 10000;
+};
+
+const getUpgradeClicksRequired = (level) => {
+  if (level < 20) return 2;
+  if (level < 50) return 4;
+  if (level < 100) return 7;
+  if (level < 250) return 10;
+  if (level < 500) return 15;
+  return 25;
+};
+
+// SECURE UPGRADE LEVEL
+app.post('/api/upgrade', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing params' });
+
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
+
+    const cost = getUpgradeCost(user.level);
+    if (user.coins < cost) {
+      return res.status(400).json({ ok: false, error: 'Not enough gold to upgrade' });
+    }
+
+    const clicksRequired = getUpgradeClicksRequired(user.level);
+    const newXp = (user.xp || 0) + 1;
+
+    let updateData = {};
+    let leveledUp = false;
+
+    if (newXp >= clicksRequired) {
+      updateData = {
+        coins: user.coins - cost,
+        level: user.level + 1,
+        xp: 0,
+        energy: user.energy + 30
+      };
+      leveledUp = true;
+    } else {
+      updateData = {
+        coins: user.coins - cost,
+        xp: newXp
+      };
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: updateData
+    });
+
+    return res.json({ ok: true, user: updatedUser, leveledUp });
+  } catch (error) {
+    console.error("Error in /api/upgrade:", error.message);
+    return res.status(500).json({ ok: false, error: 'Upgrade failed' });
+  }
+});
+
 // Basic status check
 app.get('/status', (req, res) => {
   res.json({ status: 'online', botEnabled: !!token, channel: channelUsername, appUrl: miniAppUrl });
