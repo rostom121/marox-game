@@ -93,8 +93,13 @@ export default function SlotScreen() {
 
       if (frame % 8 === 0) spawnParticle()
 
-      particlesRef.current = particlesRef.current.filter((p) => p.life < p.maxLife)
-      for (const p of particlesRef.current) {
+      for (let i = particlesRef.current.length - 1; i >= 0; i--) {
+        const p = particlesRef.current[i]
+        if (p.life >= p.maxLife) {
+          particlesRef.current.splice(i, 1)
+          continue
+        }
+
         p.x += p.vx
         p.y += p.vy
         p.life++

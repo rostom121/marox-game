@@ -72,16 +72,11 @@ export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
 
     const drawRoundRect = (x: number, y: number, w: number, h: number, r: number) => {
       ctx.beginPath()
-      ctx.moveTo(x + r, y)
-      ctx.lineTo(x + w - r, y)
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r)
-      ctx.lineTo(x + w, y + h - r)
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
-      ctx.lineTo(x + r, y + h)
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r)
-      ctx.lineTo(x, y + r)
-      ctx.quadraticCurveTo(x, y, x + r, y)
-      ctx.closePath()
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, w, h, r)
+      } else {
+        ctx.rect(x, y, w, h)
+      }
     }
 
     const drawSymbol = (
@@ -139,12 +134,7 @@ export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
         const imgX = x + w / 2 - imgSize / 2 + shake
         const imgY = y + h / 2 - 8 - imgSize / 2 + shake
 
-        ctx.save()
-        ctx.beginPath()
-        ctx.arc(imgX + imgSize / 2, imgY + imgSize / 2, imgSize / 2, 0, Math.PI * 2)
-        ctx.clip()
         ctx.drawImage(img, imgX, imgY, imgSize, imgSize)
-        ctx.restore()
       } else if (def.emoji) {
         ctx.font = `${isWinner ? 54 : 48}px serif`
         ctx.textAlign = 'center'
@@ -181,11 +171,7 @@ export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
     const render = () => {
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
 
-      // Scanline overlay background
-      ctx.fillStyle = 'rgba(0,0,0,0.12)'
-      for (let sy = 0; sy < CANVAS_H; sy += 4) {
-        ctx.fillRect(0, sy, CANVAS_W, 2)
-      }
+
 
       s.winPulse++
 
@@ -234,9 +220,7 @@ export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
         drawPayline(row * SYMBOL_H, '#ffb700', alpha)
       }
 
-      // Clip to canvas bounds (hide overflow symbols)
-      ctx.clearRect(0, -10, CANVAS_W, 10)
-      ctx.clearRect(0, CANVAS_H, CANVAS_W, 10)
+
 
       rafRef.current = requestAnimationFrame(render)
     }
