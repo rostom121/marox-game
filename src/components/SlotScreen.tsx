@@ -125,6 +125,7 @@ export default function SlotScreen() {
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
           ctx.fill()
           ctx.restore()
+        }
       }
 
       particleRafRef.current = requestAnimationFrame(animate)
