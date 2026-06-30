@@ -30,8 +30,7 @@ const AVAILABLE_BETS = [1, 2, 3, 4, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 200
 
 export default function SlotScreen() {
   const { t } = useTranslation()
-  const { data, telegramUser, spinOutcome, setTab, settings, updateSettings, activeTab } = useGameStore()
-  const isActive = activeTab === 'home';
+  const { data, telegramUser, spinOutcome, setTab, settings, updateSettings } = useGameStore()
   
   const allowedBets = useMemo(() => {
     if (data.energy >= 50000) return AVAILABLE_BETS;
@@ -59,8 +58,8 @@ export default function SlotScreen() {
   const particlesRef = useRef<Particle[]>([])
   const particleRafRef = useRef<number>(0)
 
-  const latestRef = useRef({ spinning, energy: data.energy, bet, autoSpin, isActive })
-  latestRef.current = { spinning, energy: data.energy, bet, autoSpin, isActive }
+  const latestRef = useRef({ spinning, energy: data.energy, bet, autoSpin })
+  latestRef.current = { spinning, energy: data.energy, bet, autoSpin }
 
   // We removed the useEffect that auto-decreases the bet so players can keep their unlocked bets.
 
@@ -89,9 +88,6 @@ export default function SlotScreen() {
     }
 
     const animate = () => {
-      particleRafRef.current = requestAnimationFrame(animate)
-      if (!latestRef.current.isActive) return;
-
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       frame++
 
@@ -129,8 +125,9 @@ export default function SlotScreen() {
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
           ctx.fill()
           ctx.restore()
-        }
       }
+
+      particleRafRef.current = requestAnimationFrame(animate)
     }
 
     animate()
@@ -453,7 +450,7 @@ export default function SlotScreen() {
 
         {/* Reels board */}
         <div className="slot-reels-board">
-          <PixiSlotMachine spinData={spinData} onResult={handleSpinResult} isActive={isActive} />
+          <PixiSlotMachine spinData={spinData} onResult={handleSpinResult} />
           <div className="slot-glass-overlay"></div>
         </div>
 

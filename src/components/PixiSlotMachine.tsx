@@ -6,7 +6,6 @@ import { gameConfig } from '../config/gameConfig'
 interface PixiSlotMachineProps {
   spinData: { finalGrid: string[][], winnerRows: number[], payout: { points: number, coins: number, energyWin: number } } | null
   onResult: (payout: { points: number; coins: number; energyWin: number }) => void
-  isActive?: boolean
 }
 
 // Symbol definitions with emoji and color
@@ -17,10 +16,8 @@ const SYMBOL_DEFS: Record<string, { emoji?: string; imageSrc?: string; color: st
   red_x: { emoji: '❌', color: '#ff3333', label: 'RED X' },
 }
 
-export function PixiSlotMachine({ spinData, onResult, isActive = true }: PixiSlotMachineProps) {
+export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const activeRef = useRef(isActive)
-  activeRef.current = isActive
 
   const stateRef = useRef({
     reels: [
@@ -181,9 +178,6 @@ export function PixiSlotMachine({ spinData, onResult, isActive = true }: PixiSlo
     }
 
     const render = () => {
-      rafRef.current = requestAnimationFrame(render)
-      if (!activeRef.current) return;
-
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
 
       // Scanline overlay background
@@ -242,6 +236,8 @@ export function PixiSlotMachine({ spinData, onResult, isActive = true }: PixiSlo
       // Clip to canvas bounds (hide overflow symbols)
       ctx.clearRect(0, -10, CANVAS_W, 10)
       ctx.clearRect(0, CANVAS_H, CANVAS_W, 10)
+
+      rafRef.current = requestAnimationFrame(render)
     }
 
     render()
