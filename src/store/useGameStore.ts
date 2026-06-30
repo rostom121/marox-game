@@ -236,8 +236,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const energyRegen = setInterval(() => {
       set((state) => {
         if (state.data.energy >= 100) {
-          const newData = { ...state.data, lastEnergyUpdate: Date.now() };
-          return { data: newData };
+          return state; // Do not create a new object if energy is full, prevents React re-render spam
         }
         const now = Date.now();
         const lastUpdate = state.data.lastEnergyUpdate || now;
