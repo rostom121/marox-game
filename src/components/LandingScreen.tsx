@@ -46,24 +46,10 @@ export default function LandingScreen({ navigate }: LandingProps) {
   const [charY, setCharY] = useState(0)
   const charRef = useRef({ blink: 0, breathe: 0, glow: 0 })
 
-  const { data, setGameUsername, telegramUser } = useGameStore()
-  const [showUsernameModal, setShowUsernameModal] = useState(false)
-  const [usernameInput, setUsernameInput] = useState('')
+  const { data, telegramUser } = useGameStore()
 
   const handlePlayNow = () => {
-    if (!data.gameUsername) {
-      setShowUsernameModal(true)
-    } else {
-      navigate('slot')
-    }
-  }
-
-  const handleSaveUsername = () => {
-    if (usernameInput.trim().length >= 3) {
-      setGameUsername(usernameInput.trim())
-      setShowUsernameModal(false)
-      navigate('slot')
-    }
+    navigate('slot')
   }
 
   // Continuous ambient canvas animation
@@ -248,42 +234,6 @@ export default function LandingScreen({ navigate }: LandingProps) {
         <span className="landing-mini-app-text">game mini app on telegram</span>
       </div>
 
-      {showUsernameModal && (
-        <div className="welcome-modal-overlay" style={{ zIndex: 3000 }}>
-          <div className="welcome-modal-card card" style={{ position: 'relative', maxWidth: '320px', width: 'fit-content', padding: '25px 20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <h2 className="pixel-text gold-text" style={{ fontSize: '18px', textAlign: 'center' }}>{t('choose_username')}</h2>
-            <p style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'center', lineHeight: 1.5 }}>
-              {t('choose_username_desc')}
-            </p>
-            <input 
-              type="text" 
-              className="pixel-text"
-              placeholder="Username..." 
-              value={usernameInput}
-              onChange={(e) => setUsernameInput(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                background: 'rgba(0,0,0,0.5)',
-                border: '2px solid var(--border-neon)',
-                borderRadius: '8px',
-                color: '#fff',
-                outline: 'none',
-                textAlign: 'center',
-                fontSize: '14px'
-              }}
-            />
-            <button 
-              className={`claim-btn pixel-text ${usernameInput.trim().length < 3 ? 'disabled' : ''}`}
-              onClick={handleSaveUsername}
-              disabled={usernameInput.trim().length < 3}
-              style={{ width: '100%', marginTop: '10px' }}
-            >
-              START ADVENTURE
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
