@@ -227,6 +227,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ loading: false });
     }
 
+    // Prevent multiple intervals from running
+    if (typeof window !== 'undefined' && (window as any).__maroxEnergyRegen) {
+      clearInterval((window as any).__maroxEnergyRegen);
+    }
+
     // Start energy regeneration: 100 max, 4 hours to fill (1 energy per 144 seconds)
     const energyRegen = setInterval(() => {
       set((state) => {
