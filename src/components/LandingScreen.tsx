@@ -121,21 +121,23 @@ export default function LandingScreen({ navigate }: LandingProps) {
       }
 
       // Draw sparkles
-      sparklesRef.current = sparklesRef.current.filter((s) => s.life < s.maxLife)
-      for (const s of sparklesRef.current) {
+      for (let i = sparklesRef.current.length - 1; i >= 0; i--) {
+        const s = sparklesRef.current[i]
+        if (s.life >= s.maxLife) {
+          sparklesRef.current.splice(i, 1)
+          continue
+        }
         s.life++
         const t = s.life / s.maxLife
         const alpha = s.alpha * (1 - t) * Math.sin(t * Math.PI)
         ctx.save()
         ctx.globalAlpha = alpha
         ctx.fillStyle = s.color
-        ctx.shadowColor = s.color
-        ctx.shadowBlur = 8
         // Draw star shape
         ctx.beginPath()
-        for (let i = 0; i < 4; i++) {
-          const angle = (i * Math.PI) / 2
-          const r = i % 2 === 0 ? s.size * 2 : s.size * 0.5
+        for (let j = 0; j < 4; j++) {
+          const angle = (j * Math.PI) / 2
+          const r = j % 2 === 0 ? s.size * 2 : s.size * 0.5
           ctx.lineTo(s.x + Math.cos(angle) * r, s.y + Math.sin(angle) * r)
         }
         ctx.closePath()
@@ -144,8 +146,12 @@ export default function LandingScreen({ navigate }: LandingProps) {
       }
 
       // Draw floating particles
-      particlesRef.current = particlesRef.current.filter((p) => p.life < p.maxLife)
-      for (const p of particlesRef.current) {
+      for (let i = particlesRef.current.length - 1; i >= 0; i--) {
+        const p = particlesRef.current[i]
+        if (p.life >= p.maxLife) {
+          particlesRef.current.splice(i, 1)
+          continue
+        }
         p.x += p.vx
         p.y += p.vy
         p.life++
@@ -161,8 +167,6 @@ export default function LandingScreen({ navigate }: LandingProps) {
           ctx.fillText(p.emoji, p.x, p.y)
         } else {
           ctx.fillStyle = p.color
-          ctx.shadowColor = p.color
-          ctx.shadowBlur = 10
           ctx.beginPath()
           ctx.arc(p.x, p.y, p.size / 4, 0, Math.PI * 2)
           ctx.fill()
@@ -175,8 +179,6 @@ export default function LandingScreen({ navigate }: LandingProps) {
       ctx.save()
       ctx.globalAlpha = 0.15 * starPulse
       ctx.fillStyle = 'rgba(157, 78, 221, 1)'
-      ctx.shadowColor = '#9d4edd'
-      ctx.shadowBlur = 30
       ctx.beginPath()
       ctx.arc(canvas.width * 0.5, canvas.height * 0.3, 80, 0, Math.PI * 2)
       ctx.fill()
