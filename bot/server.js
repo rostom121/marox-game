@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 const token = process.env.BOT_TOKEN;
 const port = process.env.PORT || 5000;
 const channelUsername = process.env.CHANNEL_USERNAME || '@marox_channel';
-const miniAppUrl = process.env.MINI_APP_URL || 'https://t.me/marox_bot/game';
+const miniAppUrl = process.env.MINI_APP_URL || 'https://marox-game.vercel.app';
 
 if (!token) {
   console.error("Warning: BOT_TOKEN is not set in environment variables!");
