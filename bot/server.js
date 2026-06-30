@@ -292,9 +292,9 @@ app.post('/api/spin', async (req, res) => {
     const r = Math.random() * 100;
     let outcome = 'mixed';
     if (r < 30) outcome = 'coin';
-    else if (r < 55) outcome = 'badge';
-    else if (r < 75) outcome = 'energy';
-    else if (r < 85) outcome = 'red_x';
+    else if (r < 50) outcome = 'badge';
+    else if (r < 65) outcome = 'energy';
+    else if (r < 80) outcome = 'red_x';
 
     let finalGrid;
     if (outcome !== 'mixed') {
