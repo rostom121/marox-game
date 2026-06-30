@@ -613,19 +613,7 @@ body {
 /* Floating sparks and jewels */
 /* .landing-bottom-action::before removed to stop jewels animation */
 
-.landing-bottom-action::after {
-  content: '🪙 💎 ⭐ 🪙 💎';
-  position: absolute;
-  top: 20%; left: 0; right: 0;
-  z-index: -1;
-  font-size: 32px;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  opacity: 0.25;
-  animation: floatJewels 3s ease-in-out infinite alternate;
-  pointer-events: none;
-}
+/* .landing-bottom-action::after removed to clean up UI */
 
 @keyframes floatSparks {
   0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
