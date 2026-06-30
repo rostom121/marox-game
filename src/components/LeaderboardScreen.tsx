@@ -101,27 +101,36 @@ export default function LeaderboardScreen() {
           onClick={() => setActiveTier('whale')}
           style={{ flex: 1, padding: '8px 0', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", borderRadius: '6px', transition: 'all 0.2s', border: activeTier === 'whale' ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid transparent', background: activeTier === 'whale' ? 'rgba(59, 130, 246, 0.8)' : 'transparent', color: activeTier === 'whale' ? '#fff' : '#9ca3af', boxShadow: activeTier === 'whale' ? '0 0 10px rgba(59, 130, 246, 0.4)' : 'none' }}
         >
-          🐳 WHALE
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span>🐳 WHALE</span>
+            <span style={{ fontSize: '7px', opacity: 0.7, fontFamily: 'sans-serif', letterSpacing: '0.5px' }}>0 - 99K</span>
+          </div>
         </button>
         <button
           onClick={() => setActiveTier('master')}
           style={{ flex: 1, padding: '8px 0', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", borderRadius: '6px', transition: 'all 0.2s', border: activeTier === 'master' ? '1px solid rgba(168, 85, 247, 0.5)' : '1px solid transparent', background: activeTier === 'master' ? 'rgba(168, 85, 247, 0.8)' : 'transparent', color: activeTier === 'master' ? '#fff' : '#9ca3af', boxShadow: activeTier === 'master' ? '0 0 10px rgba(168, 85, 247, 0.4)' : 'none' }}
         >
-          👑 MASTER
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span>👑 MASTER</span>
+            <span style={{ fontSize: '7px', opacity: 0.7, fontFamily: 'sans-serif', letterSpacing: '0.5px' }}>100K+</span>
+          </div>
         </button>
         <button
           onClick={() => setActiveTier('legendary')}
           style={{ flex: 1, padding: '8px 0', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", borderRadius: '6px', transition: 'all 0.2s', border: activeTier === 'legendary' ? '1px solid rgba(250, 204, 21, 0.5)' : '1px solid transparent', background: activeTier === 'legendary' ? 'rgba(250, 204, 21, 0.8)' : 'transparent', color: activeTier === 'legendary' ? '#000' : '#9ca3af', boxShadow: activeTier === 'legendary' ? '0 0 10px rgba(250, 204, 21, 0.4)' : 'none' }}
         >
-          🐉 LEGEND
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span>🐉 LEGEND</span>
+            <span style={{ fontSize: '7px', opacity: 0.7, fontFamily: 'sans-serif', letterSpacing: '0.5px' }}>500K+</span>
+          </div>
         </button>
       </div>
 
       {/* Top Player Card (Square) */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '6px' }}>
         {displayList[0] && (
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', width: '110px', height: '90px', background: 'rgba(255, 183, 0, 0.08)', border: '1px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '12px' }}>
-            <div style={{ fontSize: '24px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', width: '110px', height: '70px', background: 'rgba(255, 183, 0, 0.08)', border: '1px solid var(--gold)', boxShadow: '0 0 10px rgba(255, 183, 0, 0.2)', borderRadius: '12px' }}>
+            <div style={{ fontSize: '20px', animation: 'bounceSymbol 1.5s infinite' }}>🏆</div>
             <div style={{ fontSize: '12px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%', color: 'var(--gold)' }}>
               {displayList[0].name}
             </div>
@@ -144,7 +153,7 @@ export default function LeaderboardScreen() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '14px 12px',
+                  padding: '10px 12px',
                   borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                   background: isMe ? 'rgba(255, 183, 0, 0.15)' : player.rank <= 3 ? 'rgba(157, 78, 221, 0.05)' : 'transparent',
                   border: isMe ? '1px solid var(--gold)' : 'none',
