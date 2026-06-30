@@ -557,7 +557,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  backdrop-filter: blur(4px);
+  /* backdrop-filter removed */ background-color: rgba(12, 5, 24, 0.95);
 }
 
 .landing-feature-card:hover {
@@ -768,7 +768,7 @@ body {
   padding: 8px 10px;
   background: rgba(12, 5, 24, 0.7);
   border-bottom: 1px solid var(--border-neon);
-  backdrop-filter: blur(8px);
+  /* backdrop-filter removed */ background-color: rgba(12, 5, 24, 0.95);
   z-index: 10;
   position: relative;
 }
@@ -922,7 +922,7 @@ body {
   align-items: center;
   padding: 12px 6px;
   background: rgba(12, 5, 24, 0.55);
-  backdrop-filter: blur(6px);
+  /* backdrop-filter removed */ background-color: rgba(12, 5, 24, 0.95);
 }
 
 .slot-sidebar-btn {
@@ -1115,7 +1115,7 @@ body {
 
 .slot-wing {
   font-size: 26px;
-  filter: drop-shadow(0 0 10px #00d2ff);
+  /* drop-shadow removed for perf */
   margin: 0 8px;
 }
 
@@ -1381,7 +1381,7 @@ body {
     );
   box-shadow: inset 0 2px 5px rgba(255, 230, 150, 0.25);
   z-index: 10;
-  mix-blend-mode: overlay;
+  /* mix-blend-mode removed for perf */
 }
 
 /* ── 3x5 RETRO ARCADE SLOT MACHINE CABINET & CONTROLS ── */
@@ -1496,7 +1496,7 @@ body {
   bottom: 0;
   left: 0;
   background: rgba(8, 9, 16, 0.95);
-  backdrop-filter: blur(10px);
+  /* backdrop-filter removed */ background-color: rgba(12, 5, 24, 0.95);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -1640,7 +1640,7 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
+  /* backdrop-filter removed */ background-color: rgba(12, 5, 24, 0.95);
   z-index: 1000;
   display: flex;
   align-items: center;
