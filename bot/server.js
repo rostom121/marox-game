@@ -277,6 +277,28 @@ app.post('/api/user/sync', async (req, res) => {
   }
 });
 
+const antiCheatTracker = new Map();
+
+async function checkAntiCheat(telegramId, pointsGained) {
+  if (!pointsGained || pointsGained <= 0) return false;
+  const now = Date.now();
+  let tracker = antiCheatTracker.get(String(telegramId));
+  if (!tracker || now - tracker.windowStart > 60000) {
+    tracker = { windowStart: now, pointsEarned: 0 };
+  }
+  tracker.pointsEarned += pointsGained;
+  antiCheatTracker.set(String(telegramId), tracker);
+  
+  if (tracker.pointsEarned > 1500000) {
+    console.warn(`[ANTI-CHEAT] Banning user ${telegramId} for earning ${tracker.pointsEarned} points in under 60s!`);
+    await prisma.task.deleteMany({ where: { telegramId: String(telegramId) } });
+    await prisma.user.deleteMany({ where: { telegramId: String(telegramId) } });
+    antiCheatTracker.delete(String(telegramId));
+    return true; // Indicates user was banned
+  }
+  return false;
+}
+
 // SECURE SPIN ENDPOINT
 app.post('/api/spin', async (req, res) => {
   try {
@@ -325,6 +347,9 @@ app.post('/api/spin', async (req, res) => {
     const scaledPoints = Math.floor(points * scale);
     const scaledCoins = Math.floor(coins * scale);
     const scaledEnergyWin = Math.floor(energyWin * scale);
+
+    const isBanned = await checkAntiCheat(telegramId, scaledPoints);
+    if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
 
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
@@ -415,6 +440,9 @@ app.post('/api/tasks/complete', async (req, res) => {
       data: { telegramId: String(telegramId), taskId: taskId, status: 'completed', completedAt: new Date() }
     });
 
+    const isBanned = await checkAntiCheat(telegramId, Number(rewardPoints || 0));
+    if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
+
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
       data: {
@@ -435,6 +463,9 @@ app.post('/api/daily/claim', async (req, res) => {
   try {
     const { telegramId, points, energy } = req.body;
     if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing params' });
+
+    const isBanned = await checkAntiCheat(telegramId, Number(points || 0));
+    if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
 
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
@@ -463,6 +494,9 @@ app.post('/api/shop/buy', async (req, res) => {
     if (costCoins && user.coins < costCoins) {
       return res.status(400).json({ ok: false, error: 'Not enough coins' });
     }
+
+    const isBanned = await checkAntiCheat(telegramId, Number(gainPoints || 0));
+    if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
 
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
