@@ -62,8 +62,8 @@ export default function EventModal({ onClose }: EventModalProps) {
         className="player-modal-content" 
         onClick={(e) => e.stopPropagation()} 
         style={{ 
-          width: '95%', 
-          maxWidth: '600px', 
+          width: '98%', 
+          maxWidth: '800px', 
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
@@ -71,11 +71,10 @@ export default function EventModal({ onClose }: EventModalProps) {
           border: '2px solid var(--gold)', 
           borderRadius: '20px', 
           boxShadow: '0 0 40px rgba(255, 183, 0, 0.4)',
-          overflow: 'hidden',
           position: 'relative'
         }}
       >
-        <button className="red-glow-close-btn" onClick={onClose} style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>✕</button>
+        <button className="red-glow-close-btn" onClick={onClose} style={{ position: 'absolute', top: '-15px', right: '-15px', zIndex: 10 }}>✕</button>
         
         {/* Header Section */}
         <div style={{ padding: '8px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', position: 'relative', flexShrink: 0 }}>
@@ -120,66 +119,62 @@ export default function EventModal({ onClose }: EventModalProps) {
                     key={user.telegramId} 
                     style={{
                       display: 'flex',
-                      alignItems: 'flex-start',
+                      flexDirection: 'row',
+                      alignItems: 'center',
                       background: isMe ? 'linear-gradient(90deg, rgba(0,210,255,0.2) 0%, rgba(0,210,255,0.05) 100%)' : 'rgba(255,255,255,0.05)',
                       border: isMe ? '1px solid var(--blue)' : reward ? '1px solid var(--gold)' : '1px solid rgba(255,255,255,0.05)',
                       borderRadius: '16px',
-                      padding: '15px',
+                      padding: '10px 12px',
                       boxShadow: reward ? '0 0 15px rgba(255,183,0,0.15)' : 'none',
                       position: 'relative',
-                      overflow: 'hidden'
+                      gap: '8px'
                     }}
                   >
                     {/* Rank Badge */}
                     <div style={{ 
-                      width: '40px', 
-                      height: '40px', 
+                      width: '32px', 
+                      height: '32px', 
                       borderRadius: '50%', 
                       background: reward ? 'var(--gold)' : 'rgba(255,255,255,0.1)', 
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center',
-                      fontSize: reward ? '20px' : '16px',
+                      fontSize: reward ? '16px' : '12px',
                       fontWeight: 'bold',
                       color: reward ? '#000' : '#fff',
-                      marginRight: '15px',
-                      flexShrink: 0,
-                      marginTop: '2px'
+                      flexShrink: 0
                     }}>
                       {reward ? reward.badge : `#${rank}`}
                     </div>
 
-                    {/* Content Column */}
+                    {/* Name & Score Container (Flexible) */}
                     <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                      
-                      {/* Name & Score */}
                       <div style={{ 
-                        fontSize: '15px', 
+                        fontSize: '13px', 
                         color: isMe ? 'var(--blue)' : '#fff', 
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        marginBottom: '4px'
+                        textOverflow: 'ellipsis'
                       }}>
                         {user.firstName || user.username || 'Anonymous'} {user.premium && '⭐'} {isMe && '(You)'}
                       </div>
-                      <div style={{ fontSize: '13px', color: 'var(--gold)', fontWeight: 'bold' }}>
-                        {user.eventPoints.toLocaleString()} MRX$
+                      <div style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 'bold' }}>
+                        {user.eventPoints >= 1000 ? (user.eventPoints/1000).toFixed(1).replace('.0', '') + 'k' : user.eventPoints} MRX$
                       </div>
-
-                      {/* Rewards Row (Only for Top 3) */}
-                      {reward && (
-                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
-                          <div style={{ background: 'rgba(0,0,0,0.5)', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            ⚡ <span style={{ color: '#ff3333', fontWeight: 'bold' }}>{reward.energy.toLocaleString()}</span>
-                          </div>
-                          <div style={{ background: 'rgba(0,0,0,0.5)', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            💎 <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>{reward.marox.toLocaleString()}</span>
-                          </div>
-                        </div>
-                      )}
                     </div>
+
+                    {/* Rewards Row (Fixed, no wrap) */}
+                    {reward && (
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 6px', borderRadius: '6px', fontSize: '10px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', whiteSpace: 'nowrap' }}>
+                          ⚡ <span style={{ color: '#ff3333', fontWeight: 'bold' }}>{reward.energy >= 1000 ? (reward.energy/1000).toFixed(1).replace('.0', '') + 'k' : reward.energy}</span>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 6px', borderRadius: '6px', fontSize: '10px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', whiteSpace: 'nowrap' }}>
+                          💎 <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>{reward.marox >= 1000 ? (reward.marox/1000).toFixed(1).replace('.0', '') + 'k' : reward.marox}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
