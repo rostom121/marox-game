@@ -434,20 +434,21 @@ export default function SlotScreen() {
               style={{ position: 'relative' }}
             >
               {btn.badge && <span className="slot-sidebar-badge" />}
-              <span className="slot-sidebar-emoji" style={btn.label === t('slot_feats') ? { transform: 'translateY(-6px)' } : {}}>{btn.emoji}</span>
-              <span className="slot-sidebar-label" style={btn.label === t('slot_feats') ? { transform: 'translateY(-6px)' } : {}}>{btn.label}</span>
+              <span className="slot-sidebar-emoji">{btn.emoji}</span>
+              <span className="slot-sidebar-label">{btn.label}</span>
               {btn.label === t('slot_feats') && (
                 <span style={{ 
                   position: 'absolute',
-                  bottom: '4px',
-                  left: '0',
-                  right: '0',
+                  top: '-14px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
                   fontSize: '9.5px', 
                   color: '#FFD700', 
                   fontWeight: '900', 
                   fontFamily: 'monospace',
                   letterSpacing: '0px',
-                  textShadow: '0 0 5px #FFD700, 0 0 10px #FFA500, 0 0 15px #FF8C00'
+                  textShadow: '0 0 5px #FFD700, 0 0 10px #FFA500, 0 0 15px #FF8C00',
+                  whiteSpace: 'nowrap'
                 }}>
                   {eventTimeLeft}
                 </span>
@@ -555,7 +556,7 @@ export default function SlotScreen() {
       </div>
 
       {/* ── MODALS ── */}
-      {modalType && modalType !== 'avatar' && modalType !== 'daily' && (
+      {modalType && modalType !== 'avatar' && modalType !== 'daily' && modalType !== 'achievements' && modalType !== 'no_energy' && (
         <div className="welcome-modal-overlay" onClick={() => setModalType(null)} style={{ zIndex: 2000 }}>
           <div className="welcome-modal-card card" onClick={(e) => e.stopPropagation()} style={{ position: 'relative', maxWidth: '320px', width: 'fit-content', padding: '20px 15px' }}>
             <button className="red-glow-close-btn" onClick={() => setModalType(null)}>✕</button>
