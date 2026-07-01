@@ -99,7 +99,7 @@ export default function EventModal({ onClose }: EventModalProps) {
         </div>
 
         {/* Scrollable Leaderboard List */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '15px 8px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 4px' }}>
           {loading ? (
             <div style={{ textAlign: 'center', color: 'var(--blue)', padding: '40px 0' }}>Loading event data...</div>
           ) : leaderboard.length === 0 ? (
@@ -108,7 +108,7 @@ export default function EventModal({ onClose }: EventModalProps) {
               <span style={{ color: 'var(--gold)' }}>Spin the slots or complete tasks to climb the leaderboard!</span>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {leaderboard.map((user, index) => {
                 const rank = index + 1;
                 const isMe = user.telegramId === telegramUser?.id?.toString();
@@ -121,50 +121,55 @@ export default function EventModal({ onClose }: EventModalProps) {
                       display: 'flex',
                       flexDirection: 'row',
                       alignItems: 'center',
+                      justifyContent: 'space-between',
                       background: isMe ? 'linear-gradient(90deg, rgba(0,210,255,0.2) 0%, rgba(0,210,255,0.05) 100%)' : 'rgba(255,255,255,0.05)',
                       border: isMe ? '1px solid var(--blue)' : reward ? '1px solid var(--gold)' : '1px solid rgba(255,255,255,0.05)',
                       borderRadius: '16px',
-                      padding: '10px 12px',
+                      padding: '10px',
                       boxShadow: reward ? '0 0 15px rgba(255,183,0,0.15)' : 'none',
-                      position: 'relative',
-                      gap: '8px'
+                      position: 'relative'
                     }}
                   >
-                    {/* Rank Badge */}
-                    <div style={{ 
-                      width: '32px', 
-                      height: '32px', 
-                      borderRadius: '50%', 
-                      background: reward ? 'var(--gold)' : 'rgba(255,255,255,0.1)', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      fontSize: reward ? '16px' : '12px',
-                      fontWeight: 'bold',
-                      color: reward ? '#000' : '#fff',
-                      flexShrink: 0
-                    }}>
-                      {reward ? reward.badge : `#${rank}`}
-                    </div>
-
-                    {/* Name & Score Container (Flexible) */}
-                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                    {/* Left Section: Badge + Name & Score */}
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', overflow: 'hidden', flex: 1, paddingRight: '10px' }}>
+                      {/* Rank Badge */}
                       <div style={{ 
-                        fontSize: '13px', 
-                        color: isMe ? 'var(--blue)' : '#fff', 
+                        width: '32px', 
+                        height: '32px', 
+                        borderRadius: '50%', 
+                        background: reward ? 'var(--gold)' : 'rgba(255,255,255,0.1)', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        fontSize: reward ? '16px' : '12px',
                         fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
+                        color: reward ? '#000' : '#fff',
+                        flexShrink: 0
                       }}>
-                        {user.firstName || user.username || 'Anonymous'} {user.premium && '⭐'} {isMe && '(You)'}
+                        {reward ? reward.badge : `#${rank}`}
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 'bold' }}>
-                        {user.eventPoints >= 1000 ? (user.eventPoints/1000).toFixed(1).replace('.0', '') + 'k' : user.eventPoints} MRX$
+
+                      {/* Name & Score */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
+                        <div style={{ 
+                          fontSize: '13px', 
+                          color: isMe ? 'var(--blue)' : '#fff', 
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          width: '100%',
+                          textAlign: 'left'
+                        }}>
+                          {user.firstName || user.username || 'Anonymous'} {user.premium && '⭐'} {isMe && '(You)'}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 'bold', textAlign: 'left', marginTop: '2px' }}>
+                          {user.eventPoints >= 1000 ? (user.eventPoints/1000).toFixed(1).replace('.0', '') + 'k' : user.eventPoints} MRX$
+                        </div>
                       </div>
                     </div>
 
-                    {/* Rewards Row (Fixed, no wrap) */}
+                    {/* Right Section: Rewards Row */}
                     {reward && (
                       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
                         <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 6px', borderRadius: '6px', fontSize: '10px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', whiteSpace: 'nowrap' }}>
