@@ -523,35 +523,81 @@ app.post('/api/daily/claim', async (req, res) => {
   }
 });
 
-// SECURE SHOP PURCHASE (Virtual currency only for now)
-app.post('/api/shop/buy', async (req, res) => {
+// SECURE SHOP PURCHASE (Blockchain Verification)
+app.post('/api/shop/verify_purchase', async (req, res) => {
   try {
-    const { telegramId, costCoins, gainEnergy, gainCoins, gainPoints } = req.body;
-    if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing params' });
+    const { telegramId, walletAddress, costNano, gainEnergy, gainCoins } = req.body;
+    if (!telegramId || !walletAddress || !costNano) return res.status(400).json({ ok: false, error: 'Missing params' });
 
     const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
     if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
 
-    if (costCoins && user.coins < costCoins) {
-      return res.status(400).json({ ok: false, error: 'Not enough coins' });
+    // 1. Fetch transactions from TonAPI for the destination wallet
+    const DESTINATION_WALLET = 'UQAlEG3XMAbp2aD4OgGvUuQ5Rd1MELL04dq8ioam1jAIR51-';
+    const response = await fetch(`https://tonapi.io/v2/blockchain/accounts/${DESTINATION_WALLET}/transactions?limit=20`);
+    const data = await response.json();
+
+    if (!data.transactions || !Array.isArray(data.transactions)) {
+      return res.status(500).json({ ok: false, error: 'Failed to fetch blockchain data' });
     }
 
-    const isBanned = await checkAntiCheat(telegramId, Number(gainPoints || 0));
-    if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
+    let foundTxHash = null;
 
-    const updatedUser = await prisma.user.update({
-      where: { telegramId: String(telegramId) },
+    for (const tx of data.transactions) {
+      if (!tx.success) continue;
+      
+      const inMsg = tx.in_msg;
+      if (!inMsg || !inMsg.source) continue;
+
+      // Ensure it's from the user's wallet
+      if (inMsg.source.address === walletAddress) {
+        // Ensure the value matches exactly
+        if (String(inMsg.value) === String(costNano)) {
+          // Check if this tx is recent (within last 30 minutes)
+          const txTime = tx.utime * 1000;
+          if (Date.now() - txTime < 30 * 60 * 1000) {
+            // Found a matching transaction! Now check if we already claimed it.
+            const existingClaim = await prisma.task.findFirst({
+              where: { taskId: `tx:${tx.hash}` }
+            });
+
+            if (!existingClaim) {
+              foundTxHash = tx.hash;
+              break; // We found an unclaimed transaction
+            }
+          }
+        }
+      }
+    }
+
+    if (!foundTxHash) {
+      return res.json({ ok: false, status: 'pending', error: 'Transaction not found on chain or already claimed' });
+    }
+
+    // 2. Mark as claimed
+    await prisma.task.create({
       data: {
-        coins: user.coins - Number(costCoins || 0) + Number(gainCoins || 0),
-        energy: user.energy + Number(gainEnergy || 0),
-        points: user.points + Number(gainPoints || 0)
+        telegramId: String(telegramId),
+        taskId: `tx:${foundTxHash}`,
+        status: 'completed',
+        completedAt: new Date()
       }
     });
 
-    return res.json({ ok: true, user: updatedUser });
+    // 3. Grant the purchased items!
+    const updatedUser = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: {
+        energy: user.energy + Number(gainEnergy || 0),
+        coins: user.coins + Number(gainCoins || 0)
+      }
+    });
+
+    return res.json({ ok: true, status: 'success', user: updatedUser });
+
   } catch (error) {
-    console.error("Error in /api/shop/buy:", error.message);
-    return res.status(500).json({ ok: false, error: 'Shop purchase failed' });
+    console.error("Error in /api/shop/verify_purchase:", error.message);
+    return res.status(500).json({ ok: false, error: 'Verification failed' });
   }
 });
 

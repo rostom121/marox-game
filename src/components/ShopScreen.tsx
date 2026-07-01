@@ -56,33 +56,42 @@ export default function ShopScreen() {
 
       await tonConnectUI.sendTransaction(transaction)
 
-      setTxMessage('PAYMENT SUCCESSFUL! 💸')
+      setTxMessage('VERIFYING ON BLOCKCHAIN... (Up to 30s) ⏳')
       
-      setTimeout(async () => {
-        let gainEnergy = 0;
-        let gainCoins = 0;
-        if (pkg.type === 'energy') {
-          gainEnergy = pkg.amount;
-        } else {
-          gainCoins = pkg.amount;
-        }
-        
-        // Sync with server
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+      let gainEnergy = 0;
+      let gainCoins = 0;
+      if (pkg.type === 'energy') {
+        gainEnergy = pkg.amount;
+      } else {
+        gainCoins = pkg.amount;
+      }
+      
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+      
+      let verified = false;
+      let attempts = 0;
+      const maxAttempts = 8;
+      
+      while (!verified && attempts < maxAttempts) {
+        attempts++;
         try {
-          const res = await fetch(`${API_URL}/api/shop/buy`, {
+          const res = await fetch(`${API_URL}/api/shop/verify_purchase`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               telegramId: useGameStore.getState().telegramUser?.id,
-              costCoins: 0,
+              walletAddress: wallet.account.address,
+              costNano: amountNano,
               gainEnergy,
               gainCoins
             })
           });
+          
           const data = await res.json();
-          if (data.ok && data.user) {
+          if (data.ok && data.status === 'success' && data.user) {
+            verified = true;
             useGameStore.getState().setServerData(data.user);
+            setTxMessage('PAYMENT SUCCESSFUL! 💸');
             
             // Auto-claim the buy_shop task reward
             try {
@@ -107,13 +116,24 @@ export default function ShopScreen() {
             } catch (err) {
               console.error("Failed to apply buy_shop task reward", err);
             }
+            
+            setTimeout(() => setTxMessage(null), 3000);
+            break;
           }
-        } catch (e) {
-          console.error("Shop purchase sync failed", e);
+        } catch (err) {
+          console.error("Verification poll failed", err);
         }
-
-        setTxMessage(null)
-      }, 1500)
+        
+        if (!verified && attempts < maxAttempts) {
+          // Wait 5 seconds before next poll
+          await new Promise(r => setTimeout(r, 5000));
+        }
+      }
+      
+      if (!verified) {
+        setTxMessage('TIMEOUT. IF PAID, WILL BE CREDITED SOON.');
+        setTimeout(() => setTxMessage(null), 5000);
+      }
 
     } catch (e) {
       console.error(e)
