@@ -88,8 +88,10 @@ export const gameConfig: GameConfig = {
     { id: 'join_channel', title: 'Join MAROX Channel', emoji: '📢', points: 500, coins: 1000, energy: 200, link: 'https://t.me/MAROXCOIN', verifyDelayMs: 3000 },
     { id: 'follow_x', title: 'Follow MAROX on X', emoji: '🐦', points: 500, coins: 1000, energy: 200, link: 'https://x.com/MAROXcoin', verifyDelayMs: 3000 },
     { id: 'join_community', title: 'Join MAROX Community', emoji: '👥', points: 500, coins: 1000, energy: 200, link: 'https://t.me/MAROXCOMMUNITY', verifyDelayMs: 3000 },
-    { id: 'retweet_x', title: 'Like and retweet post on X', emoji: '🔄', points: 500, coins: 1000, energy: 200, link: 'https://x.com/i/status/2060489756056633616', verifyDelayMs: 3000 },
+    { id: 'retweet_x', title: 'Like and retweet post on X', emoji: '🔄', points: 500, coins: 0, energy: 500, link: 'https://x.com/i/status/2071362095900147979', verifyDelayMs: 3000 },
+    { id: 'react_telegram', title: 'React on Telegram Post', emoji: '💬', points: 500, coins: 0, energy: 500, link: 'https://t.me/MAROXCOIN', verifyDelayMs: 3000 },
     { id: 'follow_facebook', title: 'Follow MAROX on Facebook', emoji: '📘', points: 500, coins: 1000, energy: 200, link: 'https://www.facebook.com/share/1EyEtHkXLr/', verifyDelayMs: 3000 },
+    { id: 'buy_shop', title: 'Buy from the game shop', emoji: '🛒', points: 5000, coins: 20000, energy: 2000, link: '#', verifyDelayMs: 0 },
     { id: 'connect_wallet', title: 'Connect Wallet', emoji: '👛', points: 500, coins: 1000, energy: 200, link: '#', verifyDelayMs: 1000 },
   ],
 };

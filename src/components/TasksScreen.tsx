@@ -39,6 +39,11 @@ export default function TasksScreen() {
   const handleTaskClick = (taskId: string, link: string) => {
     if (taskStates[taskId] !== 'not_started') return;
 
+    if (taskId === 'buy_shop') {
+      useGameStore.getState().setTab('shop');
+      return;
+    }
+
     if (taskId === 'connect_wallet') {
       if (wallet) {
         setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }))
@@ -86,7 +91,8 @@ export default function TasksScreen() {
               telegramId: useGameStore.getState().telegramUser?.id,
               taskId: task.id,
               rewardPoints: task.points,
-              rewardCoins: task.coins
+              rewardCoins: task.coins,
+              rewardEnergy: task.energy || 0
             })
           });
           const data = await res.json();
@@ -149,7 +155,8 @@ export default function TasksScreen() {
             telegramId: useGameStore.getState().telegramUser?.id,
             taskId: task.id,
             rewardPoints: task.points,
-            rewardCoins: task.coins
+            rewardCoins: task.coins,
+            rewardEnergy: task.energy || 0
           })
         }).then(r => r.json()).then(data => {
           if (data.ok && data.user) {

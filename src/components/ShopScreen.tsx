@@ -83,6 +83,30 @@ export default function ShopScreen() {
           const data = await res.json();
           if (data.ok && data.user) {
             useGameStore.getState().setServerData(data.user);
+            
+            // Auto-claim the buy_shop task reward
+            try {
+              const buyTaskRes = await fetch(`${API_URL}/api/tasks/complete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  telegramId: useGameStore.getState().telegramUser?.id,
+                  taskId: 'buy_shop',
+                  rewardPoints: 5000,
+                  rewardCoins: 20000,
+                  rewardEnergy: 2000
+                })
+              });
+              const buyData = await buyTaskRes.json();
+              if (buyData.ok && buyData.user) {
+                useGameStore.getState().setServerData(buyData.user);
+                if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
+                  window.Telegram.WebApp.HapticFeedback.notificationOccurred('success')
+                }
+              }
+            } catch (err) {
+              console.error("Failed to apply buy_shop task reward", err);
+            }
           }
         } catch (e) {
           console.error("Shop purchase sync failed", e);

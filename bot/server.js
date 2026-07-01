@@ -237,7 +237,15 @@ app.get('/api/user', async (req, res) => {
       }
     }
 
-    const completedTasks = user.tasks ? user.tasks.map(t => t.taskId) : [];
+    const completedTasks = user.tasks ? user.tasks.filter(t => {
+      if (['retweet_x', 'react_telegram', 'buy_shop'].includes(t.taskId)) {
+        if (!t.completedAt) return false;
+        const diffHours = (new Date().getTime() - new Date(t.completedAt).getTime()) / (1000 * 60 * 60);
+        return diffHours < 24; // If < 24h, stays in completed. If >= 24h, drops out to be repeatable.
+      }
+      return true;
+    }).map(t => t.taskId) : [];
+    
     const payloadUser = { ...user, completedTasks };
 
     return res.json({ ok: true, user: payloadUser, isNew });
@@ -424,18 +432,30 @@ app.get('/api/verify', async (req, res) => {
 // SECURE TASK COMPLETION
 app.post('/api/tasks/complete', async (req, res) => {
   try {
-    const { telegramId, taskId, rewardPoints, rewardCoins } = req.body;
+    const { telegramId, taskId, rewardPoints, rewardCoins, rewardEnergy } = req.body;
     if (!telegramId || !taskId) return res.status(400).json({ ok: false, error: 'Missing params' });
 
     const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) }, include: { tasks: true } });
     if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
 
-    const alreadyCompleted = user.tasks.some(t => t.taskId === taskId);
-    if (alreadyCompleted) return res.status(400).json({ ok: false, error: 'Task already completed' });
-
-    await prisma.task.create({
-      data: { telegramId: String(telegramId), taskId: taskId, status: 'completed', completedAt: new Date() }
-    });
+    const existingTask = user.tasks.find(t => t.taskId === taskId);
+    if (existingTask) {
+      if (['retweet_x', 'react_telegram', 'buy_shop'].includes(taskId)) {
+        const diffHours = (new Date().getTime() - new Date(existingTask.completedAt).getTime()) / (1000 * 60 * 60);
+        if (diffHours < 24) return res.status(400).json({ ok: false, error: 'Wait 24 hours to repeat this task' });
+        
+        await prisma.task.update({
+          where: { id: existingTask.id },
+          data: { completedAt: new Date() }
+        });
+      } else {
+        return res.status(400).json({ ok: false, error: 'Task already completed' });
+      }
+    } else {
+      await prisma.task.create({
+        data: { telegramId: String(telegramId), taskId: taskId, status: 'completed', completedAt: new Date() }
+      });
+    }
 
     const isBanned = await checkAntiCheat(telegramId, Number(rewardPoints || 0));
     if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
@@ -444,7 +464,8 @@ app.post('/api/tasks/complete', async (req, res) => {
       where: { telegramId: String(telegramId) },
       data: {
         points: user.points + Number(rewardPoints || 0),
-        coins: user.coins + Number(rewardCoins || 0)
+        coins: user.coins + Number(rewardCoins || 0),
+        energy: user.energy + Number(rewardEnergy || 0)
       }
     });
 
