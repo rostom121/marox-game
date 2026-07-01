@@ -427,15 +427,30 @@ export default function SlotScreen() {
             { emoji: '👥', label: t('slot_refs'), action: () => setTab('friends') },
             { emoji: '⭐', label: t('slot_feats'), action: () => showModal('achievements') },
           ].map((btn) => (
-            <button key={btn.label} className="slot-sidebar-btn" onClick={btn.action}>
+            <button 
+              key={btn.label} 
+              className="slot-sidebar-btn" 
+              onClick={btn.action}
+              style={btn.label === t('slot_feats') ? { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', padding: '5px' } : {}}
+            >
               {btn.badge && <span className="slot-sidebar-badge" />}
-              <span className="slot-sidebar-emoji" style={btn.label === t('slot_feats') ? { transform: 'translateY(4px)' } : {}}>{btn.emoji}</span>
-              <span className="slot-sidebar-label">{btn.label}</span>
-              {btn.label === t('slot_feats') && (
-                <span style={{ fontSize: '9px', color: '#ff3333', marginTop: '4px', fontFamily: 'monospace', fontWeight: 'bold', textShadow: '0 0 5px rgba(255, 51, 51, 0.8)' }}>
-                  {eventTimeLeft}
-                </span>
-              )}
+              <span className="slot-sidebar-emoji" style={btn.label === t('slot_feats') ? { transform: 'translateY(2px)' } : {}}>{btn.emoji}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span className="slot-sidebar-label">{btn.label}</span>
+                {btn.label === t('slot_feats') && (
+                  <span style={{ 
+                    fontSize: '11px', 
+                    color: '#ff0000', 
+                    fontWeight: '900', 
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.5px',
+                    textShadow: '0 0 8px #ff0000, 0 0 16px #ff0000, 0 0 24px #ff0000',
+                    marginTop: '2px'
+                  }}>
+                    {eventTimeLeft}
+                  </span>
+                )}
+              </div>
             </button>
           ))}
         </aside>
