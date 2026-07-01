@@ -109,6 +109,7 @@ export default function ShopScreen() {
               const buyData = await buyTaskRes.json();
               if (buyData.ok && buyData.user) {
                 useGameStore.getState().setServerData(buyData.user);
+                useGameStore.getState().completeTask('buy_shop');
                 if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
                   window.Telegram.WebApp.HapticFeedback.notificationOccurred('success')
                 }
