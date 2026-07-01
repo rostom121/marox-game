@@ -57,6 +57,7 @@ export default function SlotScreen() {
   const particleCanvasRef = useRef<HTMLCanvasElement>(null)
   const particlesRef = useRef<Particle[]>([])
   const particleRafRef = useRef<number>(0)
+  const pendingServerDataRef = useRef<any>(null)
 
   const latestRef = useRef({ spinning, energy: data.energy, bet, autoSpin })
   latestRef.current = { spinning, energy: data.energy, bet, autoSpin }
@@ -266,6 +267,10 @@ export default function SlotScreen() {
     setLastWin(null)
     
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+    
+    // Deduct bet locally immediately for snappy UI
+    useGameStore.getState().updateStats(0, 0, -latestRef.current.bet);
+    
     try {
       const res = await fetch(`${API_URL}/api/spin`, {
         method: 'POST',
@@ -274,9 +279,11 @@ export default function SlotScreen() {
       });
       const resData = await res.json();
       if (resData.ok && resData.spin) {
-        useGameStore.getState().setServerData(resData.user);
+        pendingServerDataRef.current = resData.user;
         setSpinData(resData.spin);
       } else {
+        // Revert bet if API fails
+        useGameStore.getState().updateStats(0, 0, latestRef.current.bet);
         setSpinning(false);
         latestRef.current.spinning = false;
         setAutoSpin(false);
@@ -291,6 +298,11 @@ export default function SlotScreen() {
   const handleSpinResult = useCallback((payout: { points: number; coins: number; energyWin: number }) => {
     setSpinning(false)
     latestRef.current.spinning = false
+
+    if (pendingServerDataRef.current) {
+      useGameStore.getState().setServerData(pendingServerDataRef.current);
+      pendingServerDataRef.current = null;
+    }
 
     const currentBet = latestRef.current.bet
     const scaledCoins = payout.coins
