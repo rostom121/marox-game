@@ -10,6 +10,7 @@ const token = process.env.BOT_TOKEN;
 const port = process.env.PORT || 5000;
 const channelUsername = process.env.CHANNEL_USERNAME || '@marox_channel';
 const miniAppUrl = process.env.MINI_APP_URL || 'https://marox-game.vercel.app';
+const EVENT_END_TIME = new Date("2026-07-03T21:00:00Z").getTime();
 
 if (!token) {
   console.error("Warning: BOT_TOKEN is not set in environment variables!");
@@ -356,13 +357,20 @@ app.post('/api/spin', async (req, res) => {
     const isBanned = await checkAntiCheat(telegramId, scaledPoints);
     if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
 
+    const isEventActive = Date.now() < EVENT_END_TIME;
+
+    const dataUpdate = {
+      energy: user.energy - bet + scaledEnergyWin,
+      points: user.points + scaledPoints,
+      coins: user.coins + scaledCoins,
+    };
+    if (isEventActive && scaledPoints > 0) {
+      dataUpdate.eventPoints = user.eventPoints + scaledPoints;
+    }
+
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
-      data: {
-        energy: user.energy - bet + scaledEnergyWin,
-        points: user.points + scaledPoints,
-        coins: user.coins + scaledCoins,
-      }
+      data: dataUpdate
     });
 
     return res.json({
@@ -398,6 +406,28 @@ app.get('/api/leaderboard', async (req, res) => {
   } catch (error) {
     console.error("Database error in GET /api/leaderboard:", error.message);
     return res.status(500).json({ ok: false, error: 'Failed to fetch leaderboard' });
+  }
+});
+
+// Event Leaderboard
+app.get('/api/event/leaderboard', async (req, res) => {
+  try {
+    const topUsers = await prisma.user.findMany({
+      where: { eventPoints: { gt: 0 } },
+      orderBy: { eventPoints: 'desc' },
+      take: 100,
+      select: {
+        telegramId: true,
+        firstName: true,
+        username: true,
+        eventPoints: true,
+        premium: true
+      }
+    });
+    return res.json({ ok: true, leaderboard: topUsers, endTime: EVENT_END_TIME });
+  } catch (error) {
+    console.error("Database error in GET /api/event/leaderboard:", error.message);
+    return res.status(500).json({ ok: false, error: 'Failed to fetch event leaderboard' });
   }
 });
 
@@ -460,13 +490,19 @@ app.post('/api/tasks/complete', async (req, res) => {
     const isBanned = await checkAntiCheat(telegramId, Number(rewardPoints || 0));
     if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
 
+    const isEventActive = Date.now() < EVENT_END_TIME;
+    const dataUpdate = {
+      points: { increment: Number(rewardPoints || 0) },
+      coins: { increment: Number(rewardCoins || 0) },
+      energy: { increment: Number(rewardEnergy || 0) }
+    };
+    if (isEventActive && Number(rewardPoints) > 0) {
+      dataUpdate.eventPoints = { increment: Number(rewardPoints) };
+    }
+
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
-      data: {
-        points: user.points + Number(rewardPoints || 0),
-        coins: user.coins + Number(rewardCoins || 0),
-        energy: user.energy + Number(rewardEnergy || 0)
-      }
+      data: dataUpdate
     });
 
     return res.json({ ok: true, user: updatedUser });
@@ -508,13 +544,19 @@ app.post('/api/daily/claim', async (req, res) => {
     const isBanned = await checkAntiCheat(telegramId, Number(points || 0));
     if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
 
+    const isEventActive = Date.now() < EVENT_END_TIME;
+    const dataUpdate = {
+      points: { increment: Number(points || 0) },
+      coins: { increment: Number(coins || 0) },
+      energy: { increment: Number(energy || 0) }
+    };
+    if (isEventActive && Number(points) > 0) {
+      dataUpdate.eventPoints = { increment: Number(points) };
+    }
+
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
-      data: {
-        points: { increment: Number(points || 0) },
-        coins: { increment: Number(coins || 0) },
-        energy: { increment: Number(energy || 0) }
-      }
+      data: dataUpdate
     });
 
     return res.json({ ok: true, user: updatedUser });

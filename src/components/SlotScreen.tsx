@@ -7,6 +7,9 @@ import { gameConfig } from '../config/gameConfig'
 import { PixiSlotMachine } from './PixiSlotMachine'
 import PlayerInfoModal from './PlayerInfoModal'
 import DailyRewardModal from './DailyRewardModal'
+import EventModal from './EventModal'
+
+const EVENT_END_TIME = new Date("2026-07-03T21:00:00Z").getTime();
 
 interface Particle {
   id: number
@@ -58,6 +61,26 @@ export default function SlotScreen() {
   const particlesRef = useRef<Particle[]>([])
   const particleRafRef = useRef<number>(0)
   const pendingServerDataRef = useRef<any>(null)
+
+  const [eventTimeLeft, setEventTimeLeft] = useState<string>('')
+
+  useEffect(() => {
+    const updateEventTimer = () => {
+      const now = Date.now()
+      const diff = EVENT_END_TIME - now
+      if (diff <= 0) {
+        setEventTimeLeft('ENDED')
+        return
+      }
+      const h = Math.floor(diff / (1000 * 60 * 60))
+      const m = Math.floor((diff / (1000 * 60)) % 60)
+      const s = Math.floor((diff / 1000) % 60)
+      setEventTimeLeft(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`)
+    }
+    updateEventTimer()
+    const timer = setInterval(updateEventTimer, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   const latestRef = useRef({ spinning, energy: data.energy, bet, autoSpin })
   latestRef.current = { spinning, energy: data.energy, bet, autoSpin }
@@ -408,6 +431,11 @@ export default function SlotScreen() {
               {btn.badge && <span className="slot-sidebar-badge" />}
               <span className="slot-sidebar-emoji">{btn.emoji}</span>
               <span className="slot-sidebar-label">{btn.label}</span>
+              {btn.label === t('slot_feats') && (
+                <span style={{ fontSize: '8px', color: '#00ff88', marginTop: '2px', fontFamily: 'monospace' }}>
+                  {eventTimeLeft}
+                </span>
+              )}
             </button>
           ))}
         </aside>
@@ -574,6 +602,9 @@ export default function SlotScreen() {
 
       {modalType === 'avatar' && (
         <PlayerInfoModal onClose={() => setModalType(null)} />
+      )}
+      {modalType === 'achievements' && (
+        <EventModal onClose={() => setModalType(null)} />
       )}
       {/* ── SETTINGS MODAL ── */}
       {showSettings && (

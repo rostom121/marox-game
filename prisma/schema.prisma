@@ -12,6 +12,7 @@ model User {
   username       String?
   firstName      String?
   points         Int      @default(100)
+  eventPoints    Int      @default(0)
   coins          Int      @default(5000)
   energy         Int      @default(500)
   level          Int      @default(1)

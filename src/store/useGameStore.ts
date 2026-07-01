@@ -36,6 +36,7 @@ export const getUpgradeClicksRequired = (level: number): number => {
 export interface UserData {
   points: number;
   coins: number;
+  eventPoints: number;
   energy: number;
   level: number;
   xp: number;
@@ -97,6 +98,7 @@ interface GameStore {
 export const useGameStore = create<GameStore>((set, get) => ({
   data: {
     points: 100,
+    eventPoints: 0,
     coins: 5000,
     energy: 500,
     level: 1,
@@ -178,6 +180,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const initialData = localData || {
       points: 100,
+      eventPoints: 0,
       coins: 5000,
       energy: 500,
       level: 1,
