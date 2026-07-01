@@ -54,13 +54,13 @@ export interface SettingsData {
 }
 
 export const DAILY_REWARDS = [
-  { day: 1, energy: 20, coins: 0, points: 0 },
-  { day: 2, energy: 30, coins: 0, points: 0 },
-  { day: 3, energy: 40, coins: 50, points: 0 },
-  { day: 4, energy: 50, coins: 0, points: 0 },
-  { day: 5, energy: 60, coins: 0, points: 0 },
-  { day: 6, energy: 80, coins: 0, points: 0 },
-  { day: 7, energy: 150, coins: 200, points: 100 },
+  { day: 1, energy: 40, coins: 0, points: 0 },
+  { day: 2, energy: 60, coins: 0, points: 0 },
+  { day: 3, energy: 80, coins: 100, points: 0 },
+  { day: 4, energy: 100, coins: 0, points: 0 },
+  { day: 5, energy: 120, coins: 0, points: 0 },
+  { day: 6, energy: 160, coins: 0, points: 0 },
+  { day: 7, energy: 300, coins: 400, points: 200 },
 ];
 
 interface GameStore {

@@ -29,6 +29,7 @@ export default function DailyRewardModal({ onClose }: DailyRewardModalProps) {
             body: JSON.stringify({
               telegramId: useGameStore.getState().telegramUser?.id,
               points: reward.points,
+              coins: reward.coins,
               energy: reward.energy
             })
           });

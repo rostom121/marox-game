@@ -502,7 +502,7 @@ app.post('/api/ads/reward', async (req, res) => {
 // SECURE DAILY REWARD
 app.post('/api/daily/claim', async (req, res) => {
   try {
-    const { telegramId, points, energy } = req.body;
+    const { telegramId, points, coins, energy } = req.body;
     if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing params' });
 
     const isBanned = await checkAntiCheat(telegramId, Number(points || 0));
@@ -512,6 +512,7 @@ app.post('/api/daily/claim', async (req, res) => {
       where: { telegramId: String(telegramId) },
       data: {
         points: { increment: Number(points || 0) },
+        coins: { increment: Number(coins || 0) },
         energy: { increment: Number(energy || 0) }
       }
     });
