@@ -429,10 +429,10 @@ export default function SlotScreen() {
           ].map((btn) => (
             <button key={btn.label} className="slot-sidebar-btn" onClick={btn.action}>
               {btn.badge && <span className="slot-sidebar-badge" />}
-              <span className="slot-sidebar-emoji">{btn.emoji}</span>
+              <span className="slot-sidebar-emoji" style={btn.label === t('slot_feats') ? { transform: 'translateY(4px)' } : {}}>{btn.emoji}</span>
               <span className="slot-sidebar-label">{btn.label}</span>
               {btn.label === t('slot_feats') && (
-                <span style={{ fontSize: '8px', color: '#00ff88', marginTop: '2px', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '9px', color: '#ff3333', marginTop: '4px', fontFamily: 'monospace', fontWeight: 'bold', textShadow: '0 0 5px rgba(255, 51, 51, 0.8)' }}>
                   {eventTimeLeft}
                 </span>
               )}

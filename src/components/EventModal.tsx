@@ -63,36 +63,37 @@ export default function EventModal({ onClose }: EventModalProps) {
         onClick={(e) => e.stopPropagation()} 
         style={{ 
           width: '95%', 
-          maxWidth: '400px', 
-          maxHeight: '85vh',
+          maxWidth: '480px', 
+          maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
           background: 'linear-gradient(180deg, #1f0b3b 0%, #0d061c 100%)', 
           border: '2px solid var(--gold)', 
           borderRadius: '20px', 
           boxShadow: '0 0 40px rgba(255, 183, 0, 0.4)',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          position: 'relative'
         }}
       >
+        <button className="red-glow-close-btn" onClick={onClose} style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>✕</button>
         
         {/* Header Section */}
-        <div style={{ padding: '20px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', position: 'relative', flexShrink: 0 }}>
-          <button className="red-glow-close-btn" onClick={onClose} style={{ top: '15px', right: '15px' }}>✕</button>
+        <div style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', position: 'relative', flexShrink: 0 }}>
           
-          <div style={{ fontSize: '40px', marginBottom: '10px' }}>🏆</div>
-          <h2 className="pixel-text gold-text" style={{ fontSize: '20px', marginBottom: '10px', textShadow: '0 0 15px var(--gold)' }}>
+          <div style={{ fontSize: '28px', marginBottom: '4px' }}>🏆</div>
+          <h2 className="pixel-text gold-text" style={{ fontSize: '16px', marginBottom: '8px', textShadow: '0 0 15px var(--gold)' }}>
             48H MAROX EVENT
           </h2>
           
           <div style={{ 
             background: 'rgba(0,0,0,0.5)', 
-            padding: '10px', 
+            padding: '6px 16px', 
             borderRadius: '12px', 
             border: '1px solid rgba(255,255,255,0.1)',
             display: 'inline-block'
           }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginBottom: '5px', textTransform: 'uppercase' }}>Time Remaining</div>
-            <div style={{ fontSize: '24px', color: '#00ff88', fontFamily: 'monospace', fontWeight: 'bold', textShadow: '0 0 10px #00ff88' }}>
+            <div style={{ fontSize: '8px', color: 'var(--text-dim)', marginBottom: '2px', textTransform: 'uppercase' }}>Time Remaining</div>
+            <div style={{ fontSize: '18px', color: '#00ff88', fontFamily: 'monospace', fontWeight: 'bold', textShadow: '0 0 10px #00ff88' }}>
               {eventTimeLeft}
             </div>
           </div>
