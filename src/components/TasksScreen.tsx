@@ -6,6 +6,10 @@ import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../store/useGameStore'
 import { gameConfig } from '../config/gameConfig'
 
+const formatK = (num: number) => {
+  return num >= 1000 ? (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k' : num.toString();
+};
+
 interface VerificationState {
   [key: string]: 'not_started' | 'verifying' | 'completed';
 }
@@ -259,9 +263,9 @@ export default function TasksScreen() {
                       <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
                       <div style={{ fontSize: '11px', color: 'var(--gold)', marginTop: '6px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <span style={{color: 'var(--text-dim)'}}>{t('reward')}:</span>
-                        {task.points > 0 && <span>{task.points} $MAROX</span>}
-                        {task.energy && task.energy > 0 && <span>{task.energy} ⚡</span>}
-                        {task.coins && task.coins > 0 && <span>{task.coins} 🪙</span>}
+                        {task.points > 0 && <span>{formatK(task.points)} $MAROX</span>}
+                        {task.energy && task.energy > 0 && <span>{formatK(task.energy)} ⚡</span>}
+                        {task.coins && task.coins > 0 && <span>{formatK(task.coins)} 🪙</span>}
                       </div>
                     </div>
                   </div>
