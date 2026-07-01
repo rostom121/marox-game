@@ -439,7 +439,7 @@ export default function SlotScreen() {
               {btn.label === t('slot_feats') && (
                 <span style={{ 
                   position: 'absolute',
-                  top: '-14px',
+                  bottom: '-18px',
                   left: '50%',
                   transform: 'translateX(-50%)',
                   fontSize: '9.5px', 
@@ -447,7 +447,7 @@ export default function SlotScreen() {
                   fontWeight: '900', 
                   fontFamily: 'monospace',
                   letterSpacing: '0px',
-                  textShadow: '0 0 5px #FFD700, 0 0 10px #FFA500, 0 0 15px #FF8C00',
+                  textShadow: '0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 20px #FFA500, 0 0 30px #FF8C00, 0 0 40px #FF0000',
                   whiteSpace: 'nowrap'
                 }}>
                   {eventTimeLeft}
