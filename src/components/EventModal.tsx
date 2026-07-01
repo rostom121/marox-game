@@ -63,8 +63,8 @@ export default function EventModal({ onClose }: EventModalProps) {
         onClick={(e) => e.stopPropagation()} 
         style={{ 
           width: '95%', 
-          maxWidth: '480px', 
-          maxHeight: '90vh',
+          maxWidth: '600px', 
+          maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
           background: 'linear-gradient(180deg, #1f0b3b 0%, #0d061c 100%)', 
@@ -78,22 +78,22 @@ export default function EventModal({ onClose }: EventModalProps) {
         <button className="red-glow-close-btn" onClick={onClose} style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>✕</button>
         
         {/* Header Section */}
-        <div style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', position: 'relative', flexShrink: 0 }}>
+        <div style={{ padding: '8px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', position: 'relative', flexShrink: 0 }}>
           
-          <div style={{ fontSize: '28px', marginBottom: '4px' }}>🏆</div>
-          <h2 className="pixel-text gold-text" style={{ fontSize: '16px', marginBottom: '8px', textShadow: '0 0 15px var(--gold)' }}>
+          <div style={{ fontSize: '20px', marginBottom: '2px' }}>🏆</div>
+          <h2 className="pixel-text gold-text" style={{ fontSize: '14px', marginBottom: '4px', textShadow: '0 0 15px var(--gold)' }}>
             48H MAROX EVENT
           </h2>
           
           <div style={{ 
             background: 'rgba(0,0,0,0.5)', 
-            padding: '6px 16px', 
+            padding: '4px 10px', 
             borderRadius: '12px', 
             border: '1px solid rgba(255,255,255,0.1)',
             display: 'inline-block'
           }}>
-            <div style={{ fontSize: '8px', color: 'var(--text-dim)', marginBottom: '2px', textTransform: 'uppercase' }}>Time Remaining</div>
-            <div style={{ fontSize: '18px', color: '#00ff88', fontFamily: 'monospace', fontWeight: 'bold', textShadow: '0 0 10px #00ff88' }}>
+            <div style={{ fontSize: '7px', color: 'var(--text-dim)', marginBottom: '2px', textTransform: 'uppercase' }}>Time Remaining</div>
+            <div style={{ fontSize: '14px', color: '#00ff88', fontFamily: 'monospace', fontWeight: 'bold', textShadow: '0 0 10px #00ff88' }}>
               {eventTimeLeft}
             </div>
           </div>
@@ -149,9 +149,9 @@ export default function EventModal({ onClose }: EventModalProps) {
                     </div>
 
                     {/* User Info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: 1, minWidth: 0, paddingRight: '10px' }}>
                       <div style={{ 
-                        fontSize: '14px', 
+                        fontSize: '16px', 
                         color: isMe ? 'var(--blue)' : '#fff', 
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap',
@@ -161,18 +161,18 @@ export default function EventModal({ onClose }: EventModalProps) {
                       }}>
                         {user.firstName || user.username || 'Anonymous'} {user.premium && '⭐'} {isMe && '(You)'}
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--gold)', fontWeight: 'bold' }}>
+                      <div style={{ fontSize: '14px', color: 'var(--gold)', fontWeight: 'bold' }}>
                         {user.eventPoints.toLocaleString()} MRX$
                       </div>
                     </div>
 
                     {/* Rewards (Only for Top 3) */}
                     {reward && (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '8px', fontSize: '10px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '6px 10px', borderRadius: '8px', fontSize: '12px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
                           ⚡ <span style={{ color: '#ff3333', fontWeight: 'bold' }}>{reward.energy.toLocaleString()}</span>
                         </div>
-                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '8px', fontSize: '10px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '6px 10px', borderRadius: '8px', fontSize: '12px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
                           💎 <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>{reward.marox.toLocaleString()}</span>
                         </div>
                       </div>

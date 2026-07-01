@@ -431,26 +431,27 @@ export default function SlotScreen() {
               key={btn.label} 
               className="slot-sidebar-btn" 
               onClick={btn.action}
-              style={btn.label === t('slot_feats') ? { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', padding: '5px' } : {}}
+              style={{ position: 'relative' }}
             >
               {btn.badge && <span className="slot-sidebar-badge" />}
-              <span className="slot-sidebar-emoji" style={btn.label === t('slot_feats') ? { transform: 'translateY(2px)' } : {}}>{btn.emoji}</span>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span className="slot-sidebar-label">{btn.label}</span>
-                {btn.label === t('slot_feats') && (
-                  <span style={{ 
-                    fontSize: '11px', 
-                    color: '#ff0000', 
-                    fontWeight: '900', 
-                    fontFamily: 'monospace',
-                    letterSpacing: '0.5px',
-                    textShadow: '0 0 8px #ff0000, 0 0 16px #ff0000, 0 0 24px #ff0000',
-                    marginTop: '2px'
-                  }}>
-                    {eventTimeLeft}
-                  </span>
-                )}
-              </div>
+              <span className="slot-sidebar-emoji" style={btn.label === t('slot_feats') ? { transform: 'translateY(-6px)' } : {}}>{btn.emoji}</span>
+              <span className="slot-sidebar-label" style={btn.label === t('slot_feats') ? { transform: 'translateY(-6px)' } : {}}>{btn.label}</span>
+              {btn.label === t('slot_feats') && (
+                <span style={{ 
+                  position: 'absolute',
+                  bottom: '4px',
+                  left: '0',
+                  right: '0',
+                  fontSize: '9.5px', 
+                  color: '#FFD700', 
+                  fontWeight: '900', 
+                  fontFamily: 'monospace',
+                  letterSpacing: '0px',
+                  textShadow: '0 0 5px #FFD700, 0 0 10px #FFA500, 0 0 15px #FF8C00'
+                }}>
+                  {eventTimeLeft}
+                </span>
+              )}
             </button>
           ))}
         </aside>
