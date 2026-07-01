@@ -257,7 +257,12 @@ export default function TasksScreen() {
                     <span style={{ fontSize: '24px' }}>{task.emoji}</span>
                     <div>
                       <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
-                      <div style={{ fontSize: '12px', color: 'var(--gold)', marginTop: '5px' }}>{t('reward')}: {task.points} pts</div>
+                      <div style={{ fontSize: '11px', color: 'var(--gold)', marginTop: '6px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{color: 'var(--text-dim)'}}>{t('reward')}:</span>
+                        {task.points > 0 && <span>{task.points} $MAROX</span>}
+                        {task.energy && task.energy > 0 && <span>{task.energy} ⚡</span>}
+                        {task.coins && task.coins > 0 && <span>{task.coins} 🪙</span>}
+                      </div>
                     </div>
                   </div>
 
