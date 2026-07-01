@@ -22,14 +22,10 @@ export default function TasksScreen() {
   const [activeTab, setActiveTab] = useState<'new' | 'completed'>('new')
 
   const getInitialTaskStates = (): VerificationState => {
-    const states: VerificationState = {
-      join_channel: 'not_started',
-      follow_x: 'not_started',
-      join_community: 'not_started',
-      retweet_x: 'not_started',
-      follow_facebook: 'not_started',
-      connect_wallet: 'not_started',
-    };
+    const states: VerificationState = {};
+    gameConfig.tasks.forEach(task => {
+      states[task.id] = 'not_started';
+    });
     if (data.completedTasks) {
       data.completedTasks.forEach(taskId => {
         states[taskId] = 'completed';
