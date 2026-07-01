@@ -35,6 +35,7 @@ export default function TasksScreen() {
   };
 
   const [taskStates, setTaskStates] = useState<VerificationState>(getInitialTaskStates())
+  const [showAdSuccess, setShowAdSuccess] = useState(false)
 
   const handleTaskClick = (taskId: string, link: string) => {
     if (taskStates[taskId] !== 'not_started') return;
@@ -126,6 +127,7 @@ export default function TasksScreen() {
           const resData = await res.json();
           if (resData.ok && resData.user) {
             useGameStore.getState().setServerData(resData.user);
+            setShowAdSuccess(true);
             if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
               window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
@@ -317,6 +319,57 @@ export default function TasksScreen() {
           </div>
         )}
       </div>
+
+      {showAdSuccess && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #160f29 0%, #241744 100%)',
+            border: '2px solid var(--gold)',
+            borderRadius: '20px',
+            padding: '30px 20px',
+            width: '100%',
+            maxWidth: '350px',
+            textAlign: 'center',
+            boxShadow: '0 0 30px rgba(255, 183, 0, 0.3)'
+          }}>
+            <div style={{ fontSize: '50px', marginBottom: '15px' }}>🎉</div>
+            <h2 style={{ fontSize: '22px', color: '#fff', marginBottom: '10px', textTransform: 'uppercase', fontWeight: '900' }}>
+              Congratulations!
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', marginBottom: '25px', lineHeight: '1.5' }}>
+              You successfully watched the ad and earned <br />
+              <strong style={{ color: 'var(--gold)', fontSize: '18px' }}>+600 Energy ⚡</strong>
+            </p>
+            <button
+              onClick={() => setShowAdSuccess(false)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                background: 'var(--gold)',
+                color: '#000',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                textTransform: 'uppercase',
+                boxShadow: '0 4px 15px rgba(255, 183, 0, 0.4)'
+              }}
+            >
+              Awesome!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
