@@ -99,7 +99,7 @@ export default function EventModal({ onClose }: EventModalProps) {
         </div>
 
         {/* Scrollable Leaderboard List */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '15px 8px' }}>
           {loading ? (
             <div style={{ textAlign: 'center', color: 'var(--blue)', padding: '40px 0' }}>Loading event data...</div>
           ) : leaderboard.length === 0 ? (
