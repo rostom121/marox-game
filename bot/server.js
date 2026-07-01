@@ -488,7 +488,7 @@ app.post('/api/ads/reward', async (req, res) => {
     const updatedUser = await prisma.user.update({
       where: { telegramId: String(telegramId) },
       data: {
-        energy: { increment: 200 }
+        energy: { increment: 600 }
       }
     });
 

@@ -216,7 +216,7 @@ export default function TasksScreen() {
                 <span style={{ fontSize: '24px' }}>📺</span>
                 <div>
                   <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>Watch Video Ad</h3>
-                  <div style={{ fontSize: '12px', color: 'var(--blue)', marginTop: '5px' }}>Reward: 200 Energy ⚡</div>
+                  <div style={{ fontSize: '12px', color: 'var(--blue)', marginTop: '5px' }}>Reward: 600 Energy ⚡</div>
                 </div>
               </div>
               <button
