@@ -523,17 +523,38 @@ export default function SlotScreen() {
       )}
 
       {modalType === 'no_energy' && (
-        <div className="slot-modal-overlay">
-          <div className="slot-modal-card pixel-text" style={{ padding: '24px', textAlign: 'center', width: '300px' }}>
-            <h2 style={{ color: '#ff3333', fontSize: '20px', marginBottom: '10px' }}>{t('out_of_energy')}</h2>
-            <p style={{ color: '#fff', fontSize: '10px', marginBottom: '20px', lineHeight: '1.5' }}>
-              {t('out_of_energy_desc')}
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.85)', zIndex: 10000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }} onClick={() => setModalType(null)}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            background: 'linear-gradient(180deg, #160f29 0%, #0d081a 100%)',
+            border: '2px solid #ff3333', borderRadius: '16px',
+            boxShadow: '0 0 30px rgba(255, 51, 51, 0.4)',
+            padding: '24px', textAlign: 'center', width: '90%', maxWidth: '320px',
+            fontFamily: "'Press Start 2P', monospace"
+          }}>
+            <div style={{ fontSize: '40px', marginBottom: '15px' }}>⚡</div>
+            <h2 style={{ color: '#ff3333', fontSize: '16px', marginBottom: '15px', lineHeight: '1.4' }}>{t('out_of_energy') || 'OUT OF ENERGY!'}</h2>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '10px', marginBottom: '25px', lineHeight: '1.6' }}>
+              {t('out_of_energy_desc') || 'You need more energy to spin. Refill your energy in the shop!'}
             </p>
-            <button className="slot-btn primary pixel-text" style={{ padding: '12px 20px', marginBottom: '12px', width: '100%', fontSize: '12px' }} onClick={() => { setModalType(null); setTab('shop'); }}>
-              {t('buy_energy')}
+            <button style={{
+              background: 'linear-gradient(90deg, #ff8800 0%, #ffaa00 100%)',
+              color: '#000', border: 'none', borderRadius: '8px',
+              padding: '12px 20px', marginBottom: '12px', width: '100%',
+              fontSize: '12px', fontWeight: 'bold', cursor: 'pointer',
+              boxShadow: '0 0 15px rgba(255, 136, 0, 0.5)'
+            }} onClick={() => { setModalType(null); setTab('shop'); }}>
+              🛒 GO TO SHOP
             </button>
-            <button className="slot-btn pixel-text" style={{ padding: '10px 20px', background: 'transparent', border: '2px solid #555', color: '#aaa', width: '100%', fontSize: '10px' }} onClick={() => setModalType(null)}>
-              {t('close')}
+            <button style={{
+              background: 'transparent', border: '2px solid rgba(255,255,255,0.2)',
+              color: 'rgba(255,255,255,0.6)', borderRadius: '8px',
+              padding: '10px 20px', width: '100%', fontSize: '10px', cursor: 'pointer'
+            }} onClick={() => setModalType(null)}>
+              {t('close') || 'CLOSE'}
             </button>
           </div>
         </div>
