@@ -120,7 +120,7 @@ export default function EventModal({ onClose }: EventModalProps) {
                     key={user.telegramId} 
                     style={{
                       display: 'flex',
-                      alignItems: 'center',
+                      alignItems: 'flex-start',
                       background: isMe ? 'linear-gradient(90deg, rgba(0,210,255,0.2) 0%, rgba(0,210,255,0.05) 100%)' : 'rgba(255,255,255,0.05)',
                       border: isMe ? '1px solid var(--blue)' : reward ? '1px solid var(--gold)' : '1px solid rgba(255,255,255,0.05)',
                       borderRadius: '16px',
@@ -132,26 +132,29 @@ export default function EventModal({ onClose }: EventModalProps) {
                   >
                     {/* Rank Badge */}
                     <div style={{ 
-                      width: '35px', 
-                      height: '35px', 
+                      width: '40px', 
+                      height: '40px', 
                       borderRadius: '50%', 
                       background: reward ? 'var(--gold)' : 'rgba(255,255,255,0.1)', 
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center',
-                      fontSize: reward ? '18px' : '14px',
+                      fontSize: reward ? '20px' : '16px',
                       fontWeight: 'bold',
                       color: reward ? '#000' : '#fff',
                       marginRight: '15px',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      marginTop: '2px'
                     }}>
                       {reward ? reward.badge : `#${rank}`}
                     </div>
 
-                    {/* User Info */}
-                    <div style={{ flex: 1, minWidth: 0, paddingRight: '10px' }}>
+                    {/* Content Column */}
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                      
+                      {/* Name & Score */}
                       <div style={{ 
-                        fontSize: '16px', 
+                        fontSize: '15px', 
                         color: isMe ? 'var(--blue)' : '#fff', 
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap',
@@ -161,22 +164,22 @@ export default function EventModal({ onClose }: EventModalProps) {
                       }}>
                         {user.firstName || user.username || 'Anonymous'} {user.premium && '⭐'} {isMe && '(You)'}
                       </div>
-                      <div style={{ fontSize: '14px', color: 'var(--gold)', fontWeight: 'bold' }}>
+                      <div style={{ fontSize: '13px', color: 'var(--gold)', fontWeight: 'bold' }}>
                         {user.eventPoints.toLocaleString()} MRX$
                       </div>
-                    </div>
 
-                    {/* Rewards (Only for Top 3) */}
-                    {reward && (
-                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '6px 10px', borderRadius: '8px', fontSize: '12px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
-                          ⚡ <span style={{ color: '#ff3333', fontWeight: 'bold' }}>{reward.energy.toLocaleString()}</span>
+                      {/* Rewards Row (Only for Top 3) */}
+                      {reward && (
+                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                          <div style={{ background: 'rgba(0,0,0,0.5)', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            ⚡ <span style={{ color: '#ff3333', fontWeight: 'bold' }}>{reward.energy.toLocaleString()}</span>
+                          </div>
+                          <div style={{ background: 'rgba(0,0,0,0.5)', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            💎 <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>{reward.marox.toLocaleString()}</span>
+                          </div>
                         </div>
-                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '6px 10px', borderRadius: '8px', fontSize: '12px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
-                          💎 <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>{reward.marox.toLocaleString()}</span>
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 );
               })}
