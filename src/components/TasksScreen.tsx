@@ -116,7 +116,7 @@ export default function TasksScreen() {
 
   const handleWatchAd = () => {
     if (typeof window !== 'undefined' && window.Adsgram) {
-      const AdController = window.Adsgram.init({ blockId: "36721" });
+      const AdController = window.Adsgram.init({ blockId: "36809" });
       AdController.show().then(async (result) => {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
         try {
