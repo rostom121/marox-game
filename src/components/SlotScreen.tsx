@@ -34,7 +34,7 @@ const AVAILABLE_BETS = [1, 2, 3, 4, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 200
 export default function SlotScreen() {
   const { t } = useTranslation()
   const { data, telegramUser, spinOutcome, setTab, settings, updateSettings } = useGameStore()
-  
+
   const allowedBets = useMemo(() => {
     if (data.energy >= 50000) return AVAILABLE_BETS;
     if (data.energy >= 20000) return AVAILABLE_BETS.slice(0, 13);
@@ -204,7 +204,7 @@ export default function SlotScreen() {
     let nextIndex = currentIndex + diff;
     if (nextIndex < 0) nextIndex = 0;
     if (nextIndex >= AVAILABLE_BETS.length) nextIndex = AVAILABLE_BETS.length - 1;
-    
+
     const nextBet = AVAILABLE_BETS[nextIndex];
 
     // If trying to increase the bet, they can only do so if the next bet is within their allowed bets.
@@ -235,7 +235,7 @@ export default function SlotScreen() {
         osc.stop(time + 0.08);
         time += 0.08;
       }
-    } catch(e) {}
+    } catch (e) { }
   }, [settings.isMuted, settings.volume])
 
   const playRetroWinSound = useCallback(() => {
@@ -245,7 +245,7 @@ export default function SlotScreen() {
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       let time = ctx.currentTime;
-      
+
       const burstOsc = ctx.createOscillator();
       const burstGain = ctx.createGain();
       burstOsc.connect(burstGain);
@@ -272,7 +272,7 @@ export default function SlotScreen() {
         osc.start(time + (i * 0.06));
         osc.stop(time + (i * 0.06) + 0.2);
       }
-    } catch(e) {}
+    } catch (e) { }
   }, [settings.isMuted, settings.volume])
 
   const handleSpinClick = useCallback(async () => {
@@ -288,12 +288,12 @@ export default function SlotScreen() {
     latestRef.current.spinning = true
     setWinMessage(null)
     setLastWin(null)
-    
+
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
-    
+
     // Deduct bet locally immediately for snappy UI
     useGameStore.getState().updateStats(0, 0, -latestRef.current.bet);
-    
+
     try {
       const res = await fetch(`${API_URL}/api/spin`, {
         method: 'POST',
@@ -427,9 +427,9 @@ export default function SlotScreen() {
             { emoji: '👥', label: t('slot_refs'), action: () => setTab('friends') },
             { emoji: '⭐', label: t('slot_feats'), action: () => showModal('achievements') },
           ].map((btn) => (
-            <button 
-              key={btn.label} 
-              className="slot-sidebar-btn" 
+            <button
+              key={btn.label}
+              className="slot-sidebar-btn"
               onClick={btn.action}
               style={{ position: 'relative' }}
             >
@@ -437,14 +437,14 @@ export default function SlotScreen() {
               <span className="slot-sidebar-emoji">{btn.emoji}</span>
               <span className="slot-sidebar-label">{btn.label}</span>
               {btn.label === t('slot_feats') && (
-                <span style={{ 
+                <span style={{
                   position: 'absolute',
                   bottom: '-18px',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  fontSize: '9.5px', 
-                  color: '#FFD700', 
-                  fontWeight: '900', 
+                  fontSize: '9.5px',
+                  color: '#FFD700',
+                  fontWeight: '900',
                   fontFamily: 'monospace',
                   letterSpacing: '0px',
                   textShadow: '0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 20px #FFA500, 0 0 30px #FF8C00, 0 0 40px #FF0000',
@@ -633,7 +633,7 @@ export default function SlotScreen() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div className="card" style={{ padding: '15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}>
                 <h3 style={{ color: '#fff', fontSize: '14px', marginBottom: '15px' }}>{t('audio')}</h3>
-                
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                   <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>{t('sound')}</span>
                   <button onClick={() => updateSettings({ isMuted: !settings.isMuted })} style={{
@@ -656,10 +656,10 @@ export default function SlotScreen() {
                     <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>{t('volume')}</span>
                     <span style={{ color: '#fff', fontSize: '12px', fontFamily: 'monospace' }}>{Math.round(settings.volume * 100)}%</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="0" max="1" step="0.1" 
-                    value={settings.volume} 
+                  <input
+                    type="range"
+                    min="0" max="1" step="0.1"
+                    value={settings.volume}
                     onChange={(e) => updateSettings({ volume: parseFloat(e.target.value) })}
                     style={{ width: '100%', accentColor: 'var(--blue)' }}
                   />
@@ -686,7 +686,7 @@ export default function SlotScreen() {
             padding: '24px',
             position: 'relative'
           }} onClick={e => e.stopPropagation()}>
-            <button 
+            <button
               onClick={() => setShowLangModal(false)}
               style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer' }}
             >
@@ -700,7 +700,7 @@ export default function SlotScreen() {
               <div className="card" style={{ padding: '15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {['English', 'Russian', 'French'].map(lang => (
-                    <button 
+                    <button
                       key={lang}
                       onClick={() => updateSettings({ language: lang })}
                       style={{
