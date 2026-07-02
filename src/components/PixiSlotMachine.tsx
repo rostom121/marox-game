@@ -128,7 +128,7 @@ export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
       // Symbol Image or Emoji
       const shake = isWinner && pulse % 2 === 0 ? 2 : 0
 
-      if (def.imageSrc && imagesRef.current[def.imageSrc]) {
+      if (def.imageSrc && imagesRef.current[def.imageSrc]?.complete) {
         const img = imagesRef.current[def.imageSrc]
         const imgSize = isWinner ? 106 : 96 // Increased size to fit the slot box perfectly, with scaling for winners
         const imgX = x + (w - imgSize) / 2 + shake
