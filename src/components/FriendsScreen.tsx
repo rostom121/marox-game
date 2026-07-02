@@ -60,6 +60,13 @@ export default function FriendsScreen() {
       <div className="card" style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '20px' }}>
         <h3 style={{ fontSize: '12px', color: 'var(--gold)', marginBottom: '12px' }}>🎁 Invite Rewards</h3>
         
+        <div style={{ padding: '10px', background: 'rgba(255,215,0,0.1)', border: '1px dashed rgba(255,215,0,0.5)', borderRadius: '8px', marginBottom: '12px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--gold)', fontWeight: 'bold', marginBottom: '4px' }}>🔥 15% Lifetime Bonus!</div>
+          <div style={{ fontSize: '10px', color: '#fff', lineHeight: '1.4' }}>
+            Earn 15% of all $MAROX points your friends collect from playing!
+          </div>
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '16px' }}>👤</span>

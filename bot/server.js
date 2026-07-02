@@ -283,6 +283,27 @@ app.post('/api/user/sync', async (req, res) => {
   }
 });
 
+async function grantReferralBonus(user, pointsEarned) {
+  if (pointsEarned > 0 && user.referredBy) {
+    const bonus = Math.floor(pointsEarned * 0.15);
+    if (bonus > 0) {
+      try {
+        const isEventActive = Date.now() < EVENT_END_TIME;
+        const dataUpdate = { points: { increment: bonus } };
+        if (isEventActive) {
+          dataUpdate.eventPoints = { increment: bonus };
+        }
+        await prisma.user.update({
+          where: { telegramId: user.referredBy },
+          data: dataUpdate
+        });
+      } catch (err) {
+        console.error("Failed to grant referral bonus:", err.message);
+      }
+    }
+  }
+}
+
 const antiCheatTracker = new Map();
 
 async function checkAntiCheat(telegramId, pointsGained) {
@@ -372,6 +393,9 @@ app.post('/api/spin', async (req, res) => {
       where: { telegramId: String(telegramId) },
       data: dataUpdate
     });
+
+    // Grant 15% referral bonus if applicable
+    await grantReferralBonus(user, scaledPoints);
 
     return res.json({
       ok: true,
@@ -513,6 +537,9 @@ app.post('/api/tasks/complete', async (req, res) => {
       data: dataUpdate
     });
 
+    // Grant 15% referral bonus if applicable
+    await grantReferralBonus(user, Number(rewardPoints || 0));
+
     return res.json({ ok: true, user: updatedUser });
   } catch (error) {
     console.error("Error in /api/tasks/complete:", error.message);
@@ -566,6 +593,10 @@ app.post('/api/daily/claim', async (req, res) => {
       where: { telegramId: String(telegramId) },
       data: dataUpdate
     });
+
+    // Grant 15% referral bonus if applicable
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) }, select: { referredBy: true } });
+    if (user) await grantReferralBonus(user, Number(points || 0));
 
     return res.json({ ok: true, user: updatedUser });
   } catch (error) {
