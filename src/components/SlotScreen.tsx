@@ -11,6 +11,12 @@ import EventModal from './EventModal'
 
 const EVENT_END_TIME = new Date("2026-07-03T21:00:00Z").getTime();
 
+const formatK = (num: number) => {
+  if (num >= 1000000) return (num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k';
+  return num.toString();
+};
+
 interface Particle {
   id: number
   x: number
@@ -407,11 +413,11 @@ export default function SlotScreen() {
         <div className="slot-header-right">
           <div className="slot-stat-chip gold">
             <span>🪙</span>
-            <span>{data.coins.toLocaleString()}</span>
+            <span>{formatK(data.coins)}</span>
           </div>
           <div className="slot-stat-chip purple">
             <span>⭐</span>
-            <span>{data.points.toLocaleString()} MRX$</span>
+            <span>{formatK(data.points)} MRX$</span>
           </div>
         </div>
       </header>
@@ -532,7 +538,7 @@ export default function SlotScreen() {
 
           <div className="slot-spin-group">
             <div className="slot-energy-badge">
-              ⚡ {data.energy}
+              ⚡ {formatK(data.energy)}
             </div>
             <button
               className="slot-spin-btn"

@@ -3,6 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { useGameStore, getUpgradeClicksRequired } from '../store/useGameStore'
 import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react'
 
+const formatK = (num: number) => {
+  if (num >= 1000000) return (num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k';
+  return num.toString();
+};
+
 export default function ProfileScreen() {
   const { t } = useTranslation()
   const { data, telegramUser, walletConnected, setWallet } = useGameStore()
@@ -48,7 +54,7 @@ export default function ProfileScreen() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '5px' }}>
           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(0, 210, 255, 0.2)' }}>
             <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 'bold' }}>$MAROX</div>
-            <div className="pixel-text" style={{ fontSize: '14px', color: 'var(--blue)', marginTop: '6px' }}>💎 {data.points.toLocaleString()}</div>
+            <div className="pixel-text" style={{ fontSize: '14px', color: 'var(--blue)', marginTop: '6px' }}>💎 {formatK(data.points)}</div>
           </div>
           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
             <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{t('wallet_address')}</div>

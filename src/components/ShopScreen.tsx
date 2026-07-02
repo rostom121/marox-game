@@ -4,6 +4,12 @@ import { useState } from 'react'
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react'
 import { useGameStore } from '../store/useGameStore'
 
+const formatK = (num: number) => {
+  if (num >= 1000000) return (num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k';
+  return num.toString();
+};
+
 const DESTINATION_WALLET = 'UQAlEG3XMAbp2aD4OgGvUuQ5Rd1MELL04dq8ioam1jAIR51-'
 
 const ENERGY_PACKAGES = [
@@ -163,11 +169,11 @@ export default function ShopScreen() {
       <div className="flex justify-center gap-4 mb-6">
         <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-yellow-500/30">
           <span>⚡</span>
-          <span className="pixel-text text-[10px] text-white">{data.energy}</span>
+          <span className="pixel-text text-[10px] text-white">{formatK(data.energy)}</span>
         </div>
         <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-yellow-500/30">
           <span>🪙</span>
-          <span className="pixel-text text-[10px] text-white">{data.coins.toLocaleString()}</span>
+          <span className="pixel-text text-[10px] text-white">{formatK(data.coins)}</span>
         </div>
       </div>
 

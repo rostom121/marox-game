@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useGameStore, getUpgradeCost, getUpgradeClicksRequired } from '../store/useGameStore'
 
+const formatK = (num: number) => {
+  if (num >= 1000000) return (num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k';
+  return num.toString();
+};
+
 interface PlayerInfoModalProps {
   onClose: () => void;
 }
@@ -173,14 +179,14 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
         <div className="player-modal-stats">
           <div className="stat-item">
             <span className="stat-label">{t('total_gold')}</span>
-            <span className="stat-value gold-text">🪙 {data.coins.toLocaleString()}</span>
+            <span className="stat-value gold-text">🪙 {formatK(data.coins)}</span>
           </div>
         </div>
         
         <div className="player-modal-upgrade-section">
           <div className="upgrade-info" style={{ marginBottom: '10px' }}>
             <span>{t('upgrade_cost')}:</span>
-            <span className="cost-value">🪙 {cost.toLocaleString()}</span>
+            <span className="cost-value">🪙 {formatK(cost)}</span>
           </div>
           
           <div style={{ marginBottom: '15px' }}>
