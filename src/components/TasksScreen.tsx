@@ -7,7 +7,9 @@ import { useGameStore } from '../store/useGameStore'
 import { gameConfig } from '../config/gameConfig'
 
 const formatK = (num: number) => {
-  return num >= 1000 ? (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k' : num.toString();
+  if (num >= 1000000) return (num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k';
+  return num.toString();
 };
 
 interface VerificationState {
