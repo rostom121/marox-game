@@ -379,13 +379,14 @@ export default function TasksScreen() {
                     style={{
                       padding: '8px 12px',
                       borderRadius: '10px',
-                      border: 'none',
-                      background: canClaim && state === 'not_started' ? 'var(--green)' : 'rgba(255, 255, 255, 0.05)',
-                      color: canClaim && state === 'not_started' ? '#000' : 'var(--text-dim)',
-                      fontSize: '9px',
-                      fontWeight: 'bold',
+                      border: canClaim && state === 'not_started' ? '1px solid var(--gold)' : 'none',
+                      background: canClaim && state === 'not_started' ? 'rgba(255, 215, 0, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                      color: canClaim && state === 'not_started' ? 'var(--gold)' : 'var(--text-dim)',
+                      fontSize: '10px',
+                      fontWeight: '900',
                       cursor: canClaim && state === 'not_started' ? 'pointer' : 'default',
                       textTransform: 'uppercase',
+                      textShadow: canClaim && state === 'not_started' ? '0 0 5px rgba(255, 215, 0, 0.5)' : 'none',
                     }}
                   >
                     {state === 'verifying' ? t('verifying') : (canClaim ? 'CLAIM' : 'LOCKED')}
