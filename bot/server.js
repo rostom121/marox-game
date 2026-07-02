@@ -482,6 +482,14 @@ app.post('/api/tasks/complete', async (req, res) => {
         return res.status(400).json({ ok: false, error: 'Task already completed' });
       }
     } else {
+      // Validate referral tasks
+      if (taskId.startsWith('ref_')) {
+        const requiredRefs = parseInt(taskId.split('_')[1], 10);
+        if (isNaN(requiredRefs) || user.referralsCount < requiredRefs) {
+          return res.status(400).json({ ok: false, error: 'Not enough referrals to claim this task' });
+        }
+      }
+
       await prisma.task.create({
         data: { telegramId: String(telegramId), taskId: taskId, status: 'completed', completedAt: new Date() }
       });

@@ -47,6 +47,15 @@ export interface GameConfig {
     link: string;
     verifyDelayMs: number;
   }>;
+  referralTasks: Array<{
+    id: string;
+    requiredReferrals: number;
+    title: string;
+    emoji: string;
+    points: number;
+    coins: number;
+    energy: number;
+  }>;
 }
 
 export const gameConfig: GameConfig = {
@@ -93,5 +102,12 @@ export const gameConfig: GameConfig = {
     { id: 'follow_facebook', title: 'Follow MAROX on Facebook', emoji: '📘', points: 500, coins: 1000, energy: 200, link: 'https://www.facebook.com/share/1EyEtHkXLr/', verifyDelayMs: 3000 },
     { id: 'buy_shop', title: 'Buy from the game shop', emoji: '🛒', points: 5000, coins: 20000, energy: 2000, link: '#', verifyDelayMs: 0 },
     { id: 'connect_wallet', title: 'Connect Wallet', emoji: '👛', points: 500, coins: 1000, energy: 200, link: '#', verifyDelayMs: 1000 },
+  ],
+  referralTasks: [
+    { id: 'ref_1', requiredReferrals: 1, title: 'Invite 1 Friend', emoji: '👤', points: 2000, coins: 50, energy: 500 },
+    { id: 'ref_3', requiredReferrals: 3, title: 'Invite 3 Friends', emoji: '👥', points: 10000, coins: 200, energy: 1500 },
+    { id: 'ref_10', requiredReferrals: 10, title: 'Invite 10 Friends', emoji: '🏆', points: 50000, coins: 1000, energy: 5000 },
+    { id: 'ref_50', requiredReferrals: 50, title: 'Invite 50 Friends', emoji: '🔥', points: 300000, coins: 5000, energy: 20000 },
+    { id: 'ref_100', requiredReferrals: 100, title: 'Invite 100 Friends', emoji: '👑', points: 1000000, coins: 15000, energy: 50000 },
   ],
 };

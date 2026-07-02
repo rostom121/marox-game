@@ -19,11 +19,14 @@ export default function TasksScreen() {
   const { data, updateStats, completeTask } = useGameStore()
   const [tonConnectUI] = useTonConnectUI()
   const wallet = useTonWallet()
-  const [activeTab, setActiveTab] = useState<'new' | 'completed'>('new')
+  const [activeTab, setActiveTab] = useState<'new' | 'completed' | 'referrals'>('new')
 
   const getInitialTaskStates = (): VerificationState => {
     const states: VerificationState = {};
     gameConfig.tasks.forEach(task => {
+      states[task.id] = 'not_started';
+    });
+    gameConfig.referralTasks?.forEach(task => {
       states[task.id] = 'not_started';
     });
     if (data.completedTasks) {
@@ -111,6 +114,46 @@ export default function TasksScreen() {
     }, delay)
   }
 
+  const handleClaimReferralTask = async (taskId: string) => {
+    if (taskStates[taskId] !== 'not_started') return;
+    
+    const task = gameConfig.referralTasks?.find(t => t.id === taskId);
+    if (!task) return;
+
+    if ((data.referralsCount || 0) < task.requiredReferrals) return;
+
+    setTaskStates((prev) => ({ ...prev, [taskId]: 'verifying' }));
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+    try {
+      const res = await fetch(`${API_URL}/api/tasks/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegramId: useGameStore.getState().telegramUser?.id,
+          taskId: task.id,
+          rewardPoints: task.points,
+          rewardCoins: task.coins,
+          rewardEnergy: task.energy || 0
+        })
+      });
+      const resData = await res.json();
+      if (resData.ok && resData.user) {
+        setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }));
+        completeTask(taskId);
+        useGameStore.getState().setServerData(resData.user);
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
+          window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        }
+      } else {
+        setTaskStates((prev) => ({ ...prev, [taskId]: 'not_started' }));
+      }
+    } catch (e) {
+      console.error("Referral task complete failed", e);
+      setTaskStates((prev) => ({ ...prev, [taskId]: 'not_started' }));
+    }
+  }
+
   const handleWatchAd = () => {
     if (typeof window !== 'undefined' && window.Adsgram) {
       const AdController = window.Adsgram.init({ blockId: "36809" });
@@ -179,18 +222,25 @@ export default function TasksScreen() {
         <div className="accent-line" style={{ background: 'var(--neon-purple)', boxShadow: '0 0 10px var(--neon-purple)' }} />
       </header>
 
-      <div className="tab-buttons" style={{ display: 'flex', gap: '10px', marginBottom: '20px', marginTop: '20px' }}>
+      <div className="tab-buttons" style={{ display: 'flex', gap: '5px', marginBottom: '20px', marginTop: '20px' }}>
         <button 
           onClick={() => setActiveTab('new')}
           className={`tab-btn ${activeTab === 'new' ? 'active' : ''}`}
-          style={{ flex: 1, padding: '10px', background: activeTab === 'new' ? 'rgba(0, 210, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)', border: activeTab === 'new' ? '1px solid var(--blue)' : '1px solid transparent', borderRadius: '12px', color: activeTab === 'new' ? '#fff' : 'var(--text-dim)', fontWeight: 'bold' }}
+          style={{ flex: 1, padding: '10px 5px', fontSize: '10px', background: activeTab === 'new' ? 'rgba(0, 210, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)', border: activeTab === 'new' ? '1px solid var(--blue)' : '1px solid transparent', borderRadius: '12px', color: activeTab === 'new' ? '#fff' : 'var(--text-dim)', fontWeight: 'bold' }}
         >
           {t('new_tasks')}
         </button>
         <button 
+          onClick={() => setActiveTab('referrals')}
+          className={`tab-btn ${activeTab === 'referrals' ? 'active' : ''}`}
+          style={{ flex: 1, padding: '10px 5px', fontSize: '10px', background: activeTab === 'referrals' ? 'rgba(0, 210, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)', border: activeTab === 'referrals' ? '1px solid var(--blue)' : '1px solid transparent', borderRadius: '12px', color: activeTab === 'referrals' ? '#fff' : 'var(--text-dim)', fontWeight: 'bold' }}
+        >
+          Referrals
+        </button>
+        <button 
           onClick={() => setActiveTab('completed')}
           className={`tab-btn ${activeTab === 'completed' ? 'active' : ''}`}
-          style={{ flex: 1, padding: '10px', background: activeTab === 'completed' ? 'rgba(0, 210, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)', border: activeTab === 'completed' ? '1px solid var(--blue)' : '1px solid transparent', borderRadius: '12px', color: activeTab === 'completed' ? '#fff' : 'var(--text-dim)', fontWeight: 'bold' }}
+          style={{ flex: 1, padding: '10px 5px', fontSize: '10px', background: activeTab === 'completed' ? 'rgba(0, 210, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)', border: activeTab === 'completed' ? '1px solid var(--blue)' : '1px solid transparent', borderRadius: '12px', color: activeTab === 'completed' ? '#fff' : 'var(--text-dim)', fontWeight: 'bold' }}
         >
           {t('completed_tasks')}
         </button>
@@ -291,6 +341,61 @@ export default function TasksScreen() {
           </div>
         )}
 
+        {activeTab === 'referrals' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {gameConfig.referralTasks?.filter(t => taskStates[t.id] !== 'completed').map((task) => {
+              const state = taskStates[task.id] || 'not_started'
+              const currentRefs = data.referralsCount || 0
+              const canClaim = currentRefs >= task.requiredReferrals
+              return (
+                <div
+                  key={task.id}
+                  className="task-card card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    background: 'rgba(22, 15, 41, 0.6)',
+                    border: '2px solid var(--border-neon)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '24px' }}>{task.emoji}</span>
+                    <div>
+                      <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title} <span style={{ fontSize: '10px', color: canClaim ? 'var(--green)' : 'var(--text-dim)' }}>({currentRefs}/{task.requiredReferrals})</span></h3>
+                      <div style={{ fontSize: '11px', color: 'var(--gold)', marginTop: '6px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{color: 'var(--text-dim)'}}>{t('reward')}:</span>
+                        {task.points > 0 && <span>{formatK(task.points)} $MAROX</span>}
+                        {task.energy && task.energy > 0 && <span>{formatK(task.energy)} ⚡</span>}
+                        {task.coins && task.coins > 0 && <span>{formatK(task.coins)} 🪙</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    disabled={!canClaim || state !== 'not_started'}
+                    onClick={() => handleClaimReferralTask(task.id)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: canClaim && state === 'not_started' ? 'var(--green)' : 'rgba(255, 255, 255, 0.05)',
+                      color: canClaim && state === 'not_started' ? '#000' : 'var(--text-dim)',
+                      fontSize: '9px',
+                      fontWeight: 'bold',
+                      cursor: canClaim && state === 'not_started' ? 'pointer' : 'default',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {state === 'verifying' ? t('verifying') : (canClaim ? 'CLAIM' : 'LOCKED')}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
         {activeTab === 'completed' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {gameConfig.tasks.filter(t => taskStates[t.id] === 'completed').map((task) => (
@@ -302,20 +407,47 @@ export default function TasksScreen() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '12px 14px',
-                    background: 'rgba(22, 15, 41, 0.3)',
-                    border: '1px solid rgba(0, 210, 255, 0.1)',
-                    opacity: 0.6,
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.5 }}>
                     <span style={{ fontSize: '24px' }}>{task.emoji}</span>
                     <div>
-                      <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{task.title}</h3>
+                      <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-dim)' }}>{task.title}</h3>
+                      <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '4px' }}>{t('completed_tasks')} ✓</div>
                     </div>
                   </div>
-                  <div style={{ color: '#00ff88', fontSize: '12px', fontWeight: 'bold' }}>✓ {t('completed')}</div>
                 </div>
             ))}
+            {gameConfig.referralTasks?.filter(t => taskStates[t.id] === 'completed').map((task) => (
+                <div
+                  key={task.id}
+                  className="task-card card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.5 }}>
+                    <span style={{ fontSize: '24px' }}>{task.emoji}</span>
+                    <div>
+                      <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-dim)' }}>{task.title}</h3>
+                      <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '4px' }}>{t('completed_tasks')} ✓</div>
+                    </div>
+                  </div>
+                </div>
+            ))}
+            {gameConfig.tasks.filter(t => taskStates[t.id] === 'completed').length === 0 && (!gameConfig.referralTasks || gameConfig.referralTasks.filter(t => taskStates[t.id] === 'completed').length === 0) && (
+              <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '20px 0' }}>
+                <span style={{ fontSize: '30px' }}>🤷‍♂️</span>
+                <p style={{ marginTop: '10px' }}>No completed tasks yet</p>
+              </div>
+            )}
           </div>
         )}
       </div>
