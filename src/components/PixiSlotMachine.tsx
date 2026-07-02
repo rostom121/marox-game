@@ -126,20 +126,18 @@ export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
       }
 
       // Symbol Image or Emoji
-      const shake = isWinner && pulse % 2 === 0 ? 2 : 0
-
       if (def.imageSrc && imagesRef.current[def.imageSrc]?.complete) {
         const img = imagesRef.current[def.imageSrc]
         const imgSize = isWinner ? 106 : 96 // Increased size to fit the slot box perfectly, with scaling for winners
-        const imgX = x + (w - imgSize) / 2 + shake
-        const imgY = y + (h - imgSize) / 2 - 8 + shake
+        const imgX = x + (w - imgSize) / 2
+        const imgY = y + (h - imgSize) / 2 - 8
         ctx.drawImage(img, imgX, imgY, imgSize, imgSize)
       } else if (def.emoji) {
         ctx.font = `${isWinner ? 54 : 48}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillStyle = '#ffffff'
-        ctx.fillText(def.emoji, x + w / 2 + shake, y + h / 2 - 8 + shake)
+        ctx.fillText(def.emoji, x + w / 2, y + h / 2 - 8)
       }
 
       // Label
