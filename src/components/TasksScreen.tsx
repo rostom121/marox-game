@@ -85,6 +85,7 @@ export default function TasksScreen() {
     setTimeout(async () => {
       setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }))
       completeTask(taskId)
+      setActiveTab('completed')
       
       if (task) {
         // Send completion to server
@@ -143,6 +144,7 @@ export default function TasksScreen() {
       if (resData.ok && resData.user) {
         setTaskStates((prev) => ({ ...prev, [taskId]: 'completed' }));
         completeTask(taskId);
+        setActiveTab('completed');
         useGameStore.getState().setServerData(resData.user);
         if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
           window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
@@ -192,6 +194,7 @@ export default function TasksScreen() {
     if (wallet && taskStates['connect_wallet'] === 'verifying') {
       setTaskStates((prev) => ({ ...prev, connect_wallet: 'completed' }))
       completeTask('connect_wallet')
+      setActiveTab('completed')
       const task = gameConfig.tasks.find((t) => t.id === 'connect_wallet')
       if (task) {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
