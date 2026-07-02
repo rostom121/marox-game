@@ -11,7 +11,7 @@ interface PixiSlotMachineProps {
 // Symbol definitions with emoji and color
 const SYMBOL_DEFS: Record<string, { emoji?: string; imageSrc?: string; color: string; label: string }> = {
   coin: { emoji: '🪙', color: '#ffb700', label: 'GOLD' },
-  badge: { imageSrc: '/marox-badge.png', color: '#00d2ff', label: 'MAROX' },
+  badge: { imageSrc: '/marox-hodl.png', color: '#00d2ff', label: 'MAROX' },
   energy: { emoji: '⚡', color: '#00d2ff', label: 'ENERGY' },
   red_x: { emoji: '❌', color: '#ff3333', label: 'RED X' },
 }
@@ -126,14 +126,13 @@ export function PixiSlotMachine({ spinData, onResult }: PixiSlotMachineProps) {
       }
 
       // Symbol Image or Emoji
-      const shake = 0
+      const shake = isWinner && pulse % 2 === 0 ? 2 : 0
 
-      if (def.imageSrc && imagesRef.current[def.imageSrc]?.complete) {
+      if (def.imageSrc && imagesRef.current[def.imageSrc]) {
         const img = imagesRef.current[def.imageSrc]
-        const imgSize = isWinner ? 76 : 68
-        const imgX = x + w / 2 - imgSize / 2 + shake
-        const imgY = y + h / 2 - 8 - imgSize / 2 + shake
-
+        const imgSize = isWinner ? 106 : 96 // Increased size to fit the slot box perfectly, with scaling for winners
+        const imgX = x + (w - imgSize) / 2 + shake
+        const imgY = y + (h - imgSize) / 2 - 8 + shake
         ctx.drawImage(img, imgX, imgY, imgSize, imgSize)
       } else if (def.emoji) {
         ctx.font = `${isWinner ? 54 : 48}px serif`
