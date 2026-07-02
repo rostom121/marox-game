@@ -362,7 +362,7 @@ app.post('/api/spin', async (req, res) => {
     const dataUpdate = {
       energy: user.energy - bet + scaledEnergyWin,
       points: user.points + scaledPoints,
-      coins: user.coins + scaledCoins,
+      coins: Math.max(0, user.coins + scaledCoins),
     };
     if (isEventActive && scaledPoints > 0) {
       dataUpdate.eventPoints = user.eventPoints + scaledPoints;
