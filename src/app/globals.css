@@ -978,12 +978,17 @@ body {
 }
 
 .slot-sidebar-label {
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 800;
   text-transform: uppercase;
   color: #fff;
   letter-spacing: 0.05em;
   text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
 }
 
 /* Slot Cabinet (Luxurious Golden Frame) */
