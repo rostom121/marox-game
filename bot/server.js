@@ -359,7 +359,7 @@ app.post('/api/spin', async (req, res) => {
 
     const symbolValues = {
       'red_x': { points: 0, coins: -500, energy: 0 },
-      'coin': { points: 0, coins: 150, energy: 0 },
+      'coin': { points: 0, coins: 1000, energy: 0 },
       'badge': { points: 400, coins: 0, energy: 0 },
       'energy': { points: 0, coins: 0, energy: 30 }
     };
