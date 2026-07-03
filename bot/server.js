@@ -74,6 +74,9 @@ if (token) {
         }
       }
 
+      const ogCount = await prisma.user.count({ where: { isOG: true } });
+      const canBeOG = ogCount < 1000;
+
       await prisma.user.upsert({
         where: { telegramId: userId },
         update: {
@@ -86,6 +89,7 @@ if (token) {
           username: msg.from.username,
           referredBy: referredBy,
           premium: !!msg.from.is_premium,
+          isOG: canBeOG,
         }
       });
     } catch (e) {
@@ -371,7 +375,10 @@ app.post('/api/spin', async (req, res) => {
       energyWin = symbolValues[outcome].energy;
     }
 
-    const scaledPoints = Math.floor(points * scale);
+    let scaledPoints = Math.floor(points * scale);
+    if (user.isOG) {
+      scaledPoints = Math.floor(scaledPoints * 1.5);
+    }
     const scaledCoins = Math.floor(coins * scale);
     const scaledEnergyWin = Math.floor(energyWin * scale);
 
@@ -519,17 +526,22 @@ app.post('/api/tasks/complete', async (req, res) => {
       });
     }
 
-    const isBanned = await checkAntiCheat(telegramId, Number(rewardPoints || 0));
+    let finalRewardPoints = Number(rewardPoints || 0);
+    if (user.isOG) {
+      finalRewardPoints = Math.floor(finalRewardPoints * 1.5);
+    }
+
+    const isBanned = await checkAntiCheat(telegramId, finalRewardPoints);
     if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
 
     const isEventActive = Date.now() < EVENT_END_TIME;
     const dataUpdate = {
-      points: { increment: Number(rewardPoints || 0) },
+      points: { increment: finalRewardPoints },
       coins: { increment: Number(rewardCoins || 0) },
       energy: { increment: Number(rewardEnergy || 0) }
     };
-    if (isEventActive && Number(rewardPoints) > 0) {
-      dataUpdate.eventPoints = { increment: Number(rewardPoints) };
+    if (isEventActive && finalRewardPoints > 0) {
+      dataUpdate.eventPoints = { increment: finalRewardPoints };
     }
 
     const updatedUser = await prisma.user.update({
@@ -538,7 +550,7 @@ app.post('/api/tasks/complete', async (req, res) => {
     });
 
     // Grant 15% referral bonus if applicable
-    await grantReferralBonus(user, Number(rewardPoints || 0));
+    await grantReferralBonus(user, finalRewardPoints);
 
     return res.json({ ok: true, user: updatedUser });
   } catch (error) {
@@ -576,17 +588,25 @@ app.post('/api/daily/claim', async (req, res) => {
     const { telegramId, points, coins, energy } = req.body;
     if (!telegramId) return res.status(400).json({ ok: false, error: 'Missing params' });
 
-    const isBanned = await checkAntiCheat(telegramId, Number(points || 0));
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
+
+    let finalPoints = Number(points || 0);
+    if (user.isOG) {
+      finalPoints = Math.floor(finalPoints * 1.5);
+    }
+
+    const isBanned = await checkAntiCheat(telegramId, finalPoints);
     if (isBanned) return res.status(403).json({ ok: false, error: 'Banned for suspicious activity' });
 
     const isEventActive = Date.now() < EVENT_END_TIME;
     const dataUpdate = {
-      points: { increment: Number(points || 0) },
+      points: { increment: finalPoints },
       coins: { increment: Number(coins || 0) },
       energy: { increment: Number(energy || 0) }
     };
-    if (isEventActive && Number(points) > 0) {
-      dataUpdate.eventPoints = { increment: Number(points) };
+    if (isEventActive && finalPoints > 0) {
+      dataUpdate.eventPoints = { increment: finalPoints };
     }
 
     const updatedUser = await prisma.user.update({
@@ -595,8 +615,7 @@ app.post('/api/daily/claim', async (req, res) => {
     });
 
     // Grant 15% referral bonus if applicable
-    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) }, select: { referredBy: true } });
-    if (user) await grantReferralBonus(user, Number(points || 0));
+    await grantReferralBonus(user, finalPoints);
 
     return res.json({ ok: true, user: updatedUser });
   } catch (error) {
@@ -800,6 +819,29 @@ cron.schedule('0 12 * * *', async () => {
 
 
 
+
+// ADMIN ENDPOINT TO MIGRATE EXISTING USERS TO OG
+app.get('/api/admin/migrate-ogs', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'asc' },
+      take: 1000,
+      select: { telegramId: true }
+    });
+    
+    const ids = users.map(u => u.telegramId);
+    if (ids.length === 0) return res.json({ ok: true, message: "No users found" });
+    
+    const result = await prisma.user.updateMany({
+      where: { telegramId: { in: ids } },
+      data: { isOG: true }
+    });
+    
+    res.json({ ok: true, message: `Migrated ${result.count} users to OG Builders status!` });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Express API server is running on port ${port}`);

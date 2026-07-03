@@ -397,7 +397,10 @@ export default function SlotScreen() {
             />
           </div>
           <div className="slot-player-info">
-            <span className="slot-player-name">{data.gameUsername || telegramUser?.firstName || 'Player'}</span>
+            <span className="slot-player-name" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {data.gameUsername || telegramUser?.firstName || 'Player'}
+              {data.isOG && <span style={{ fontSize: '9px', color: 'var(--gold)', fontWeight: 'bold', textShadow: '0 0 5px var(--gold)', background: 'rgba(255,215,0,0.15)', padding: '1px 4px', borderRadius: '4px', border: '1px solid rgba(255,215,0,0.3)' }}>👑 OG Builders</span>}
+            </span>
             <span className="slot-player-level">LV {data.level}</span>
             <div className="slot-xp-bar">
               <div className="slot-xp-fill" style={{ width: `${data.xp}%` }} />

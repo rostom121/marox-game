@@ -173,7 +173,10 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
           />
         </div>
         
-        <h2 className="player-modal-name">{data.gameUsername || telegramUser?.firstName || 'Player'}</h2>
+        <h2 className="player-modal-name" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '6px' }}>
+          {data.gameUsername || telegramUser?.firstName || 'Player'}
+          {data.isOG && <span style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 'bold', textShadow: '0 0 5px var(--gold)', background: 'rgba(255,215,0,0.15)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255,215,0,0.3)' }}>👑 OG Builders</span>}
+        </h2>
         <div className="player-modal-level-badge">{t('level')} {data.level}</div>
         
         <div className="player-modal-stats">

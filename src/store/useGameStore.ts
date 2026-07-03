@@ -46,6 +46,7 @@ export interface UserData {
   lastEnergyUpdate?: number;
   completedTasks?: string[];
   referralsCount?: number;
+  isOG?: boolean;
 }
 
 export interface SettingsData {
