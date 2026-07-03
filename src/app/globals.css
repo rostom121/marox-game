@@ -781,7 +781,7 @@ body {
 
 .og-badge-edge {
   position: absolute;
-  bottom: -4px;
+  bottom: -7px;
   left: 50%;
   transform: translateX(-50%);
   background: #1a1a2e;
