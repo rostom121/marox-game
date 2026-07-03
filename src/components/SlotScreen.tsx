@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useGameStore } from '../store/useGameStore'
+import { useGameStore, getUpgradeClicksRequired } from '../store/useGameStore'
 import { gameConfig } from '../config/gameConfig'
 import { PixiSlotMachine } from './PixiSlotMachine'
 import PlayerInfoModal from './PlayerInfoModal'
@@ -410,7 +410,7 @@ export default function SlotScreen() {
             <span className="slot-player-name">{telegramUser?.firstName || telegramUser?.username || 'Player'}</span>
             <span className="slot-player-level">LV {data.level}</span>
             <div className="slot-xp-bar">
-              <div className="slot-xp-fill" style={{ width: `${data.xp}%` }} />
+              <div className="slot-xp-fill" style={{ width: `${Math.min(100, Math.max(0, (data.xp / getUpgradeClicksRequired(data.level)) * 100))}%` }} />
             </div>
           </div>
         </div>
