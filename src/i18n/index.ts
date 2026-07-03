@@ -104,6 +104,19 @@ const resources = {
       day: 'Day',
       claim: 'CLAIM',
       come_back_tomorrow: 'Come back tomorrow',
+      
+      // Modals & UI
+      inventory_title: 'Inventory Items',
+      inventory_desc: 'Claim your event rewards and items here.',
+      inventory_empty: 'Your inventory is empty.',
+      achievements_title: 'Achievements',
+      achievements_desc: 'Earn medals for reaching high spin milestones and leveling up.',
+      shop_desc: 'Purchase energy refuels, profile frames, and exclusive tokens with Gold Coins!',
+      congrats_claim: 'Congratulations! You have successfully claimed',
+      spin_earn: 'SPIN, EARN MAROX!',
+      hold_auto: 'Hold for Auto',
+      stop_auto: 'STOP AUTO',
+      auto_spin: 'AUTO SPIN'
     }
   },
 
@@ -209,6 +222,19 @@ const resources = {
       day: 'День',
       claim: 'ПОЛУЧИТЬ',
       come_back_tomorrow: 'Возвращайтесь завтра',
+
+      // Modals & UI
+      inventory_title: 'Ваши Предметы',
+      inventory_desc: 'Получите свои награды за события и предметы здесь.',
+      inventory_empty: 'Ваш инвентарь пуст.',
+      achievements_title: 'Достижения',
+      achievements_desc: 'Получайте медали за достижения в спинах и уровнях.',
+      shop_desc: 'Покупайте энергию, рамки профиля и эксклюзивные токены за золотые монеты!',
+      congrats_claim: 'Поздравляем! Вы успешно получили',
+      spin_earn: 'КРУТИТЕ, ЗАРАБАТЫВАЙТЕ MAROX!',
+      hold_auto: 'Удерживайте для Авто',
+      stop_auto: 'СТОП АВТО',
+      auto_spin: 'АВТО СПИН'
     }
   },
   fr: {
@@ -313,6 +339,19 @@ const resources = {
       day: 'Jour',
       claim: 'RÉCLAMER',
       come_back_tomorrow: 'Revenez demain',
+
+      // Modals & UI
+      inventory_title: 'Objets d\'Inventaire',
+      inventory_desc: 'Réclamez vos récompenses d\'événement et objets ici.',
+      inventory_empty: 'Votre inventaire est vide.',
+      achievements_title: 'Réalisations',
+      achievements_desc: 'Gagnez des médailles en atteignant de grands jalons et de nouveaux niveaux.',
+      shop_desc: 'Achetez des recharges d\'énergie, des cadres de profil et des jetons avec des Pièces d\'Or!',
+      congrats_claim: 'Félicitations ! Vous avez réclamé avec succès',
+      spin_earn: 'TOURNEZ, GAGNEZ MAROX !',
+      hold_auto: 'Maintenez pour Auto',
+      stop_auto: 'STOP AUTO',
+      auto_spin: 'AUTO TOUR'
     }
   }
 }

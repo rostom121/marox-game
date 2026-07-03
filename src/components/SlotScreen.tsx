@@ -11,6 +11,21 @@ import EventModal from './EventModal'
 
 const EVENT_END_TIME = new Date("2026-07-03T21:00:00Z").getTime();
 
+let globalAudioCtx: any = null;
+const getAudioContext = () => {
+  if (typeof window !== 'undefined') {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioCtx && !globalAudioCtx) {
+      globalAudioCtx = new AudioCtx();
+    }
+    if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
+      globalAudioCtx.resume();
+    }
+    return globalAudioCtx;
+  }
+  return null;
+};
+
 const formatK = (num: number) => {
   if (num >= 1000000) return (num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1) + 'M';
   if (num >= 1000) return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k';
@@ -231,9 +246,8 @@ export default function SlotScreen() {
   const playRetroSpinSound = useCallback(() => {
     if (settings.isMuted) return;
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      const ctx = getAudioContext();
+      if (!ctx) return;
       let time = ctx.currentTime;
       for (let i = 0; i < 20; i++) {
         const osc = ctx.createOscillator();
@@ -254,9 +268,8 @@ export default function SlotScreen() {
   const playRetroWinSound = useCallback(() => {
     if (settings.isMuted) return;
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      const ctx = getAudioContext();
+      if (!ctx) return;
       let time = ctx.currentTime;
 
       const burstOsc = ctx.createOscillator();
@@ -535,7 +548,7 @@ export default function SlotScreen() {
 
         {/* LED marquee banner */}
         <div className={`slot-led-banner pixel-text ${isWin ? 'win-banner' : ''}`}>
-          {winMessage || '◄ SPIN, EARN MAROX! ►'}
+          {winMessage || `◄ ${t('spin_earn')} ►`}
         </div>
 
         {/* Reels board */}
@@ -556,7 +569,7 @@ export default function SlotScreen() {
               }
             }}
           >
-            {autoSpin ? 'STOP\nAUTO' : 'AUTO\nSPIN'}
+            {autoSpin ? t('stop_auto').replace(' ', '\n') : t('auto_spin').replace(' ', '\n')}
           </button>
 
           <div className="slot-spin-group">
@@ -568,13 +581,13 @@ export default function SlotScreen() {
               disabled={spinning || data.energy < bet}
               onClick={handleSpinClick}
             >
-              <span className="slot-spin-title pixel-text">{spinning ? '...' : 'SPIN'}</span>
-              <span className="slot-spin-sub">Hold for Auto</span>
+              <span className="slot-spin-title pixel-text">{spinning ? '...' : t('spin')}</span>
+              <span className="slot-spin-sub">{t('hold_auto')}</span>
             </button>
           </div>
 
           <div className="slot-bet-panel">
-            <span className="slot-bet-label">BET ENERGY</span>
+            <span className="slot-bet-label">{t('bet')} {t('energy')}</span>
             <div className="slot-bet-row">
               <button className="slot-bet-adj" onClick={() => changeBet(-1)}>−</button>
               <span className="slot-bet-val pixel-text">{bet}</span>
@@ -593,14 +606,14 @@ export default function SlotScreen() {
               {modalType === 'inventory' ? '📦' : '⚡'}
             </div>
             <h2 className="pixel-text" style={{ fontSize: 13, textTransform: 'uppercase', color: 'var(--blue)' }}>
-              {modalType === 'inventory' && 'Inventory Items'}
-              {modalType === 'achievements' && 'Achievements'}
-              {modalType === 'shop' && 'Store Shop'}
+              {modalType === 'inventory' && t('inventory_title')}
+              {modalType === 'achievements' && t('achievements_title')}
+              {modalType === 'shop' && t('shop_title')}
             </h2>
             <p style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.8, margin: '10px 0 20px' }}>
-              {modalType === 'inventory' && 'Claim your event rewards and items here.'}
-              {modalType === 'achievements' && 'Earn medals for reaching high spin milestones and leveling up.'}
-              {modalType === 'shop' && 'Purchase energy refuels, profile frames, and exclusive tokens with Gold Coins!'}
+              {modalType === 'inventory' && t('inventory_desc')}
+              {modalType === 'achievements' && t('achievements_desc')}
+              {modalType === 'shop' && t('shop_desc')}
             </p>
 
             {modalType === 'inventory' && (
@@ -619,7 +632,7 @@ export default function SlotScreen() {
                         onClick={async () => {
                           const success = await claimInventoryItem(item.id);
                           if (success) {
-                            setClaimMessage(`🎉 Congratulations! You have successfully claimed ${formatK(item.amount)} ${item.type.toUpperCase()}!`);
+                            setClaimMessage(`🎉 ${t('congrats_claim')} ${formatK(item.amount)} ${item.type.toUpperCase()}!`);
                             setTimeout(() => setClaimMessage(null), 3000);
                           }
                         }}
@@ -635,13 +648,13 @@ export default function SlotScreen() {
                           boxShadow: '0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.5)'
                         }}
                       >
-                        CLAIM
+                        {t('claim')}
                       </button>
                     </div>
                   ))
                 ) : (
                   <div style={{ padding: '20px', color: 'var(--text-dim)' }}>
-                    Your inventory is empty.
+                    {t('inventory_empty')}
                   </div>
                 )}
               </div>
