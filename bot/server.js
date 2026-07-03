@@ -772,7 +772,9 @@ cron.schedule('0 12 * * *', async () => {
     
     const message = `🌟 *Your Daily MAROX Rewards are Waiting!* 🌟\n\nHey there! Don't forget to claim your daily login rewards, energy refills, and spin the slots to climb the leaderboard! 🎰💎\n\nTap the button below to jump back into the action! 👇`;
     
+    const photoUrl = `${miniAppUrl}/daily-poster.jpg`;
     const opts = {
+      caption: message,
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [
@@ -785,7 +787,7 @@ cron.schedule('0 12 * * *', async () => {
     for (let i = 0; i < users.length; i++) {
       setTimeout(async () => {
         try {
-          await bot.sendMessage(users[i].telegramId, message, opts);
+          await bot.sendPhoto(users[i].telegramId, photoUrl, opts);
         } catch (err) {
           // Ignore errors like user blocking the bot
         }
@@ -803,15 +805,16 @@ app.get('/api/test-reminder', async (req, res) => {
   if (!token) return res.status(400).send("No BOT_TOKEN");
   try {
     const users = await prisma.user.findMany({ select: { telegramId: true } });
-    const message = `🌟 *Your Daily MAROX Rewards are Waiting! (TEST)* 🌟\n\nHey there! Don't forget to claim your daily login rewards, energy refills, and spin the slots to climb the leaderboard! 🎰💎\n\nTap the button below to jump back into the action! 👇`;
-    const opts = { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🎮 Play Now', web_app: { url: miniAppUrl } }]] } };
+    const message = `🌟 *Your Daily MAROX Rewards are Waiting!* 🌟\n\nHey there! Don't forget to claim your daily login rewards, energy refills, and spin the slots to climb the leaderboard! 🎰💎\n\nTap the button below to jump back into the action! 👇`;
+    const photoUrl = `${miniAppUrl}/daily-poster.jpg`;
+    const opts = { caption: message, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🎮 Play Now', web_app: { url: miniAppUrl } }]] } };
     
     res.send(`Started sending to ${users.length} users. Check your Telegram!`);
 
     for (let i = 0; i < users.length; i++) {
       setTimeout(async () => {
         try {
-          await bot.sendMessage(users[i].telegramId, message, opts);
+          await bot.sendPhoto(users[i].telegramId, photoUrl, opts);
         } catch (err) {}
       }, i * 50);
     }
