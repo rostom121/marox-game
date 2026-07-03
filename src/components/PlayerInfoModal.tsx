@@ -164,13 +164,15 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
       <div className="player-modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="red-glow-close-btn" onClick={onClose}>✕</button>
         
-        <div className={`player-modal-avatar ${data.isOG ? 'og-avatar-wrap' : ''}`} style={{ position: 'relative' }}>
-          <img
-            src={telegramUser?.photoUrl || "/marox.png"}
-            onError={(e: any) => { e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e63946'/><circle cx='50' cy='55' r='20' fill='%23fff'/><rect x='35' y='18' width='30' height='18' fill='%23fff' rx='4'/></svg>" }}
-            alt="Avatar"
-            style={{ objectFit: 'cover' }}
-          />
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+          <div className={`player-modal-avatar ${data.isOG ? 'og-avatar-wrap' : ''}`}>
+            <img
+              src={telegramUser?.photoUrl || "/marox.png"}
+              onError={(e: any) => { e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e63946'/><circle cx='50' cy='55' r='20' fill='%23fff'/><rect x='35' y='18' width='30' height='18' fill='%23fff' rx='4'/></svg>" }}
+              alt="Avatar"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
           {data.isOG && <div className="og-badge-edge">OG</div>}
         </div>
         
