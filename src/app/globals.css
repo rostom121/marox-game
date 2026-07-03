@@ -1178,6 +1178,7 @@ body {
   display: flex;
   gap: 12px;
   flex: 1;
+  margin-top: 18px;
 }
 
 .slot-marquee-lights.left {
