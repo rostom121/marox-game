@@ -53,7 +53,7 @@ export default function LeaderboardScreen() {
 
   // Add current user to the list
   const currentUserId = String(telegramUser?.id || 'demo');
-  const currentUserName = data.gameUsername || telegramUser?.username || telegramUser?.firstName || 'You'
+  const currentUserName = telegramUser?.firstName || telegramUser?.username || 'You'
   // Check if current user is already in the list by ID
   if (!dynamicLeaderboard.find(p => String(p.id) === currentUserId)) {
     dynamicLeaderboard.push({

@@ -43,7 +43,7 @@ export default function ProfileScreen() {
           </div>
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff' }}>
-              {data.gameUsername || telegramUser?.firstName || 'Player'}
+              {telegramUser?.firstName || telegramUser?.username || 'Player'}
             </h2>
             {telegramUser?.username && <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>@{telegramUser.username}</div>}
             <div style={{ fontSize: '11px', color: 'var(--gold)', marginTop: '4px', fontWeight: 'bold' }}>{t('level')} {data.level}</div>

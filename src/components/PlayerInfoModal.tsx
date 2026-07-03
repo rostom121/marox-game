@@ -135,7 +135,7 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
           </h2>
           
           <p style={{ color: '#fff', fontSize: '14px', marginBottom: '20px' }}>
-            {t('congratulations')} <strong style={{color: 'var(--blue)'}}>{data.gameUsername || telegramUser?.username || telegramUser?.firstName || 'Player'}</strong>! {t('reached_new_level')}
+            {t('congratulations')} <strong style={{color: 'var(--blue)'}}>{telegramUser?.firstName || telegramUser?.username || 'Player'}</strong>! {t('reached_new_level')}
           </p>
           
           <div className="player-modal-level-badge" style={{ fontSize: '18px', padding: '10px 20px', background: 'var(--gold)', color: '#000', border: 'none', boxShadow: '0 0 20px var(--gold)' }}>
@@ -174,7 +174,7 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
           {data.isOG && <div className="og-badge-edge">OG</div>}
         </div>
         
-        <h2 className="player-modal-name">{data.gameUsername || telegramUser?.firstName || 'Player'}</h2>
+        <h2 className="player-modal-name">{telegramUser?.firstName || telegramUser?.username || 'Player'}</h2>
         <div className="player-modal-level-badge">{t('level')} {data.level}</div>
         
         <div className="player-modal-stats">

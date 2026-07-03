@@ -398,7 +398,7 @@ export default function SlotScreen() {
             {data.isOG && <div className="og-badge-edge">OG</div>}
           </div>
           <div className="slot-player-info">
-            <span className="slot-player-name">{data.gameUsername || telegramUser?.firstName || 'Player'}</span>
+            <span className="slot-player-name">{telegramUser?.firstName || telegramUser?.username || 'Player'}</span>
             <span className="slot-player-level">LV {data.level}</span>
             <div className="slot-xp-bar">
               <div className="slot-xp-fill" style={{ width: `${data.xp}%` }} />
