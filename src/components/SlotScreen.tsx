@@ -63,6 +63,7 @@ export default function SlotScreen() {
   const [modalType, setModalType] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [showLangModal, setShowLangModal] = useState(false)
+  const [claimMessage, setClaimMessage] = useState<string | null>(null)
   const [bet, setBet] = useState(5)
   const [spinData, setSpinData] = useState<{ finalGrid: string[][], winnerRows: number[], payout: { points: number, coins: number, energyWin: number } } | null>(null)
   const [spinning, setSpinning] = useState(false)
@@ -618,19 +619,20 @@ export default function SlotScreen() {
                         onClick={async () => {
                           const success = await claimInventoryItem(item.id);
                           if (success) {
-                            // Optional: play a success sound or animation
+                            setClaimMessage(`🎉 Congratulations! You have successfully claimed ${formatK(item.amount)} ${item.type.toUpperCase()}!`);
+                            setTimeout(() => setClaimMessage(null), 3000);
                           }
                         }}
                         style={{
-                          background: 'linear-gradient(180deg, #00ff88 0%, #00cc6a 100%)',
+                          background: 'linear-gradient(180deg, #ffd700 0%, #ff8c00 100%)',
                           color: '#000',
-                          border: 'none',
+                          border: '1px solid #ffe53b',
                           padding: '6px 12px',
                           borderRadius: '8px',
                           fontWeight: 'bold',
                           fontSize: '12px',
                           cursor: 'pointer',
-                          boxShadow: '0 0 10px rgba(0,255,136,0.3)'
+                          boxShadow: '0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.5)'
                         }}
                       >
                         CLAIM
@@ -645,6 +647,19 @@ export default function SlotScreen() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {claimMessage && (
+        <div style={{
+          position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+          background: 'linear-gradient(180deg, #ffd700 0%, #d4af37 100%)',
+          color: '#000', padding: '15px 25px', borderRadius: '16px', zIndex: 10000,
+          boxShadow: '0 0 30px rgba(255, 215, 0, 0.6)', fontWeight: 'bold', fontSize: '14px',
+          textAlign: 'center', minWidth: '280px', border: '2px solid #fff',
+          animation: 'slideDown 0.3s ease-out'
+        }}>
+          {claimMessage}
         </div>
       )}
 
