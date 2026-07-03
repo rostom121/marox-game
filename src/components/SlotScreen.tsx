@@ -39,7 +39,13 @@ const AVAILABLE_BETS = [1, 2, 3, 4, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 200
 
 export default function SlotScreen() {
   const { t } = useTranslation()
-  const { data, telegramUser, spinOutcome, setTab, settings, updateSettings } = useGameStore()
+  const { data, telegramUser, spinOutcome, setTab, settings, updateSettings, inventoryItems, fetchInventory, claimInventoryItem } = useGameStore()
+
+  useEffect(() => {
+    if (telegramUser?.id) {
+      fetchInventory();
+    }
+  }, [telegramUser?.id]);
 
   const allowedBets = useMemo(() => {
     if (data.energy >= 50000) return AVAILABLE_BETS;
@@ -478,9 +484,22 @@ export default function SlotScreen() {
             { emoji: '⚙️', label: t('slot_setup'), action: () => setShowSettings(true) },
             { emoji: '🌐', label: t('lang'), action: () => setShowLangModal(true) },
           ].map((btn) => (
-            <button key={btn.label} className="slot-sidebar-btn" onClick={btn.action}>
+            <button key={btn.label} className="slot-sidebar-btn" onClick={btn.action} style={{ position: 'relative' }}>
               <span className="slot-sidebar-emoji">{btn.emoji}</span>
               <span className="slot-sidebar-label">{btn.label}</span>
+              {btn.label === t('slot_items') && inventoryItems && inventoryItems.length > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  width: '12px',
+                  height: '12px',
+                  backgroundColor: '#ff3333',
+                  borderRadius: '50%',
+                  border: '2px solid #1f0b3b',
+                  boxShadow: '0 0 8px #ff3333'
+                }} />
+              )}
             </button>
           ))}
         </aside>
@@ -567,19 +586,64 @@ export default function SlotScreen() {
       {/* ── MODALS ── */}
       {modalType && modalType !== 'avatar' && modalType !== 'daily' && modalType !== 'achievements' && modalType !== 'no_energy' && (
         <div className="welcome-modal-overlay" onClick={() => setModalType(null)} style={{ zIndex: 2000 }}>
-          <div className="welcome-modal-card card" onClick={(e) => e.stopPropagation()} style={{ position: 'relative', maxWidth: '320px', width: 'fit-content', padding: '20px 15px' }}>
+          <div className="welcome-modal-card card" onClick={(e) => e.stopPropagation()} style={{ position: 'relative', maxWidth: '360px', width: '90%', padding: '20px 15px' }}>
             <button className="red-glow-close-btn" onClick={() => setModalType(null)}>✕</button>
-            <div style={{ fontSize: 50, marginTop: '10px' }}>⚡</div>
+            <div style={{ fontSize: 40, marginTop: '10px' }}>
+              {modalType === 'inventory' ? '📦' : '⚡'}
+            </div>
             <h2 className="pixel-text" style={{ fontSize: 13, textTransform: 'uppercase', color: 'var(--blue)' }}>
               {modalType === 'inventory' && 'Inventory Items'}
               {modalType === 'achievements' && 'Achievements'}
               {modalType === 'shop' && 'Store Shop'}
             </h2>
             <p style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.8, margin: '10px 0 20px' }}>
-              {modalType === 'inventory' && 'Equip boosters, backgrounds, and custom symbols here.'}
+              {modalType === 'inventory' && 'Claim your event rewards and items here.'}
               {modalType === 'achievements' && 'Earn medals for reaching high spin milestones and leveling up.'}
               {modalType === 'shop' && 'Purchase energy refuels, profile frames, and exclusive tokens with Gold Coins!'}
             </p>
+
+            {modalType === 'inventory' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '50vh', overflowY: 'auto', padding: '4px' }}>
+                {inventoryItems && inventoryItems.length > 0 ? (
+                  inventoryItems.map((item) => (
+                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ fontSize: '24px' }}>{item.type === 'energy' ? '⚡' : '💎'}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--gold)', fontWeight: 'bold' }}>{item.title}</span>
+                          <span style={{ fontSize: '14px', color: '#fff', fontWeight: 'bold' }}>+ {formatK(item.amount)} {item.type.toUpperCase()}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          const success = await claimInventoryItem(item.id);
+                          if (success) {
+                            // Optional: play a success sound or animation
+                          }
+                        }}
+                        style={{
+                          background: 'linear-gradient(180deg, #00ff88 0%, #00cc6a 100%)',
+                          color: '#000',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          fontWeight: 'bold',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          boxShadow: '0 0 10px rgba(0,255,136,0.3)'
+                        }}
+                      >
+                        CLAIM
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '20px', color: 'var(--text-dim)' }}>
+                    Your inventory is empty.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

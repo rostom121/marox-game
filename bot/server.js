@@ -843,6 +843,95 @@ app.get('/api/admin/migrate-ogs', async (req, res) => {
   }
 });
 
+// ── INVENTORY & EVENT REWARDS ──
+
+app.get('/api/inventory/:telegramId', async (req, res) => {
+  try {
+    const items = await prisma.rewardItem.findMany({
+      where: { telegramId: req.params.telegramId, claimed: false },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json({ ok: true, items });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+app.post('/api/inventory/claim', async (req, res) => {
+  const { telegramId, itemId } = req.body;
+  try {
+    const item = await prisma.rewardItem.findUnique({ where: { id: itemId } });
+    if (!item || item.telegramId !== telegramId || item.claimed) {
+      return res.status(400).json({ ok: false, error: "Invalid or already claimed item" });
+    }
+
+    const updateData = { claimed: true };
+    const userUpdate = {};
+    if (item.type === 'marox') userUpdate.points = { increment: item.amount };
+    if (item.type === 'energy') userUpdate.energy = { increment: item.amount };
+    
+    // Transaction to ensure atomicity
+    await prisma.$transaction([
+      prisma.rewardItem.update({ where: { id: itemId }, data: updateData }),
+      prisma.user.update({ where: { telegramId }, data: userUpdate })
+    ]);
+
+    res.json({ ok: true, message: "Claimed successfully" });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Event Reward Distribution Cron
+let eventRewardsDistributed = false;
+setInterval(async () => {
+  if (eventRewardsDistributed) return;
+  const now = Date.now();
+  const verifyTime = EVENT_END_TIME + (15 * 60 * 1000); // 15 mins after end
+  
+  if (now >= verifyTime) {
+    try {
+      // Check if we already created event prizes
+      const existingPrize = await prisma.rewardItem.findFirst({
+        where: { title: { startsWith: '1st Place Prize' } }
+      });
+      if (existingPrize) {
+        eventRewardsDistributed = true;
+        return;
+      }
+      
+      console.log("Distributing Event Rewards...");
+      const topPlayers = await prisma.user.findMany({
+        orderBy: [ { eventPoints: 'desc' }, { updatedAt: 'asc' } ],
+        take: 3,
+      });
+
+      const prizes = [
+        { rank: 1, energy: 10000, marox: 5000, title: '1st Place Prize' },
+        { rank: 2, energy: 6000, marox: 3000, title: '2nd Place Prize' },
+        { rank: 3, energy: 3000, marox: 1800, title: '3rd Place Prize' }
+      ];
+
+      for (let i = 0; i < topPlayers.length; i++) {
+        const player = topPlayers[i];
+        const prize = prizes[i];
+        if (player.eventPoints <= 0) continue;
+        
+        await prisma.rewardItem.createMany({
+          data: [
+            { telegramId: player.telegramId, type: 'marox', amount: prize.marox, title: prize.title + ' (MAROX)' },
+            { telegramId: player.telegramId, type: 'energy', amount: prize.energy, title: prize.title + ' (Energy)' }
+          ]
+        });
+      }
+      eventRewardsDistributed = true;
+      console.log("Event Rewards Distributed successfully.");
+    } catch (err) {
+      console.error("Failed to distribute event rewards:", err);
+    }
+  }
+}, 60 * 1000); // Check every minute
+
 app.listen(port, () => {
   console.log(`Express API server is running on port ${port}`);
 });

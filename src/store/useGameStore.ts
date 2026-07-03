@@ -94,6 +94,9 @@ interface GameStore {
   addPurchasedItems: (energyAmount: number, coinsAmount: number) => void;
   completeTask: (taskId: string) => void;
   updateSettings: (newSettings: Partial<SettingsData>) => void;
+  inventoryItems: any[];
+  fetchInventory: () => Promise<void>;
+  claimInventoryItem: (itemId: string) => Promise<boolean>;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -524,4 +527,49 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return { settings: nextSettings };
     });
   },
+
+  inventoryItems: [],
+  fetchInventory: async () => {
+    const { telegramUser } = get();
+    if (!telegramUser?.id) return;
+    try {
+      const res = await fetch(`${API_URL}/api/inventory/${telegramUser.id}`);
+      const data = await res.json();
+      if (data.ok) {
+        set({ inventoryItems: data.items });
+      }
+    } catch (e) {
+      console.error("Failed to fetch inventory:", e);
+    }
+  },
+  claimInventoryItem: async (itemId: string) => {
+    const { telegramUser } = get();
+    if (!telegramUser?.id) return false;
+    try {
+      const res = await fetch(`${API_URL}/api/inventory/claim`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId: telegramUser.id, itemId })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        // Optimistically remove the item and update local balance
+        const item = get().inventoryItems.find(i => i.id === itemId);
+        if (item) {
+           set((state) => ({
+             inventoryItems: state.inventoryItems.filter(i => i.id !== itemId),
+             data: {
+               ...state.data,
+               points: state.data.points + (item.type === 'marox' ? item.amount : 0),
+               energy: state.data.energy + (item.type === 'energy' ? item.amount : 0)
+             }
+           }));
+        }
+        return true;
+      }
+    } catch (e) {
+      console.error("Failed to claim item:", e);
+    }
+    return false;
+  }
 }));
