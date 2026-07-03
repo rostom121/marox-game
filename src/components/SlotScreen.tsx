@@ -388,19 +388,17 @@ export default function SlotScreen() {
       {/* ── TOP HEADER ── */}
       <header className="slot-header">
         <div className="slot-header-left" onClick={() => showModal('avatar')}>
-          <div className="slot-avatar-wrap">
+          <div className={`slot-avatar-wrap ${data.isOG ? 'og-avatar-wrap' : ''}`}>
             <img
               src={telegramUser?.photoUrl || "/marox.png"}
               onError={(e: any) => { e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e63946'/><circle cx='50' cy='55' r='20' fill='%23fff'/><rect x='35' y='18' width='30' height='18' fill='%23fff' rx='4'/></svg>" }}
               alt="Avatar"
               style={{ objectFit: 'cover' }}
             />
+            {data.isOG && <div className="og-badge-edge">OG</div>}
           </div>
           <div className="slot-player-info">
-            <span className="slot-player-name" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {data.gameUsername || telegramUser?.firstName || 'Player'}
-              {data.isOG && <span style={{ fontSize: '9px', color: 'var(--gold)', fontWeight: 'bold', textShadow: '0 0 5px var(--gold)', background: 'rgba(255,215,0,0.15)', padding: '1px 4px', borderRadius: '4px', border: '1px solid rgba(255,215,0,0.3)' }}>👑 OG Builders</span>}
-            </span>
+            <span className="slot-player-name">{data.gameUsername || telegramUser?.firstName || 'Player'}</span>
             <span className="slot-player-level">LV {data.level}</span>
             <div className="slot-xp-bar">
               <div className="slot-xp-fill" style={{ width: `${data.xp}%` }} />

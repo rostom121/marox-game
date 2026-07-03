@@ -37,13 +37,13 @@ export default function ProfileScreen() {
       {/* Profile Info Card */}
       <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(22, 15, 41, 0.6)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div className="avatar-img-wrap" style={{ width: '60px', height: '60px', border: '2px solid var(--blue)', borderRadius: '14px' }}>
+          <div className={`avatar-img-wrap ${data.isOG ? 'og-avatar-wrap' : ''}`} style={{ width: '60px', height: '60px', border: '2px solid var(--blue)', borderRadius: '14px', position: 'relative' }}>
             <img src={telegramUser?.photoUrl || "/marox.png"} onError={(e: any) => { e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e63946'/><circle cx='50' cy='55' r='20' fill='%23fff'/><rect x='35' y='18' width='30' height='18' fill='%23fff' rx='4'/><circle cx='40' cy='52' r='3' fill='%23000'/><circle cx='60' cy='52' r='3' fill='%23000'/></svg>" }} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+            {data.isOG && <div className="og-badge-edge">OG</div>}
           </div>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+            <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff' }}>
               {data.gameUsername || telegramUser?.firstName || 'Player'}
-              {data.isOG && <span style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 'bold', textShadow: '0 0 5px var(--gold)', background: 'rgba(255,215,0,0.15)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255,215,0,0.3)' }}>👑 OG Builders</span>}
             </h2>
             {telegramUser?.username && <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>@{telegramUser.username}</div>}
             <div style={{ fontSize: '11px', color: 'var(--gold)', marginTop: '4px', fontWeight: 'bold' }}>{t('level')} {data.level}</div>

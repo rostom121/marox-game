@@ -164,19 +164,17 @@ export default function PlayerInfoModal({ onClose }: PlayerInfoModalProps) {
       <div className="player-modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="red-glow-close-btn" onClick={onClose}>✕</button>
         
-        <div className="player-modal-avatar">
+        <div className={`player-modal-avatar ${data.isOG ? 'og-avatar-wrap' : ''}`} style={{ position: 'relative' }}>
           <img
             src={telegramUser?.photoUrl || "/marox.png"}
             onError={(e: any) => { e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e63946'/><circle cx='50' cy='55' r='20' fill='%23fff'/><rect x='35' y='18' width='30' height='18' fill='%23fff' rx='4'/></svg>" }}
             alt="Avatar"
             style={{ objectFit: 'cover' }}
           />
+          {data.isOG && <div className="og-badge-edge">OG</div>}
         </div>
         
-        <h2 className="player-modal-name" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '6px' }}>
-          {data.gameUsername || telegramUser?.firstName || 'Player'}
-          {data.isOG && <span style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 'bold', textShadow: '0 0 5px var(--gold)', background: 'rgba(255,215,0,0.15)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255,215,0,0.3)' }}>👑 OG Builders</span>}
-        </h2>
+        <h2 className="player-modal-name">{data.gameUsername || telegramUser?.firstName || 'Player'}</h2>
         <div className="player-modal-level-badge">{t('level')} {data.level}</div>
         
         <div className="player-modal-stats">
