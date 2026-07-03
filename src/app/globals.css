@@ -1266,7 +1266,8 @@ body {
 
 /* ── LED Marquee Banner (Decorated) ── */
 .slot-led-banner {
-  width: 100%;
+  width: 85%;
+  margin: 0 auto;
   background: linear-gradient(180deg, #020108 0%, #0d061c 100%);
   border: 2px solid var(--neon-purple);
   border-radius: 12px;
