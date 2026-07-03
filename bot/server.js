@@ -797,6 +797,30 @@ cron.schedule('0 12 * * *', async () => {
 });
 
 
+
+// TEST REMINDER ENDPOINT
+app.get('/api/test-reminder', async (req, res) => {
+  if (!token) return res.status(400).send("No BOT_TOKEN");
+  try {
+    const users = await prisma.user.findMany({ select: { telegramId: true } });
+    const message = `🌟 *Your Daily MAROX Rewards are Waiting! (TEST)* 🌟\n\nHey there! Don't forget to claim your daily login rewards, energy refills, and spin the slots to climb the leaderboard! 🎰💎\n\nTap the button below to jump back into the action! 👇`;
+    const opts = { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🎮 Play Now', web_app: { url: miniAppUrl } }]] } };
+    
+    res.send(`Started sending to ${users.length} users. Check your Telegram!`);
+
+    for (let i = 0; i < users.length; i++) {
+      setTimeout(async () => {
+        try {
+          await bot.sendMessage(users[i].telegramId, message, opts);
+        } catch (err) {}
+      }, i * 50);
+    }
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
 app.listen(port, () => {
   console.log(`Express API server is running on port ${port}`);
 });
+
