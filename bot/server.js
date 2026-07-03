@@ -755,6 +755,47 @@ app.get('/status', (req, res) => {
 });
 
 
+// DAILY REMINDER CRON JOB
+const cron = require('node-cron');
+
+// Run every day at 12:00 PM (noon) server time
+cron.schedule('0 12 * * *', async () => {
+  if (!token) return; // Don't run if bot is not configured
+  
+  console.log("Starting daily reminder broadcast...");
+  try {
+    const users = await prisma.user.findMany({
+      select: { telegramId: true }
+    });
+    
+    console.log(`Found ${users.length} users to remind.`);
+    
+    const message = `🌟 *Your Daily MAROX Rewards are Waiting!* 🌟\n\nHey there! Don't forget to claim your daily login rewards, energy refills, and spin the slots to climb the leaderboard! 🎰💎\n\nTap the button below to jump back into the action! 👇`;
+    
+    const opts = {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '🎮 Play Now', web_app: { url: miniAppUrl } }]
+        ]
+      }
+    };
+
+    // Send messages with a delay to avoid Telegram rate limits (30 msgs/sec max)
+    for (let i = 0; i < users.length; i++) {
+      setTimeout(async () => {
+        try {
+          await bot.sendMessage(users[i].telegramId, message, opts);
+        } catch (err) {
+          // Ignore errors like user blocking the bot
+        }
+      }, i * 50); // 50ms delay between messages (20 msgs per second)
+    }
+  } catch (error) {
+    console.error("Error running daily reminder cron job:", error);
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Express API server is running on port ${port}`);
