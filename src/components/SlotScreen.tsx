@@ -450,14 +450,14 @@ export default function SlotScreen() {
         {/* Left Sidebar */}
         <aside className="slot-sidebar">
           {[
-            { emoji: '📜', label: t('slot_tasks'), action: () => setTab('missions'), badge: true },
-            { emoji: '🎁', label: t('slot_daily'), action: () => showModal('daily') },
-            { emoji: '🏆', label: t('slot_rank'), action: () => setTab('leaderboard') },
-            { emoji: '👥', label: t('slot_refs'), action: () => setTab('friends') },
-            { emoji: '⭐', label: t('slot_feats'), action: () => showModal('achievements') },
+            { id: 'tasks', emoji: '📜', label: t('slot_tasks'), action: () => setTab('missions'), badge: true },
+            { id: 'daily', emoji: '🎁', label: t('slot_daily'), action: () => showModal('daily') },
+            { id: 'rank', emoji: '🏆', label: t('slot_rank'), action: () => setTab('leaderboard') },
+            { id: 'refs', emoji: '👥', label: t('slot_refs'), action: () => setTab('friends') },
+            { id: 'event', emoji: '⭐', label: t('slot_feats'), action: () => showModal('achievements') },
           ].map((btn) => (
             <button
-              key={btn.label}
+              key={btn.id}
               className="slot-sidebar-btn"
               onClick={btn.action}
               style={{ position: 'relative' }}
@@ -465,7 +465,7 @@ export default function SlotScreen() {
               {btn.badge && <span className="slot-sidebar-badge" />}
               <span className="slot-sidebar-emoji">{btn.emoji}</span>
               <span className="slot-sidebar-label">{btn.label}</span>
-              {btn.label === t('slot_feats') && (
+              {btn.id === 'event' && (
                 <span style={{
                   position: 'absolute',
                   bottom: '-18px',
@@ -492,16 +492,16 @@ export default function SlotScreen() {
         {/* Right Sidebar */}
         <aside className="slot-sidebar">
           {[
-            { emoji: '🛒', label: t('slot_shop'), action: () => setTab('shop') },
-            { emoji: '📦', label: t('slot_items'), action: () => showModal('inventory') },
-            { emoji: '👛', label: t('slot_wallet'), action: () => setTab('profile') },
-            { emoji: '⚙️', label: t('slot_setup'), action: () => setShowSettings(true) },
-            { emoji: '🌐', label: t('lang'), action: () => setShowLangModal(true) },
+            { id: 'shop', emoji: '🛒', label: t('slot_shop'), action: () => setTab('shop') },
+            { id: 'items', emoji: '📦', label: t('slot_items'), action: () => showModal('inventory') },
+            { id: 'wallet', emoji: '👛', label: t('slot_wallet'), action: () => setTab('profile') },
+            { id: 'setup', emoji: '⚙️', label: t('slot_setup'), action: () => setShowSettings(true) },
+            { id: 'lang', emoji: '🌐', label: t('slot_lang'), action: () => setShowLangModal(true) },
           ].map((btn) => (
-            <button key={btn.label} className="slot-sidebar-btn" onClick={btn.action} style={{ position: 'relative' }}>
+            <button key={btn.id} className="slot-sidebar-btn" onClick={btn.action} style={{ position: 'relative' }}>
               <span className="slot-sidebar-emoji">{btn.emoji}</span>
               <span className="slot-sidebar-label">{btn.label}</span>
-              {btn.label === t('slot_items') && inventoryItems && inventoryItems.length > 0 && (
+              {btn.id === 'items' && inventoryItems && inventoryItems.length > 0 && (
                 <div style={{
                   position: 'absolute',
                   top: '-4px',
