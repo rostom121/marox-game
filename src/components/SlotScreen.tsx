@@ -397,7 +397,7 @@ export default function SlotScreen() {
                 style={{ objectFit: 'cover' }}
               />
             </div>
-            {data.isOG && <div className="og-badge-edge">OG</div>}
+            {data.isOG && <div className="og-badge-edge" style={{ transform: 'translateX(-50%) scale(0.7)', bottom: '-5px' }}>OG</div>}
           </div>
           <div className="slot-player-info">
             <span className="slot-player-name">{telegramUser?.firstName || telegramUser?.username || 'Player'}</span>
