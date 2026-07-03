@@ -781,8 +781,9 @@ body {
 
 .og-badge-edge {
   position: absolute;
-  bottom: -2px;
-  left: -2px;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
   background: #1a1a2e;
   color: var(--gold);
   border: 1px solid var(--gold);
@@ -792,7 +793,7 @@ body {
   font-weight: 800;
   line-height: 1.1;
   z-index: 5;
-  box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5);
 }
 
 .slot-player-info {
