@@ -10,7 +10,7 @@ const token = process.env.BOT_TOKEN;
 const port = process.env.PORT || 5000;
 const channelUsername = process.env.CHANNEL_USERNAME || '@marox_channel';
 const miniAppUrl = process.env.MINI_APP_URL || 'https://marox-game.vercel.app';
-const EVENT_END_TIME = new Date("2026-07-03T21:00:00Z").getTime();
+const EVENT_END_TIME = new Date("2026-07-09T13:30:00Z").getTime();
 
 if (!token) {
   console.error("Warning: BOT_TOKEN is not set in environment variables!");
@@ -261,6 +261,17 @@ app.get('/api/user', async (req, res) => {
 });
 
 // 2. Sync User Stats
+app.get('/api/admin/reset-event', async (req, res) => {
+  try {
+    const result = await prisma.user.updateMany({
+      data: { eventPoints: 0 }
+    });
+    res.json({ ok: true, message: `Reset event points for ${result.count} users.` });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 app.post('/api/user/sync', async (req, res) => {
   try {
     const { telegramId, walletAddress } = req.body;

@@ -5,7 +5,7 @@ interface EventModalProps {
   onClose: () => void;
 }
 
-const EVENT_END_TIME = new Date("2026-07-03T21:00:00Z").getTime();
+const EVENT_END_TIME = new Date("2026-07-09T13:30:00Z").getTime();
 
 export default function EventModal({ onClose }: EventModalProps) {
   const { telegramUser } = useGameStore();
@@ -14,7 +14,21 @@ export default function EventModal({ onClose }: EventModalProps) {
   const [eventTimeLeft, setEventTimeLeft] = useState<string>('');
 
   useEffect(() => {
-    setLoading(false);
+    const fetchEventLeaderboard = async () => {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marox-game-production.up.railway.app';
+      try {
+        const res = await fetch(`${API_URL}/api/event/leaderboard`);
+        const data = await res.json();
+        if (data.ok) {
+          setLeaderboard(data.leaderboard);
+        }
+      } catch (err) {
+        console.error("Failed to fetch event leaderboard:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEventLeaderboard();
   }, []);
 
   useEffect(() => {
@@ -85,15 +99,92 @@ export default function EventModal({ onClose }: EventModalProps) {
         </div>
 
         {/* Scrollable Leaderboard List */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px 0', lineHeight: 1.6 }}>
-            <span style={{ fontSize: '50px', display: 'block', marginBottom: '20px' }}>🎉</span>
-            <span style={{ color: 'var(--gold)', fontSize: '20px', fontWeight: 'bold', display: 'block', marginBottom: '15px', textShadow: '0 0 10px rgba(255,215,0,0.5)' }}>EVENT ENDED!</span>
-            The 48H MAROX Event has successfully concluded.<br/><br/>
-            If you were among the top players,<br/>
-            your prizes have been sent to your <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>Items</span> section.<br/><br/>
-            <span style={{ color: '#fff', fontSize: '13px' }}>Thank you for participating!</span>
-          </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 4px' }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', color: 'var(--blue)', padding: '40px 0' }}>Loading event data...</div>
+          ) : leaderboard.length === 0 ? (
+            <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px 0', lineHeight: 1.5 }}>
+              No players have collected points in this event yet.<br/><br/>
+              <span style={{ color: 'var(--gold)' }}>Spin the slots or complete tasks to climb the leaderboard!</span>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {leaderboard.map((user, index) => {
+                const rank = index + 1;
+                const isMe = user.telegramId === telegramUser?.id?.toString();
+                const reward = getRewardForRank(rank);
+
+                return (
+                  <div 
+                    key={user.telegramId} 
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: isMe ? 'linear-gradient(90deg, rgba(0,210,255,0.2) 0%, rgba(0,210,255,0.05) 100%)' : 'rgba(255,255,255,0.05)',
+                      border: isMe ? '1px solid var(--blue)' : reward ? '1px solid var(--gold)' : '1px solid rgba(255,255,255,0.05)',
+                      borderRadius: '16px',
+                      padding: '10px',
+                      boxShadow: reward ? '0 0 15px rgba(255,183,0,0.15)' : 'none',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Left Section: Badge + Name & Score */}
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', overflow: 'hidden', flex: 1, paddingRight: '10px' }}>
+                      {/* Rank Badge */}
+                      <div style={{ 
+                        width: '32px', 
+                        height: '32px', 
+                        borderRadius: '50%', 
+                        background: reward ? 'var(--gold)' : 'rgba(255,255,255,0.1)', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        fontSize: reward ? '16px' : '12px',
+                        fontWeight: 'bold',
+                        color: reward ? '#000' : '#fff',
+                        flexShrink: 0
+                      }}>
+                        {reward ? reward.badge : `#${rank}`}
+                      </div>
+
+                      {/* Name & Score */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
+                        <div style={{ 
+                          fontSize: '13px', 
+                          color: isMe ? 'var(--blue)' : '#fff', 
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          width: '100%',
+                          textAlign: 'left'
+                        }}>
+                          {user.firstName || user.username || 'Anonymous'} {user.premium && '⭐'} {isMe && '(You)'}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 'bold', textAlign: 'left', marginTop: '2px' }}>
+                          {user.eventPoints >= 1000 ? (user.eventPoints/1000).toFixed(1).replace('.0', '') + 'k' : user.eventPoints} MRX$
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Section: Rewards Row */}
+                    {reward && (
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 6px', borderRadius: '6px', fontSize: '10px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', whiteSpace: 'nowrap' }}>
+                          ⚡ <span style={{ color: '#ff3333', fontWeight: 'bold' }}>{reward.energy >= 1000 ? (reward.energy/1000).toFixed(1).replace('.0', '') + 'k' : reward.energy}</span>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 6px', borderRadius: '6px', fontSize: '10px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', whiteSpace: 'nowrap' }}>
+                          💎 <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>{reward.marox >= 1000 ? (reward.marox/1000).toFixed(1).replace('.0', '') + 'k' : reward.marox}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
