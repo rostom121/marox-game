@@ -9,7 +9,7 @@ import PlayerInfoModal from './PlayerInfoModal'
 import DailyRewardModal from './DailyRewardModal'
 import EventModal from './EventModal'
 
-const EVENT_END_TIME = new Date("2026-07-03T21:00:00Z").getTime();
+const EVENT_END_TIME = new Date("2026-07-09T13:30:00Z").getTime();
 
 let globalAudioCtx: any = null;
 const getAudioContext = () => {
