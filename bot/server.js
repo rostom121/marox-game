@@ -272,6 +272,58 @@ app.get('/api/admin/reset-event', async (req, res) => {
   }
 });
 
+app.get('/api/admin/distribute-event-rewards', async (req, res) => {
+  try {
+    const topPlayers = await prisma.user.findMany({
+      where: { eventPoints: { gt: 0 } },
+      orderBy: { eventPoints: 'desc' },
+      take: 3
+    });
+
+    if (topPlayers.length === 0) {
+      return res.json({ ok: false, message: 'No players with event points found.' });
+    }
+
+    const rewardsMap = [
+      { energy: 10000, marox: 5000, title: '🥇 1st Place Event Prize' },
+      { energy: 6000, marox: 3000, title: '🥈 2nd Place Event Prize' },
+      { energy: 3000, marox: 1800, title: '🥉 3rd Place Event Prize' }
+    ];
+
+    let createdCount = 0;
+    for (let i = 0; i < topPlayers.length; i++) {
+      const player = topPlayers[i];
+      const reward = rewardsMap[i];
+      
+      // Energy reward
+      await prisma.rewardItem.create({
+        data: {
+          telegramId: player.telegramId,
+          type: 'energy',
+          amount: reward.energy,
+          title: reward.title + ' (Energy)',
+          claimed: false
+        }
+      });
+      // Marox reward
+      await prisma.rewardItem.create({
+        data: {
+          telegramId: player.telegramId,
+          type: 'marox',
+          amount: reward.marox,
+          title: reward.title + ' (MAROX)',
+          claimed: false
+        }
+      });
+      createdCount += 2;
+    }
+
+    res.json({ ok: true, message: `Successfully distributed ${createdCount} reward items to the top ${topPlayers.length} players.` });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 app.post('/api/user/sync', async (req, res) => {
   try {
     const { telegramId, walletAddress } = req.body;
